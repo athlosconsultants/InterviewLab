@@ -4,9 +4,9 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { FileDrop } from './FileDrop';
-import { FileDropMultiple } from './FileDropMultiple';
-import { uploadFile, uploadFiles } from '@/lib/upload-client';
+import { uploadFile } from '@/lib/upload-client';
 import { toast } from 'sonner';
 
 interface IntakeFormData {
@@ -14,7 +14,7 @@ interface IntakeFormData {
   company: string;
   location: string;
   cv: File | null;
-  jobSpec: File[];
+  jobDescription: string;
 }
 
 interface FormErrors {
@@ -22,7 +22,7 @@ interface FormErrors {
   company?: string;
   location?: string;
   cv?: string;
-  jobSpec?: string;
+  jobDescription?: string;
 }
 
 export function IntakeForm() {
@@ -31,7 +31,7 @@ export function IntakeForm() {
     company: '',
     location: '',
     cv: null,
-    jobSpec: [],
+    jobDescription: '',
   });
 
   const [errors, setErrors] = useState<FormErrors>({});
@@ -39,7 +39,7 @@ export function IntakeForm() {
 
   const validateField = (
     field: keyof IntakeFormData,
-    value: string | File | null | File[]
+    value: string | File | null
   ): string | undefined => {
     switch (field) {
       case 'jobTitle':
@@ -70,9 +70,13 @@ export function IntakeForm() {
           return 'CV/Resume is required';
         }
         break;
-      case 'jobSpec':
-        if (Array.isArray(value) && value.length === 0) {
-          return 'At least one job specification file is required';
+      case 'jobDescription':
+        if (typeof value === 'string') {
+          if (!value.trim()) {
+            return 'Job description is required';
+          } else if (value.trim().length < 50) {
+            return 'Job description must be at least 50 characters';
+          }
         }
         break;
     }
@@ -85,7 +89,7 @@ export function IntakeForm() {
       company: validateField('company', formData.company),
       location: validateField('location', formData.location),
       cv: validateField('cv', formData.cv),
-      jobSpec: validateField('jobSpec', formData.jobSpec),
+      jobDescription: validateField('jobDescription', formData.jobDescription),
     };
 
     // Remove undefined errors
@@ -125,32 +129,39 @@ export function IntakeForm() {
         return;
       }
 
-      // Upload job spec files
-      if (formData.jobSpec.length === 0) {
-        toast.error('At least one job spec file is required');
+      // Save job description text
+      if (!formData.jobDescription.trim()) {
+        toast.error('Job description is required');
         setIsSubmitting(false);
         return;
       }
 
-      const jobSpecResults = await uploadFiles(formData.jobSpec, 'jobspec');
-      const failedUploads = jobSpecResults.filter((r) => !r.success);
+      const jobDescResponse = await fetch('/api/upload-text', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text: formData.jobDescription,
+          type: 'jobspec',
+        }),
+      });
 
-      if (failedUploads.length > 0) {
-        toast.error('Some job spec uploads failed', {
-          description: failedUploads.map((r) => r.error).join(', '),
+      const jobDescResult = await jobDescResponse.json();
+      if (!jobDescResult.success) {
+        toast.error('Job description save failed', {
+          description: jobDescResult.error,
         });
         setIsSubmitting(false);
         return;
       }
 
-      // All uploads successful
-      toast.success('Files uploaded successfully!', {
+      // All successful
+      toast.success('Setup complete!', {
         description: 'Your interview session is being created...',
       });
 
       console.log('Upload results:', {
         cv: cvResult,
-        jobSpecs: jobSpecResults,
+        jobDescription: jobDescResult,
         formData: {
           jobTitle: formData.jobTitle,
           company: formData.company,
@@ -158,7 +169,7 @@ export function IntakeForm() {
         },
       });
 
-      // TODO: T33 will save document metadata to database
+      // TODO: Next task will create session and redirect
     } catch (error) {
       console.error('Submit error:', error);
       toast.error('An error occurred', {
@@ -169,11 +180,11 @@ export function IntakeForm() {
     }
   };
 
-  const handleFileChange = (field: 'cv' | 'jobSpec', file: File | null) => {
-    setFormData((prev) => ({ ...prev, [field]: file }));
+  const handleFileChange = (file: File | null) => {
+    setFormData((prev) => ({ ...prev, cv: file }));
     // Clear error when file is selected
-    if (file && errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: undefined }));
+    if (file && errors.cv) {
+      setErrors((prev) => ({ ...prev, cv: undefined }));
     }
   };
 
@@ -183,7 +194,7 @@ export function IntakeForm() {
       formData.company.trim() &&
       formData.location.trim() &&
       formData.cv &&
-      formData.jobSpec.length > 0
+      formData.jobDescription.trim().length >= 50
     );
   };
 
@@ -276,7 +287,7 @@ export function IntakeForm() {
           Your CV/Resume <span className="text-destructive">*</span>
         </Label>
         <FileDrop
-          onFileSelect={(file) => handleFileChange('cv', file)}
+          onFileSelect={handleFileChange}
           acceptedExtensions={['.pdf', '.doc', '.docx']}
           acceptedTypes={[
             'application/pdf',
@@ -289,46 +300,36 @@ export function IntakeForm() {
         {errors.cv && <p className="text-sm text-destructive">{errors.cv}</p>}
       </div>
 
-      {/* Job Spec Upload */}
+      {/* Job Description */}
       <div className="space-y-2">
-        <Label>
-          Job Description/Specification{' '}
-          <span className="text-destructive">*</span>
+        <Label htmlFor="jobDescription">
+          Job Description <span className="text-destructive">*</span>
         </Label>
         <p className="text-xs text-muted-foreground">
-          Upload up to 3 files (useful for multiple screenshots)
+          Paste the full job description here (minimum 50 characters)
         </p>
-        <FileDropMultiple
-          onFilesChange={(files) => {
-            setFormData({ ...formData, jobSpec: files });
-            if (files.length > 0 && errors.jobSpec) {
-              setErrors({ ...errors, jobSpec: undefined });
+        <Textarea
+          id="jobDescription"
+          placeholder="e.g., Are you a dedicated Software Engineer in pursuit of a remarkable chance to invent innovative solutions..."
+          value={formData.jobDescription}
+          onChange={(e) => {
+            setFormData({ ...formData, jobDescription: e.target.value });
+            if (errors.jobDescription) {
+              setErrors({ ...errors, jobDescription: undefined });
             }
           }}
-          acceptedExtensions={[
-            '.pdf',
-            '.doc',
-            '.docx',
-            '.txt',
-            '.png',
-            '.jpg',
-            '.jpeg',
-          ]}
-          acceptedTypes={[
-            'application/pdf',
-            'application/msword',
-            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-            'text/plain',
-            'image/png',
-            'image/jpeg',
-            'image/jpg',
-          ]}
-          label="Drop your job description here"
-          currentFiles={formData.jobSpec}
-          maxFiles={3}
+          onBlur={() => {
+            const error = validateField(
+              'jobDescription',
+              formData.jobDescription
+            );
+            setErrors({ ...errors, jobDescription: error });
+          }}
+          className={errors.jobDescription ? 'border-destructive' : ''}
+          rows={10}
         />
-        {errors.jobSpec && (
-          <p className="text-sm text-destructive">{errors.jobSpec}</p>
+        {errors.jobDescription && (
+          <p className="text-sm text-destructive">{errors.jobDescription}</p>
         )}
       </div>
 

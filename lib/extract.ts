@@ -1,5 +1,6 @@
 import PDFParser from 'pdf2json';
 import mammoth from 'mammoth';
+import { extractTextFromImage } from './ocr';
 
 /**
  * Extract text from a PDF file
@@ -9,7 +10,7 @@ import mammoth from 'mammoth';
 async function extractPdfText(buffer: Buffer): Promise<string> {
   return new Promise((resolve) => {
     try {
-      const pdfParser = new PDFParser(null, 1);
+      const pdfParser = new PDFParser(null, true);
 
       pdfParser.on('pdfParser_dataError', (errData: any) => {
         console.error('PDF parsing error:', errData?.parserError);
@@ -100,6 +101,16 @@ export async function extractText(file: File): Promise<string> {
     } else if (fileType === 'text/plain' || fileName.endsWith('.txt')) {
       // Plain text file
       return buffer.toString('utf-8').trim();
+    } else if (
+      fileType === 'image/png' ||
+      fileType === 'image/jpeg' ||
+      fileType === 'image/jpg' ||
+      fileName.endsWith('.png') ||
+      fileName.endsWith('.jpg') ||
+      fileName.endsWith('.jpeg')
+    ) {
+      // Extract text from image using OCR
+      return await extractTextFromImage(buffer);
     } else {
       console.warn(`Unsupported file type for text extraction: ${fileType}`);
       return '';
@@ -146,6 +157,12 @@ export async function extractTextFromStorage(
       return await extractDocxText(buffer);
     } else if (extension === 'txt') {
       return buffer.toString('utf-8').trim();
+    } else if (
+      extension === 'png' ||
+      extension === 'jpg' ||
+      extension === 'jpeg'
+    ) {
+      return await extractTextFromImage(buffer);
     } else {
       console.warn(`Unsupported file extension for extraction: ${extension}`);
       return '';
