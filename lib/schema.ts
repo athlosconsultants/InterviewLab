@@ -104,3 +104,98 @@ export interface Database {
 
 // Document type enum
 export type DocumentType = 'cv' | 'jobspec' | 'extra' | 'audio' | 'report';
+
+// Session status enum
+export type SessionStatus =
+  | 'intake'
+  | 'research'
+  | 'ready'
+  | 'running'
+  | 'feedback'
+  | 'complete';
+
+// Research Snapshot type
+// This is the structured data produced during the research phase
+// and stored in sessions.research_snapshot
+export interface ResearchSnapshot {
+  // Summarized CV content
+  cv_summary: {
+    name?: string;
+    experience_years?: number;
+    key_skills: string[];
+    recent_roles: string[];
+    education?: string[];
+    summary: string; // Concise 2-3 sentence summary
+  };
+
+  // Summarized job specification
+  job_spec_summary: {
+    role: string;
+    level?: string; // e.g., 'junior', 'mid', 'senior', 'lead'
+    key_requirements: string[];
+    nice_to_have?: string[];
+    responsibilities: string[];
+    summary: string; // Concise 2-3 sentence summary
+  };
+
+  // Company information (from research or user-provided)
+  company_facts: {
+    name: string;
+    industry?: string;
+    size?: string; // e.g., 'startup', 'mid-size', 'enterprise'
+    mission?: string;
+    values?: string[];
+    recent_news?: string[];
+  };
+
+  // Role competencies (skills/behaviors to assess)
+  competencies: {
+    technical: string[]; // e.g., ['React', 'TypeScript', 'System Design']
+    behavioral: string[]; // e.g., ['Leadership', 'Communication', 'Problem Solving']
+    domain: string[]; // e.g., ['FinTech', 'Healthcare', 'E-commerce']
+  };
+
+  // Sources used for research
+  sources: {
+    company_website?: string;
+    linkedin?: string;
+    news_articles?: string[];
+    other?: string[];
+  };
+
+  // Metadata
+  created_at: string;
+  version: string; // e.g., '1.0' - for future compatibility
+}
+
+// Session limits type
+export interface SessionLimits {
+  question_cap: number; // Maximum number of questions
+  replay_cap: number; // Maximum number of replays per question
+  timer_sec: number; // Time limit per question in seconds
+}
+
+// Question type (stored in turns.question)
+export interface Question {
+  text: string;
+  category: string; // e.g., 'technical', 'behavioral', 'situational'
+  difficulty: 'easy' | 'medium' | 'hard';
+  time_limit: number; // seconds
+  follow_up?: boolean; // Is this a follow-up question?
+}
+
+// Answer digest type (stored in turns.answer_digest)
+export interface AnswerDigest {
+  summary: string; // Short summary of the answer (1-2 sentences)
+  key_points: string[]; // Main points mentioned
+  sentiment?: 'positive' | 'neutral' | 'negative';
+  word_count?: number;
+}
+
+// Timing type (stored in turns.timing)
+export interface Timing {
+  duration_ms: number; // How long the user took to answer
+  replay_count: number; // Number of times the question was replayed
+  started_at: string;
+  completed_at: string;
+}
