@@ -71,6 +71,7 @@ export async function submitInterviewAnswer(params: {
   turnId: string;
   answerText: string;
   audioKey?: string;
+  replayCount?: number;
 }) {
   try {
     const supabase = await createClient();

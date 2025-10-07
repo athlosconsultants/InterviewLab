@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2, Send, Mic, Type } from 'lucide-react';
+import { Loader2, Send, Mic, Type, AccessibilityIcon } from 'lucide-react';
 import {
   initializeInterview,
   submitInterviewAnswer,
@@ -15,6 +15,9 @@ import { QuestionBubble } from './QuestionBubble';
 import { TimerRing } from './TimerRing';
 import { ReplayButton } from './ReplayButton';
 import { AudioRecorder } from './AudioRecorder';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { UpgradeDialog } from './UpgradeDialog';
 
 interface InterviewUIProps {
   sessionId: string;
@@ -47,6 +50,8 @@ export function InterviewUI({
   const [timerSec, setTimerSec] = useState(90);
   const [answerMode, setAnswerMode] = useState<'text' | 'audio'>('text');
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
+  const [accessibilityMode, setAccessibilityMode] = useState(false);
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
 
   // Initialize interview on mount
   useEffect(() => {
@@ -161,12 +166,13 @@ export function InterviewUI({
         toast.success('Audio transcribed successfully');
       }
 
-      // Submit the answer
+      // Submit the answer (including replay count for scoring)
       const result = await submitInterviewAnswer({
         sessionId,
         turnId: currentTurnId,
         answerText: finalAnswer,
         audioKey,
+        replayCount,
       });
 
       if (result.error) {
@@ -187,12 +193,10 @@ export function InterviewUI({
         // Check if interview is complete
         if (result.data.done) {
           toast.success('Interview complete!', {
-            description: 'Redirecting to your report...',
+            description: 'Great work on completing your interview.',
           });
-          // Redirect to report page
-          setTimeout(() => {
-            router.push(`/report/${sessionId}`);
-          }, 1500);
+          // Show upgrade dialog for free plan users (3 questions)
+          setShowUpgradeDialog(true);
           return;
         }
 
@@ -251,11 +255,29 @@ export function InterviewUI({
     <div className="mx-auto w-full max-w-4xl p-4 space-y-6">
       {/* Header */}
       <div className="border-b pb-4">
-        <h1 className="text-2xl font-bold">{jobTitle}</h1>
-        <p className="text-muted-foreground">{company}</p>
-        <p className="text-sm text-muted-foreground mt-2">
-          Question {questionNumber} of {totalQuestions}
-        </p>
+        <div className="flex items-start justify-between">
+          <div>
+            <h1 className="text-2xl font-bold">{jobTitle}</h1>
+            <p className="text-muted-foreground">{company}</p>
+            <p className="text-sm text-muted-foreground mt-2">
+              Question {questionNumber} of {totalQuestions}
+            </p>
+          </div>
+          <div className="flex items-center space-x-2">
+            <AccessibilityIcon className="h-4 w-4 text-muted-foreground" />
+            <Switch
+              id="accessibility-mode"
+              checked={accessibilityMode}
+              onCheckedChange={setAccessibilityMode}
+            />
+            <Label
+              htmlFor="accessibility-mode"
+              className="text-sm cursor-pointer"
+            >
+              No Timer
+            </Label>
+          </div>
+        </div>
       </div>
 
       {/* Conversation Thread */}
@@ -299,17 +321,19 @@ export function InterviewUI({
               onReplay={handleReplay}
               disabled={isSubmitting}
             />
-            <TimerRing
-              timeLimit={timerSec}
-              startTime={
-                currentQuestion.timing?.started_at || new Date().toISOString()
-              }
-              onExpire={() => {
-                toast.warning('Time is up!', {
-                  description: 'Please submit your answer',
-                });
-              }}
-            />
+            {!accessibilityMode && (
+              <TimerRing
+                timeLimit={timerSec}
+                startTime={
+                  currentQuestion.timing?.started_at || new Date().toISOString()
+                }
+                onExpire={() => {
+                  toast.warning('Time is up!', {
+                    description: 'Please submit your answer',
+                  });
+                }}
+              />
+            )}
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -407,6 +431,13 @@ export function InterviewUI({
           </form>
         </div>
       )}
+
+      {/* Upgrade Dialog */}
+      <UpgradeDialog
+        open={showUpgradeDialog}
+        onClose={() => setShowUpgradeDialog(false)}
+        onViewReport={() => router.push(`/report/${sessionId}`)}
+      />
     </div>
   );
 }

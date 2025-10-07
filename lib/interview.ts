@@ -183,8 +183,9 @@ export async function submitAnswer(params: {
   turnId: string;
   answerText: string;
   audioKey?: string;
+  replayCount?: number;
 }) {
-  const { sessionId, turnId, answerText, audioKey } = params;
+  const { sessionId, turnId, answerText, audioKey, replayCount } = params;
   const supabase = await createClient();
 
   // Get the current turn
@@ -206,7 +207,7 @@ export async function submitAnswer(params: {
     word_count: answerText.split(/\s+/).length,
   };
 
-  // Update turn with answer (and audio key if provided)
+  // Update turn with answer (and audio key + replay count if provided)
   const { error: updateError } = await supabase
     .from('turns')
     .update({
@@ -219,6 +220,7 @@ export async function submitAnswer(params: {
         duration_ms:
           new Date().getTime() -
           new Date((turn.timing as any)?.started_at).getTime(),
+        replay_count: replayCount || 0,
       },
     })
     .eq('id', turnId);
