@@ -1,0 +1,19 @@
+{
+  "name": "interviewlab",
+  "version": "0.1.0",
+  "description": "AI-driven interview simulation platform",
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "test": "echo \"Tests not yet configured\" && exit 0"
+  },
+  "keywords": ["interview", "ai", "saas"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {}
+}
+
