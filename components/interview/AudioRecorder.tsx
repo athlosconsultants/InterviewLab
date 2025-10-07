@@ -20,6 +20,7 @@ export function AudioRecorder({
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [mimeType, setMimeType] = useState<string>('audio/webm');
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -47,7 +48,29 @@ export function AudioRecorder({
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream);
+
+      // Determine the best supported MIME type
+      const mimeTypes = [
+        'audio/webm;codecs=opus',
+        'audio/webm',
+        'audio/ogg;codecs=opus',
+        'audio/mp4',
+        'audio/mpeg',
+      ];
+
+      let selectedMimeType = 'audio/webm';
+      for (const type of mimeTypes) {
+        if (MediaRecorder.isTypeSupported(type)) {
+          selectedMimeType = type;
+          break;
+        }
+      }
+
+      setMimeType(selectedMimeType);
+
+      const mediaRecorder = new MediaRecorder(stream, {
+        mimeType: selectedMimeType,
+      });
       mediaRecorderRef.current = mediaRecorder;
       audioChunksRef.current = [];
 
@@ -58,7 +81,9 @@ export function AudioRecorder({
       };
 
       mediaRecorder.onstop = () => {
-        const blob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        const blob = new Blob(audioChunksRef.current, {
+          type: selectedMimeType,
+        });
         setAudioBlob(blob);
         const url = URL.createObjectURL(blob);
         setAudioUrl(url);
@@ -136,10 +161,18 @@ export function AudioRecorder({
   };
 
   const playRecording = () => {
-    if (audioUrl) {
+    if (audioUrl && audioBlob) {
       if (!audioElementRef.current) {
-        audioElementRef.current = new Audio(audioUrl);
+        audioElementRef.current = new Audio();
         audioElementRef.current.onended = () => {
+          setIsPlaying(false);
+        };
+        audioElementRef.current.onerror = (e) => {
+          console.error('Audio playback error:', e);
+          toast.error('Playback failed', {
+            description:
+              'Unable to play the recording. Please try re-recording.',
+          });
           setIsPlaying(false);
         };
       }
@@ -148,7 +181,16 @@ export function AudioRecorder({
         audioElementRef.current.pause();
         setIsPlaying(false);
       } else {
-        audioElementRef.current.play();
+        // Set source (browser will auto-detect format from blob URL)
+        audioElementRef.current.src = audioUrl;
+        audioElementRef.current.play().catch((error) => {
+          console.error('Play failed:', error);
+          toast.error('Playback failed', {
+            description:
+              'Unable to play the recording. Please try re-recording.',
+          });
+          setIsPlaying(false);
+        });
         setIsPlaying(true);
       }
     }
@@ -163,6 +205,7 @@ export function AudioRecorder({
     setRecordingTime(0);
     if (audioElementRef.current) {
       audioElementRef.current.pause();
+      audioElementRef.current.src = '';
       audioElementRef.current = null;
     }
     setIsPlaying(false);
