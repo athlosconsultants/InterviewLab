@@ -6,6 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { FileDrop } from './FileDrop';
 import { FileDropMultiple } from './FileDropMultiple';
+import { uploadFile, uploadFiles } from '@/lib/upload-client';
+import { toast } from 'sonner';
 
 interface IntakeFormData {
   jobTitle: string;
@@ -106,13 +108,65 @@ export function IntakeForm() {
 
     setIsSubmitting(true);
 
-    // TODO: T32 will implement actual upload logic
-    console.log('Form submitted:', formData);
+    try {
+      // Upload CV
+      if (!formData.cv) {
+        toast.error('CV is required');
+        setIsSubmitting(false);
+        return;
+      }
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+      const cvResult = await uploadFile(formData.cv, 'cv');
+      if (!cvResult.success) {
+        toast.error('CV upload failed', {
+          description: cvResult.error,
+        });
+        setIsSubmitting(false);
+        return;
+      }
 
-    setIsSubmitting(false);
+      // Upload job spec files
+      if (formData.jobSpec.length === 0) {
+        toast.error('At least one job spec file is required');
+        setIsSubmitting(false);
+        return;
+      }
+
+      const jobSpecResults = await uploadFiles(formData.jobSpec, 'jobspec');
+      const failedUploads = jobSpecResults.filter((r) => !r.success);
+
+      if (failedUploads.length > 0) {
+        toast.error('Some job spec uploads failed', {
+          description: failedUploads.map((r) => r.error).join(', '),
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
+      // All uploads successful
+      toast.success('Files uploaded successfully!', {
+        description: 'Your interview session is being created...',
+      });
+
+      console.log('Upload results:', {
+        cv: cvResult,
+        jobSpecs: jobSpecResults,
+        formData: {
+          jobTitle: formData.jobTitle,
+          company: formData.company,
+          location: formData.location,
+        },
+      });
+
+      // TODO: T33 will save document metadata to database
+    } catch (error) {
+      console.error('Submit error:', error);
+      toast.error('An error occurred', {
+        description: 'Please try again',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleFileChange = (field: 'cv' | 'jobSpec', file: File | null) => {
