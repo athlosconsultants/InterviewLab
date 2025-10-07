@@ -1,9 +1,10 @@
+import './globals.css';
+import { Header } from '@/components/header';
+
 export const metadata = {
   title: 'InterviewLab',
   description: 'AI-driven interview simulation platform',
 };
-
-import './globals.css';
 
 export default function RootLayout({
   children,
@@ -12,8 +13,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <Header />
+        {children}
+      </body>
     </html>
   );
 }
-
