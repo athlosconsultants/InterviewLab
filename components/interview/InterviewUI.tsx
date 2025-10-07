@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Loader2, Send } from 'lucide-react';
@@ -29,6 +30,7 @@ export function InterviewUI({
   jobTitle,
   company,
 }: InterviewUIProps) {
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [turns, setTurns] = useState<Turn[]>([]);
   const [currentTurnId, setCurrentTurnId] = useState<string | null>(null);
@@ -127,6 +129,18 @@ export function InterviewUI({
           )
         );
 
+        // Check if interview is complete
+        if (result.data.done) {
+          toast.success('Interview complete!', {
+            description: 'Redirecting to your report...',
+          });
+          // Redirect to report page
+          setTimeout(() => {
+            router.push(`/report/${sessionId}`);
+          }, 1500);
+          return;
+        }
+
         // If there's a next question, add it
         if (result.data.nextQuestion && result.data.turnId) {
           setTurns((prev) => [
@@ -142,12 +156,6 @@ export function InterviewUI({
 
         // Clear answer
         setAnswer('');
-
-        if (result.data.done) {
-          toast.success('Interview complete!', {
-            description: 'Redirecting to your report...',
-          });
-        }
       }
     } catch (error) {
       console.error('Submit error:', error);

@@ -6,7 +6,6 @@ import {
   submitAnswer,
   getInterviewState,
 } from '@/lib/interview';
-import { redirect } from 'next/navigation';
 
 /**
  * Server action to initialize the interview and get the first question.
@@ -102,11 +101,6 @@ export async function submitInterviewAnswer(params: {
 
     // Submit answer
     const result = await submitAnswer(params);
-
-    // If done, redirect to report page
-    if (result.done) {
-      redirect(`/report/${params.sessionId}`);
-    }
 
     return { error: null, data: result };
   } catch (error) {
