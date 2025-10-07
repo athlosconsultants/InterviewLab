@@ -70,6 +70,7 @@ export async function submitInterviewAnswer(params: {
   sessionId: string;
   turnId: string;
   answerText: string;
+  audioKey?: string;
 }) {
   try {
     const supabase = await createClient();
@@ -93,7 +94,7 @@ export async function submitInterviewAnswer(params: {
       return { error: 'Session not found', data: null };
     }
 
-    // Submit answer
+    // Submit answer (including audio key if provided)
     const result = await submitAnswer(params);
 
     return { error: null, data: result };

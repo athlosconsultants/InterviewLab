@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2, Send } from 'lucide-react';
+import { Loader2, Send, Mic, Type } from 'lucide-react';
 import {
   initializeInterview,
   submitInterviewAnswer,
@@ -14,6 +14,7 @@ import { toast } from 'sonner';
 import { QuestionBubble } from './QuestionBubble';
 import { TimerRing } from './TimerRing';
 import { ReplayButton } from './ReplayButton';
+import { AudioRecorder } from './AudioRecorder';
 
 interface InterviewUIProps {
   sessionId: string;
@@ -44,6 +45,8 @@ export function InterviewUI({
   const [replayCount, setReplayCount] = useState(0);
   const [replayCap, setReplayCap] = useState(2);
   const [timerSec, setTimerSec] = useState(90);
+  const [answerMode, setAnswerMode] = useState<'text' | 'audio'>('text');
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
 
   // Initialize interview on mount
   useEffect(() => {
@@ -92,8 +95,14 @@ export function InterviewUI({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!answer.trim()) {
+    // Validate we have an answer (text or audio)
+    if (answerMode === 'text' && !answer.trim()) {
       toast.error('Please provide an answer');
+      return;
+    }
+
+    if (answerMode === 'audio' && !audioBlob) {
+      toast.error('Please record your answer');
       return;
     }
 
@@ -105,10 +114,59 @@ export function InterviewUI({
     setIsSubmitting(true);
 
     try {
+      let finalAnswer = answer.trim();
+      let audioKey: string | undefined = undefined;
+
+      // Handle audio mode
+      if (answerMode === 'audio' && audioBlob) {
+        // Upload audio
+        const audioFormData = new FormData();
+        audioFormData.append('audio', audioBlob, 'answer.webm');
+        audioFormData.append('turnId', currentTurnId);
+
+        const uploadResponse = await fetch('/api/upload-audio', {
+          method: 'POST',
+          body: audioFormData,
+        });
+
+        const uploadData = await uploadResponse.json();
+
+        if (!uploadData.success) {
+          toast.error('Failed to upload audio');
+          setIsSubmitting(false);
+          return;
+        }
+
+        audioKey = uploadData.storageKey;
+
+        // Transcribe audio
+        toast.info('Transcribing your answer...');
+        const transcribeFormData = new FormData();
+        transcribeFormData.append('audio', audioBlob, 'answer.webm');
+
+        const transcribeResponse = await fetch('/api/transcribe', {
+          method: 'POST',
+          body: transcribeFormData,
+        });
+
+        const transcribeData = await transcribeResponse.json();
+
+        if (!transcribeData.success) {
+          toast.error('Failed to transcribe audio');
+          setIsSubmitting(false);
+          return;
+        }
+
+        finalAnswer = transcribeData.text;
+        toast.success('Audio transcribed successfully');
+      }
+
+      // Submit the answer
       const result = await submitInterviewAnswer({
         sessionId,
         turnId: currentTurnId,
-        answerText: answer.trim(),
+        answerText: finalAnswer,
+        audioKey,
       });
 
       if (result.error) {
@@ -122,7 +180,7 @@ export function InterviewUI({
         // Update turns with the answer
         setTurns((prev) =>
           prev.map((t) =>
-            t.id === currentTurnId ? { ...t, answer_text: answer.trim() } : t
+            t.id === currentTurnId ? { ...t, answer_text: finalAnswer } : t
           )
         );
 
@@ -151,8 +209,10 @@ export function InterviewUI({
           setQuestionNumber((prev) => prev + 1);
         }
 
-        // Clear answer
+        // Clear answer and reset state
         setAnswer('');
+        setAudioBlob(null);
+        setReplayCount(0); // Reset replay count for next question
       }
     } catch (error) {
       console.error('Submit error:', error);
@@ -253,32 +313,97 @@ export function InterviewUI({
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            <Textarea
-              value={answer}
-              onChange={(e) => setAnswer(e.target.value)}
-              placeholder="Type your answer here..."
-              rows={6}
-              disabled={isSubmitting}
-              className="resize-none"
-            />
-            <div className="flex justify-between items-center">
-              <p className="text-sm text-muted-foreground">
-                {answer.trim().split(/\s+/).filter(Boolean).length} words
-              </p>
-              <Button type="submit" disabled={isSubmitting || !answer.trim()}>
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Submitting...
-                  </>
-                ) : (
-                  <>
-                    <Send className="mr-2 h-4 w-4" />
-                    Submit Answer
-                  </>
-                )}
+            {/* Answer Mode Toggle */}
+            <div className="flex items-center gap-2 mb-4">
+              <Button
+                type="button"
+                variant={answerMode === 'text' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => {
+                  setAnswerMode('text');
+                  setAudioBlob(null);
+                }}
+                disabled={isSubmitting}
+                className="gap-2"
+              >
+                <Type className="h-4 w-4" />
+                Type Answer
+              </Button>
+              <Button
+                type="button"
+                variant={answerMode === 'audio' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => {
+                  setAnswerMode('audio');
+                  setAnswer('');
+                }}
+                disabled={isSubmitting}
+                className="gap-2"
+              >
+                <Mic className="h-4 w-4" />
+                Record Answer
               </Button>
             </div>
+
+            {/* Text Input */}
+            {answerMode === 'text' && (
+              <>
+                <Textarea
+                  value={answer}
+                  onChange={(e) => setAnswer(e.target.value)}
+                  placeholder="Type your answer here..."
+                  rows={6}
+                  disabled={isSubmitting}
+                  className="resize-none"
+                />
+                <div className="flex justify-between items-center">
+                  <p className="text-sm text-muted-foreground">
+                    {answer.trim().split(/\s+/).filter(Boolean).length} words
+                  </p>
+                  <Button
+                    type="submit"
+                    disabled={isSubmitting || !answer.trim()}
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Submitting...
+                      </>
+                    ) : (
+                      <>
+                        <Send className="mr-2 h-4 w-4" />
+                        Submit Answer
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </>
+            )}
+
+            {/* Audio Recorder */}
+            {answerMode === 'audio' && (
+              <>
+                <AudioRecorder
+                  onRecordingComplete={(blob) => setAudioBlob(blob)}
+                  disabled={isSubmitting}
+                />
+                <div className="flex justify-end">
+                  <Button type="submit" disabled={isSubmitting || !audioBlob}>
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Submitting...
+                      </>
+                    ) : (
+                      <>
+                        <Send className="mr-2 h-4 w-4" />
+                        Submit Answer
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </>
+            )}
           </form>
         </div>
       )}
