@@ -199,3 +199,13 @@ export interface Timing {
   started_at: string;
   completed_at: string;
 }
+
+// Report type (from reports table)
+export interface Report {
+  id: string;
+  session_id: string;
+  user_id: string;
+  feedback: any; // InterviewFeedback JSON
+  pdf_key: string | null;
+  created_at: string;
+}
