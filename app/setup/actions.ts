@@ -4,6 +4,10 @@ import { createClient } from '@/lib/supabase-server';
 import { generateResearchSnapshot } from '@/lib/research';
 import { redirect } from 'next/navigation';
 import type { InterviewMode, PlanTier } from '@/lib/schema';
+import {
+  checkAvailableEntitlement,
+  consumeEntitlement,
+} from '@/lib/entitlements';
 
 interface CreateSessionParams {
   jobTitle: string;
@@ -30,6 +34,22 @@ export async function createSession(params: CreateSessionParams) {
 
     if (!user) {
       return { error: 'Unauthorized', sessionId: null };
+    }
+
+    // T86: Check for available entitlement if user is requesting paid tier
+    let entitlementId: string | null = null;
+    if (params.planTier === 'paid') {
+      const availableEntitlement = await checkAvailableEntitlement(user.id);
+
+      if (!availableEntitlement) {
+        return {
+          error:
+            'No available interview package found. Please purchase a paid interview package to access paid features.',
+          sessionId: null,
+        };
+      }
+
+      entitlementId = availableEntitlement.id;
     }
 
     // Fetch the most recent CV document
@@ -95,7 +115,7 @@ export async function createSession(params: CreateSessionParams) {
 
     console.log('Research snapshot generated:', researchSnapshot);
 
-    // Create session record (T84 - with tier configuration)
+    // Create session record (T84 - with tier configuration, T86 - with entitlement_id)
     const { data: session, error: sessionError } = await supabase
       .from('sessions')
       .insert({
@@ -109,6 +129,7 @@ export async function createSession(params: CreateSessionParams) {
         mode: params.mode,
         stages_planned: params.stagesPlanned,
         current_stage: 1,
+        entitlement_id: entitlementId, // T86: Link entitlement to session
         limits: {
           question_cap: params.planTier === 'free' ? 3 : 30, // Free: 3 questions, Paid: 30 questions (10 per stage max)
           replay_cap: 2,
@@ -124,6 +145,21 @@ export async function createSession(params: CreateSessionParams) {
         error: 'Failed to create interview session. Please try again.',
         sessionId: null,
       };
+    }
+
+    // T86: Consume the entitlement after successful session creation
+    if (entitlementId) {
+      const consumeResult = await consumeEntitlement(entitlementId, user.id);
+      if (!consumeResult.success) {
+        // Log the error but don't fail the session creation
+        // The session is already created, we don't want to rollback
+        console.error('Failed to consume entitlement:', consumeResult.error);
+        console.warn(
+          'Session created but entitlement not consumed. Manual intervention may be required.'
+        );
+      } else {
+        console.log('Entitlement consumed:', entitlementId);
+      }
     }
 
     console.log('Session created:', session.id);
