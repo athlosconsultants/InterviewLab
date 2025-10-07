@@ -40,16 +40,21 @@ export async function POST(request: NextRequest) {
 
     // Check if TTS already exists for this turn
     if (turn.tts_key) {
-      // Get the existing audio URL
-      const { data: audioData } = supabase.storage
+      // Get a signed URL for the cached audio (valid for 1 hour)
+      const { data: audioData, error: signError } = await supabase.storage
         .from('audio')
-        .getPublicUrl(turn.tts_key);
+        .createSignedUrl(turn.tts_key, 3600);
 
-      return NextResponse.json({
-        success: true,
-        audioUrl: audioData.publicUrl,
-        cached: true,
-      });
+      if (signError || !audioData) {
+        console.error('Failed to get signed URL for cached audio:', signError);
+        // Fall through to regenerate
+      } else {
+        return NextResponse.json({
+          success: true,
+          audioUrl: audioData.signedUrl,
+          cached: true,
+        });
+      }
     }
 
     // Generate TTS audio using OpenAI
@@ -91,14 +96,22 @@ export async function POST(request: NextRequest) {
       console.error('Failed to update turn with TTS key:', updateError);
     }
 
-    // Get public URL
-    const { data: audioData } = supabase.storage
+    // Get signed URL (valid for 1 hour)
+    const { data: audioData, error: signError } = await supabase.storage
       .from('audio')
-      .getPublicUrl(uploadData.path);
+      .createSignedUrl(uploadData.path, 3600);
+
+    if (signError || !audioData) {
+      console.error('Failed to create signed URL:', signError);
+      return NextResponse.json(
+        { error: 'Failed to generate audio URL' },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json({
       success: true,
-      audioUrl: audioData.publicUrl,
+      audioUrl: audioData.signedUrl,
       storageKey: uploadData.path,
       cached: false,
     });
