@@ -11,6 +11,7 @@ import {
 } from '@/app/interview/[id]/actions';
 import type { Question } from '@/lib/schema';
 import { toast } from 'sonner';
+import { QuestionBubble } from './QuestionBubble';
 
 interface InterviewUIProps {
   sessionId: string;
@@ -183,22 +184,11 @@ export function InterviewUI({
         {turns.map((turn, index) => (
           <div key={turn.id} className="space-y-4">
             {/* Question */}
-            <div className="flex justify-start">
-              <div className="max-w-[80%] rounded-lg bg-muted p-4">
-                <div className="mb-2 flex items-center gap-2">
-                  <span className="text-xs font-medium text-muted-foreground uppercase">
-                    Question {index + 1}
-                  </span>
-                  <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
-                    {turn.question.category}
-                  </span>
-                  <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-medium">
-                    {turn.question.difficulty}
-                  </span>
-                </div>
-                <p className="text-base">{turn.question.text}</p>
-              </div>
-            </div>
+            <QuestionBubble
+              question={turn.question}
+              questionNumber={index + 1}
+              turnId={turn.id}
+            />
 
             {/* Answer */}
             {turn.answer_text && (
