@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { FileDrop } from './FileDrop';
 import { uploadFile } from '@/lib/upload-client';
 import { toast } from 'sonner';
+import { createSession, startInterview } from '@/app/setup/actions';
 
 interface IntakeFormData {
   jobTitle: string;
@@ -154,9 +155,9 @@ export function IntakeForm() {
         return;
       }
 
-      // All successful
-      toast.success('Setup complete!', {
-        description: 'Your interview session is being created...',
+      // All uploads successful, now create the session
+      toast.success('Files uploaded!', {
+        description: 'Analyzing your materials...',
       });
 
       console.log('Upload results:', {
@@ -169,7 +170,28 @@ export function IntakeForm() {
         },
       });
 
-      // TODO: Next task will create session and redirect
+      // Create interview session with research snapshot
+      const { sessionId, error: sessionError } = await createSession({
+        jobTitle: formData.jobTitle,
+        company: formData.company,
+        location: formData.location,
+      });
+
+      if (sessionError || !sessionId) {
+        toast.error('Session creation failed', {
+          description: sessionError || 'Please try again',
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Session created successfully
+      toast.success('Interview ready!', {
+        description: 'Redirecting to interview...',
+      });
+
+      // Redirect to interview page
+      await startInterview(sessionId);
     } catch (error) {
       console.error('Submit error:', error);
       toast.error('An error occurred', {
