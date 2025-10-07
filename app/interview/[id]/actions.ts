@@ -42,19 +42,13 @@ export async function initializeInterview(sessionId: string) {
 
     // If there are already turns, just get the current state
     if (existingTurns && existingTurns.length > 0) {
-      console.log('Session has existing turns, getting current state');
       const state = await getInterviewState(sessionId);
-      console.log('Current state:', state);
       return { error: null, data: state };
     }
 
     // No turns yet - generate the first question
-    console.log('No turns found, starting interview for session:', sessionId);
     const result = await startInterview(sessionId);
-    console.log('Start interview result:', result);
-
     const state = await getInterviewState(sessionId);
-    console.log('Final state:', state);
 
     return { error: null, data: state };
   } catch (error) {

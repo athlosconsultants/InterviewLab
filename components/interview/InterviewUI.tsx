@@ -54,10 +54,6 @@ export function InterviewUI({
         }
 
         if (result.data) {
-          console.log('Interview data received:', result.data);
-          console.log('Turns:', result.data.turns);
-          console.log('Current turn:', result.data.currentTurn);
-
           setTurns(result.data.turns || []);
           setCurrentTurnId(result.data.currentTurn?.id || null);
 
@@ -72,13 +68,6 @@ export function InterviewUI({
           const limits = result.data.session?.limits as any;
           setTotalQuestions(limits?.question_cap || 3);
         }
-
-        console.log(
-          'After init - turns:',
-          turns,
-          'currentTurnId:',
-          currentTurnId
-        );
       } catch (error) {
         console.error('Init error:', error);
         toast.error('An error occurred', {
