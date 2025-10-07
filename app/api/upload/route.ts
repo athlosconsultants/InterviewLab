@@ -37,9 +37,27 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: result.error }, { status: 500 });
     }
 
+    // Save document metadata to database
+    const { data: document, error: dbError } = await supabase
+      .from('documents')
+      .insert({
+        user_id: user.id,
+        type: type,
+        storage_key: result.storageKey,
+      })
+      .select()
+      .single();
+
+    if (dbError) {
+      console.error('Database error:', dbError);
+      // File was uploaded but metadata wasn't saved - still return success
+      // but log the error for investigation
+    }
+
     return NextResponse.json({
       success: true,
       storageKey: result.storageKey,
+      documentId: document?.id,
       fileName: file.name,
       fileSize: file.size,
       fileType: file.type,
