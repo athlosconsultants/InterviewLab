@@ -200,16 +200,24 @@ export function InterviewUI({
           return;
         }
 
-        // If there's a next question, add it
-        if (result.data.nextQuestion && result.data.turnId) {
+        // If there's a next question, add it (T85)
+        const nextData = result.data as {
+          done: boolean;
+          nextQuestion: Question;
+          turnId: string;
+        };
+        if (nextData.nextQuestion && nextData.turnId) {
+          toast.success('Answer submitted!', {
+            description: 'Next question generated.',
+          });
           setTurns((prev) => [
             ...prev,
             {
-              id: result.data.turnId!,
-              question: result.data.nextQuestion!,
+              id: nextData.turnId,
+              question: nextData.nextQuestion,
             },
           ]);
-          setCurrentTurnId(result.data.turnId);
+          setCurrentTurnId(nextData.turnId);
           setQuestionNumber((prev) => prev + 1);
         }
 

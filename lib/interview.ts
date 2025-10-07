@@ -229,10 +229,10 @@ export async function submitAnswer(params: {
     throw new Error('Failed to update turn');
   }
 
-  // Get session and all turns
+  // Get session and all turns (T85 - with plan_tier)
   const { data: session, error: sessionError } = await supabase
     .from('sessions')
-    .select('*, research_snapshot, limits')
+    .select('*, research_snapshot, limits, plan_tier')
     .eq('id', sessionId)
     .single();
 
@@ -251,8 +251,23 @@ export async function submitAnswer(params: {
   }
 
   const questionCap = (session.limits as any)?.question_cap || 3;
+  const planTier = (session as any).plan_tier || 'free';
 
-  // Check if we've reached the question limit
+  // T85: Enforce free tier restrictions (3 questions max)
+  if (planTier === 'free' && allTurns.length >= 3) {
+    // End interview for free tier
+    await supabase
+      .from('sessions')
+      .update({ status: 'feedback' })
+      .eq('id', sessionId);
+
+    return {
+      done: true,
+      nextQuestion: null,
+    };
+  }
+
+  // Check if we've reached the question limit (paid tier or general cap)
   if (allTurns.length >= questionCap) {
     // End interview
     await supabase

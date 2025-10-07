@@ -83,10 +83,10 @@ export async function submitInterviewAnswer(params: {
       return { error: 'Unauthorized', data: null };
     }
 
-    // Verify session belongs to user
+    // Verify session belongs to user (T85 - fetch plan_tier and limits)
     const { data: session, error: sessionError } = await supabase
       .from('sessions')
-      .select('id, user_id')
+      .select('id, user_id, plan_tier, limits')
       .eq('id', params.sessionId)
       .eq('user_id', user.id)
       .single();
@@ -95,7 +95,23 @@ export async function submitInterviewAnswer(params: {
       return { error: 'Session not found', data: null };
     }
 
-    // Submit answer (including audio key if provided)
+    // T85: Verify free tier hasn't exceeded limits before submitting
+    if (session.plan_tier === 'free') {
+      const { data: existingTurns, error: turnsError } = await supabase
+        .from('turns')
+        .select('id')
+        .eq('session_id', params.sessionId)
+        .eq('user_id', user.id);
+
+      if (!turnsError && existingTurns && existingTurns.length >= 3) {
+        return {
+          error: 'Free tier limit reached (3 questions maximum)',
+          data: { done: true, nextQuestion: null },
+        };
+      }
+    }
+
+    // Submit answer (including audio key and replay count if provided)
     const result = await submitAnswer(params);
 
     return { error: null, data: result };
