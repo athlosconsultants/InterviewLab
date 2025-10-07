@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase-server';
 import { uploadFile, FileType } from '@/lib/storage';
+import { extractText } from '@/lib/extract';
 
 export async function POST(request: NextRequest) {
   try {
@@ -30,6 +31,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid file type' }, { status: 400 });
     }
 
+    // Extract text from file (for CV and job specs)
+    let extractedText: string | null = null;
+    if (type === 'cv' || type === 'jobspec') {
+      extractedText = await extractText(file);
+      if (!extractedText) {
+        console.warn(`No text extracted from ${type} file: ${file.name}`);
+      }
+    }
+
     // Upload file
     const result = await uploadFile(file, type, user.id);
 
@@ -44,6 +54,7 @@ export async function POST(request: NextRequest) {
         user_id: user.id,
         type: type,
         storage_key: result.storageKey,
+        extracted_text: extractedText,
       })
       .select()
       .single();
