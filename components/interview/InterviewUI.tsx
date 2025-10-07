@@ -12,6 +12,8 @@ import {
 import type { Question } from '@/lib/schema';
 import { toast } from 'sonner';
 import { QuestionBubble } from './QuestionBubble';
+import { TimerRing } from './TimerRing';
+import { ReplayButton } from './ReplayButton';
 
 interface InterviewUIProps {
   sessionId: string;
@@ -39,6 +41,9 @@ export function InterviewUI({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [questionNumber, setQuestionNumber] = useState(1);
   const [totalQuestions, setTotalQuestions] = useState(3);
+  const [replayCount, setReplayCount] = useState(0);
+  const [replayCap, setReplayCap] = useState(2);
+  const [timerSec, setTimerSec] = useState(90);
 
   // Initialize interview on mount
   useEffect(() => {
@@ -68,6 +73,8 @@ export function InterviewUI({
 
           const limits = result.data.session?.limits as any;
           setTotalQuestions(limits?.question_cap || 3);
+          setReplayCap(limits?.replay_cap || 2);
+          setTimerSec(limits?.timer_sec || 90);
         }
       } catch (error) {
         console.error('Init error:', error);
@@ -157,6 +164,18 @@ export function InterviewUI({
     }
   };
 
+  const handleReplay = () => {
+    if (replayCount >= replayCap) {
+      toast.error('No replays remaining');
+      return;
+    }
+
+    setReplayCount((prev) => prev + 1);
+    toast.info('Question replayed', {
+      description: `${replayCap - replayCount - 1} replays remaining`,
+    });
+  };
+
   if (isLoading) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center p-4">
@@ -212,6 +231,27 @@ export function InterviewUI({
       {/* Answer Input */}
       {currentQuestion && (
         <div className="sticky bottom-0 bg-background border-t pt-4">
+          {/* Timer and Replay Controls */}
+          <div className="mb-4 flex items-center justify-between">
+            <ReplayButton
+              replayCount={replayCount}
+              replayCap={replayCap}
+              onReplay={handleReplay}
+              disabled={isSubmitting}
+            />
+            <TimerRing
+              timeLimit={timerSec}
+              startTime={
+                currentQuestion.timing?.started_at || new Date().toISOString()
+              }
+              onExpire={() => {
+                toast.warning('Time is up!', {
+                  description: 'Please submit your answer',
+                });
+              }}
+            />
+          </div>
+
           <form onSubmit={handleSubmit} className="space-y-4">
             <Textarea
               value={answer}
