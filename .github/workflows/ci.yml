@@ -48,4 +48,9 @@ jobs:
 
       - name: Build project
         run: pnpm run build
+        env:
+          # Dummy environment variables for build (not used at build time)
+          NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder-key
+          OPENAI_API_KEY: sk-placeholder
 
