@@ -4,13 +4,15 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { FileDrop } from './FileDrop';
+import { FileDropMultiple } from './FileDropMultiple';
 
 interface IntakeFormData {
   jobTitle: string;
   company: string;
   location: string;
   cv: File | null;
-  jobSpec: File | null;
+  jobSpec: File[];
 }
 
 interface FormErrors {
@@ -27,7 +29,7 @@ export function IntakeForm() {
     company: '',
     location: '',
     cv: null,
-    jobSpec: null,
+    jobSpec: [],
   });
 
   const [errors, setErrors] = useState<FormErrors>({});
@@ -35,7 +37,7 @@ export function IntakeForm() {
 
   const validateField = (
     field: keyof IntakeFormData,
-    value: string | File | null
+    value: string | File | null | File[]
   ): string | undefined => {
     switch (field) {
       case 'jobTitle':
@@ -67,8 +69,8 @@ export function IntakeForm() {
         }
         break;
       case 'jobSpec':
-        if (!value) {
-          return 'Job specification is required';
+        if (Array.isArray(value) && value.length === 0) {
+          return 'At least one job specification file is required';
         }
         break;
     }
@@ -127,7 +129,7 @@ export function IntakeForm() {
       formData.company.trim() &&
       formData.location.trim() &&
       formData.cv &&
-      formData.jobSpec
+      formData.jobSpec.length > 0
     );
   };
 
@@ -216,50 +218,61 @@ export function IntakeForm() {
 
       {/* CV Upload */}
       <div className="space-y-2">
-        <Label htmlFor="cv">
+        <Label>
           Your CV/Resume <span className="text-destructive">*</span>
         </Label>
-        <Input
-          id="cv"
-          type="file"
-          accept=".pdf,.doc,.docx"
-          onChange={(e) => {
-            const file = e.target.files?.[0] || null;
-            handleFileChange('cv', file);
-          }}
-          className={errors.cv ? 'border-destructive' : ''}
+        <FileDrop
+          onFileSelect={(file) => handleFileChange('cv', file)}
+          acceptedExtensions={['.pdf', '.doc', '.docx']}
+          acceptedTypes={[
+            'application/pdf',
+            'application/msword',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          ]}
+          label="Drop your CV/Resume here"
+          currentFile={formData.cv}
         />
-        {formData.cv && (
-          <p className="text-sm text-muted-foreground">
-            Selected: {formData.cv.name} ({(formData.cv.size / 1024).toFixed(1)}{' '}
-            KB)
-          </p>
-        )}
         {errors.cv && <p className="text-sm text-destructive">{errors.cv}</p>}
       </div>
 
       {/* Job Spec Upload */}
       <div className="space-y-2">
-        <Label htmlFor="jobSpec">
+        <Label>
           Job Description/Specification{' '}
           <span className="text-destructive">*</span>
         </Label>
-        <Input
-          id="jobSpec"
-          type="file"
-          accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg"
-          onChange={(e) => {
-            const file = e.target.files?.[0] || null;
-            handleFileChange('jobSpec', file);
+        <p className="text-xs text-muted-foreground">
+          Upload up to 3 files (useful for multiple screenshots)
+        </p>
+        <FileDropMultiple
+          onFilesChange={(files) => {
+            setFormData({ ...formData, jobSpec: files });
+            if (files.length > 0 && errors.jobSpec) {
+              setErrors({ ...errors, jobSpec: undefined });
+            }
           }}
-          className={errors.jobSpec ? 'border-destructive' : ''}
+          acceptedExtensions={[
+            '.pdf',
+            '.doc',
+            '.docx',
+            '.txt',
+            '.png',
+            '.jpg',
+            '.jpeg',
+          ]}
+          acceptedTypes={[
+            'application/pdf',
+            'application/msword',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'text/plain',
+            'image/png',
+            'image/jpeg',
+            'image/jpg',
+          ]}
+          label="Drop your job description here"
+          currentFiles={formData.jobSpec}
+          maxFiles={3}
         />
-        {formData.jobSpec && (
-          <p className="text-sm text-muted-foreground">
-            Selected: {formData.jobSpec.name} (
-            {(formData.jobSpec.size / 1024).toFixed(1)} KB)
-          </p>
-        )}
         {errors.jobSpec && (
           <p className="text-sm text-destructive">{errors.jobSpec}</p>
         )}

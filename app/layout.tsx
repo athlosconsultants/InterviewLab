@@ -1,5 +1,6 @@
 import './globals.css';
 import { Header } from '@/components/header';
+import { Toaster } from '@/components/ui/sonner';
 
 export const metadata = {
   title: 'InterviewLab',
@@ -16,6 +17,7 @@ export default function RootLayout({
       <body>
         <Header />
         {children}
+        <Toaster />
       </body>
     </html>
   );
