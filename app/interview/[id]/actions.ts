@@ -34,15 +34,28 @@ export async function initializeInterview(sessionId: string) {
       return { error: 'Session not found', data: null };
     }
 
-    // If already running, get current state
-    if (session.status === 'running') {
+    // Check if interview has any turns (questions)
+    const { data: existingTurns } = await supabase
+      .from('turns')
+      .select('id')
+      .eq('session_id', sessionId)
+      .limit(1);
+
+    // If there are already turns, just get the current state
+    if (existingTurns && existingTurns.length > 0) {
+      console.log('Session has existing turns, getting current state');
       const state = await getInterviewState(sessionId);
+      console.log('Current state:', state);
       return { error: null, data: state };
     }
 
-    // Start the interview
+    // No turns yet - generate the first question
+    console.log('No turns found, starting interview for session:', sessionId);
     const result = await startInterview(sessionId);
+    console.log('Start interview result:', result);
+
     const state = await getInterviewState(sessionId);
+    console.log('Final state:', state);
 
     return { error: null, data: state };
   } catch (error) {
