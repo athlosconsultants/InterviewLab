@@ -5,10 +5,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
 import { FileDrop } from './FileDrop';
 import { uploadFile } from '@/lib/upload-client';
 import { toast } from 'sonner';
 import { createSession } from '@/app/setup/actions';
+import { Mic, Type } from 'lucide-react';
+import type { InterviewMode, PlanTier } from '@/lib/schema';
 
 interface IntakeFormData {
   jobTitle: string;
@@ -16,6 +19,9 @@ interface IntakeFormData {
   location: string;
   cv: File | null;
   jobDescription: string;
+  mode: InterviewMode;
+  stagesPlanned: number;
+  planTier: PlanTier;
 }
 
 interface IntakeFormProps {
@@ -42,6 +48,9 @@ export function IntakeForm({ onSuccess }: IntakeFormProps = {}) {
     location: '',
     cv: null,
     jobDescription: '',
+    mode: 'text', // Default to text mode (T84)
+    stagesPlanned: 1, // Default to 1 stage for free tier (T84)
+    planTier: 'free', // Default to free tier (T84)
   });
 
   const [errors, setErrors] = useState<FormErrors>({});
@@ -179,11 +188,14 @@ export function IntakeForm({ onSuccess }: IntakeFormProps = {}) {
         },
       });
 
-      // Create interview session with research snapshot
+      // Create interview session with research snapshot (T84)
       const { sessionId, error: sessionError } = await createSession({
         jobTitle: formData.jobTitle,
         company: formData.company,
         location: formData.location,
+        mode: formData.mode,
+        stagesPlanned: formData.stagesPlanned,
+        planTier: formData.planTier,
       });
 
       if (sessionError || !sessionId) {
@@ -369,6 +381,85 @@ export function IntakeForm({ onSuccess }: IntakeFormProps = {}) {
         {errors.jobDescription && (
           <p className="text-sm text-destructive">{errors.jobDescription}</p>
         )}
+      </div>
+
+      {/* Interview Mode Toggle (T84) */}
+      <div className="space-y-4 rounded-lg border p-4 bg-muted/30">
+        <div className="space-y-2">
+          <Label className="text-base font-semibold">Interview Mode</Label>
+          <div className="flex items-center gap-4">
+            <button
+              type="button"
+              onClick={() => setFormData({ ...formData, mode: 'text' })}
+              disabled={formData.planTier === 'free'}
+              className={`flex-1 flex items-center justify-center gap-2 rounded-lg border-2 p-4 transition-colors ${
+                formData.mode === 'text'
+                  ? 'border-primary bg-primary/10'
+                  : 'border-border hover:border-primary/50'
+              } ${formData.planTier === 'free' && formData.mode !== 'text' ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              <Type className="h-5 w-5" />
+              <span className="font-medium">Text</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setFormData({ ...formData, mode: 'voice' })}
+              disabled={formData.planTier === 'free'}
+              className={`flex-1 flex items-center justify-center gap-2 rounded-lg border-2 p-4 transition-colors ${
+                formData.mode === 'voice'
+                  ? 'border-primary bg-primary/10'
+                  : 'border-border hover:border-primary/50'
+              } ${formData.planTier === 'free' ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              <Mic className="h-5 w-5" />
+              <span className="font-medium">Voice</span>
+              {formData.planTier === 'free' && (
+                <span className="ml-1 text-xs bg-amber-100 dark:bg-amber-900 text-amber-800 dark:text-amber-200 px-2 py-0.5 rounded">
+                  Pro
+                </span>
+              )}
+            </button>
+          </div>
+          {formData.planTier === 'free' && (
+            <p className="text-xs text-muted-foreground">
+              Voice mode is available with Pro tier
+            </p>
+          )}
+        </div>
+
+        {/* Interview Stages Selector (T84) */}
+        <div className="space-y-2">
+          <Label className="text-base font-semibold">Interview Stages</Label>
+          <div className="flex items-center gap-2">
+            {[1, 2, 3].map((stage) => (
+              <button
+                key={stage}
+                type="button"
+                onClick={() =>
+                  setFormData({ ...formData, stagesPlanned: stage })
+                }
+                disabled={formData.planTier === 'free' && stage > 1}
+                className={`flex-1 rounded-lg border-2 p-3 transition-colors ${
+                  formData.stagesPlanned === stage
+                    ? 'border-primary bg-primary/10'
+                    : 'border-border hover:border-primary/50'
+                } ${formData.planTier === 'free' && stage > 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                <span className="font-semibold">{stage}</span>
+                {formData.planTier === 'free' && stage > 1 && (
+                  <span className="ml-1 text-[10px] bg-amber-100 dark:bg-amber-900 text-amber-800 dark:text-amber-200 px-1.5 py-0.5 rounded">
+                    Pro
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+          <p className="text-xs text-muted-foreground">
+            {formData.planTier === 'free'
+              ? 'Free tier includes 1 stage with 3 questions'
+              : `${formData.stagesPlanned} stage${formData.stagesPlanned > 1 ? 's' : ''} with 5-10 questions each`}
+          </p>
+        </div>
       </div>
 
       {/* Submit Button */}

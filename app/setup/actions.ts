@@ -3,11 +3,15 @@
 import { createClient } from '@/lib/supabase-server';
 import { generateResearchSnapshot } from '@/lib/research';
 import { redirect } from 'next/navigation';
+import type { InterviewMode, PlanTier } from '@/lib/schema';
 
 interface CreateSessionParams {
   jobTitle: string;
   company: string;
   location: string;
+  mode: InterviewMode; // T84
+  stagesPlanned: number; // T84
+  planTier: PlanTier; // T84
 }
 
 /**
@@ -91,7 +95,7 @@ export async function createSession(params: CreateSessionParams) {
 
     console.log('Research snapshot generated:', researchSnapshot);
 
-    // Create session record
+    // Create session record (T84 - with tier configuration)
     const { data: session, error: sessionError } = await supabase
       .from('sessions')
       .insert({
@@ -101,8 +105,12 @@ export async function createSession(params: CreateSessionParams) {
         company: params.company,
         location: params.location,
         research_snapshot: researchSnapshot,
+        plan_tier: params.planTier,
+        mode: params.mode,
+        stages_planned: params.stagesPlanned,
+        current_stage: 1,
         limits: {
-          question_cap: 3,
+          question_cap: params.planTier === 'free' ? 3 : 30, // Free: 3 questions, Paid: 30 questions (10 per stage max)
           replay_cap: 2,
           timer_sec: 90,
         },

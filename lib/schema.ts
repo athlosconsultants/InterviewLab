@@ -67,6 +67,11 @@ export interface Database {
           location: string | null;
           research_snapshot: Json | null;
           limits: Json | null;
+          plan_tier: string;
+          mode: string;
+          stages_planned: number;
+          current_stage: number;
+          entitlement_id: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -79,6 +84,11 @@ export interface Database {
           location?: string | null;
           research_snapshot?: Json | null;
           limits?: Json | null;
+          plan_tier?: string;
+          mode?: string;
+          stages_planned?: number;
+          current_stage?: number;
+          entitlement_id?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -91,6 +101,11 @@ export interface Database {
           location?: string | null;
           research_snapshot?: Json | null;
           limits?: Json | null;
+          plan_tier?: string;
+          mode?: string;
+          stages_planned?: number;
+          current_stage?: number;
+          entitlement_id?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -113,6 +128,12 @@ export type SessionStatus =
   | 'running'
   | 'feedback'
   | 'complete';
+
+// Plan tier enum (T84)
+export type PlanTier = 'free' | 'paid';
+
+// Interview mode enum (T84)
+export type InterviewMode = 'text' | 'voice';
 
 // Research Snapshot type
 // This is the structured data produced during the research phase
@@ -207,5 +228,18 @@ export interface Report {
   user_id: string;
   feedback: any; // InterviewFeedback JSON
   pdf_key: string | null;
+  created_at: string;
+}
+
+// Entitlement type (from entitlements table) - T84
+export interface Entitlement {
+  id: string;
+  user_id: string;
+  type: 'interview_package' | 'subscription';
+  status: 'active' | 'consumed' | 'expired';
+  order_id: string | null;
+  metadata: Json;
+  expires_at: string | null;
+  consumed_at: string | null;
   created_at: string;
 }
