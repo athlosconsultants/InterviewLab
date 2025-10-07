@@ -30,35 +30,34 @@ export function UpgradeDialog({
             <Sparkles className="h-5 w-5 text-primary" />
             <DialogTitle>Free Plan Limit Reached</DialogTitle>
           </div>
-          <DialogDescription className="space-y-4 pt-4">
-            <p>
-              You&apos;ve completed <strong>3 questions</strong> on the free
-              plan. Great work!
-            </p>
-
-            <div className="rounded-lg border bg-muted/50 p-4">
-              <p className="font-medium mb-2">Upgrade to Pro for:</p>
-              <ul className="space-y-2">
-                <li className="flex items-center gap-2 text-sm">
-                  <Check className="h-4 w-4 text-green-500" />
-                  <span>Unlimited interview questions</span>
-                </li>
-                <li className="flex items-center gap-2 text-sm">
-                  <Check className="h-4 w-4 text-green-500" />
-                  <span>Detailed performance reports</span>
-                </li>
-                <li className="flex items-center gap-2 text-sm">
-                  <Check className="h-4 w-4 text-green-500" />
-                  <span>Advanced analytics</span>
-                </li>
-                <li className="flex items-center gap-2 text-sm">
-                  <Check className="h-4 w-4 text-green-500" />
-                  <span>Priority support</span>
-                </li>
-              </ul>
-            </div>
+          <DialogDescription>
+            You&apos;ve completed 3 questions on the free plan. Great work!
           </DialogDescription>
         </DialogHeader>
+
+        <div className="space-y-4">
+          <div className="rounded-lg border bg-muted/50 p-4">
+            <p className="font-medium mb-2">Upgrade to Pro for:</p>
+            <ul className="space-y-2">
+              <li className="flex items-center gap-2 text-sm">
+                <Check className="h-4 w-4 text-green-500" />
+                <span>Unlimited interview questions</span>
+              </li>
+              <li className="flex items-center gap-2 text-sm">
+                <Check className="h-4 w-4 text-green-500" />
+                <span>Detailed performance reports</span>
+              </li>
+              <li className="flex items-center gap-2 text-sm">
+                <Check className="h-4 w-4 text-green-500" />
+                <span>Advanced analytics</span>
+              </li>
+              <li className="flex items-center gap-2 text-sm">
+                <Check className="h-4 w-4 text-green-500" />
+                <span>Priority support</span>
+              </li>
+            </ul>
+          </div>
+        </div>
 
         <DialogFooter className="flex-col sm:flex-row gap-2">
           <Button variant="outline" onClick={onViewReport} className="w-full">
