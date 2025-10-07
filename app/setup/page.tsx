@@ -1,4 +1,4 @@
-import { IntakeForm } from '@/components/forms/IntakeForm';
+import { SetupFlow } from '@/components/setup/SetupFlow';
 
 export default function SetupPage() {
   return (
@@ -12,7 +12,7 @@ export default function SetupPage() {
         </div>
 
         <div className="rounded-lg border p-6 shadow-sm">
-          <IntakeForm />
+          <SetupFlow />
         </div>
       </div>
     </main>

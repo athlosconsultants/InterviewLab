@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { FileDrop } from './FileDrop';
 import { uploadFile } from '@/lib/upload-client';
 import { toast } from 'sonner';
-import { createSession, startInterview } from '@/app/setup/actions';
+import { createSession } from '@/app/setup/actions';
 
 interface IntakeFormData {
   jobTitle: string;
@@ -16,6 +16,15 @@ interface IntakeFormData {
   location: string;
   cv: File | null;
   jobDescription: string;
+}
+
+interface IntakeFormProps {
+  onSuccess?: (data: {
+    sessionId: string;
+    jobTitle: string;
+    company: string;
+    location: string;
+  }) => void;
 }
 
 interface FormErrors {
@@ -26,7 +35,7 @@ interface FormErrors {
   jobDescription?: string;
 }
 
-export function IntakeForm() {
+export function IntakeForm({ onSuccess }: IntakeFormProps = {}) {
   const [formData, setFormData] = useState<IntakeFormData>({
     jobTitle: '',
     company: '',
@@ -187,11 +196,18 @@ export function IntakeForm() {
 
       // Session created successfully
       toast.success('Interview ready!', {
-        description: 'Redirecting to interview...',
+        description: 'Preparing your interview...',
       });
 
-      // Redirect to interview page
-      await startInterview(sessionId);
+      // Call onSuccess callback or handle locally
+      if (onSuccess) {
+        onSuccess({
+          sessionId,
+          jobTitle: formData.jobTitle,
+          company: formData.company,
+          location: formData.location,
+        });
+      }
     } catch (error) {
       console.error('Submit error:', error);
       toast.error('An error occurred', {
