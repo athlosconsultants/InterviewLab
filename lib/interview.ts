@@ -280,10 +280,12 @@ Return ONLY valid JSON with no additional text:
 export async function startInterview(sessionId: string) {
   const supabase = await createClient();
 
-  // Get the session with research snapshot
+  // Get the session with research snapshot and stage info
   const { data: session, error: sessionError } = await supabase
     .from('sessions')
-    .select('id, user_id, status, research_snapshot, limits')
+    .select(
+      'id, user_id, status, research_snapshot, limits, current_stage, stages_planned'
+    )
     .eq('id', sessionId)
     .single();
 
@@ -296,13 +298,29 @@ export async function startInterview(sessionId: string) {
     throw new Error(`Cannot start interview in ${session.status} state`);
   }
 
-  // Generate first question
+  // T91: Get stage information for first question
+  const currentStage = (session as any).current_stage || 1;
+  const stagesPlanned = (session as any).stages_planned || 1;
+  const researchSnapshot = session.research_snapshot as ResearchSnapshot;
+
+  console.log(
+    `[T91] Starting interview - Stage ${currentStage} of ${stagesPlanned}`
+  );
+
+  // Generate first question with stage information
   const question = await generateQuestion({
-    researchSnapshot: session.research_snapshot as ResearchSnapshot,
+    researchSnapshot,
     previousTurns: [],
     questionNumber: 1,
     totalQuestions: (session.limits as any)?.question_cap || 3,
+    currentStage, // T91: Pass stage info
+    stagesPlanned, // T91: Pass stage info
+    questionsInStage: 0, // T91: First question in stage
   });
+
+  console.log(
+    `[T91] First question generated with category: ${question.category}`
+  );
 
   // Create first turn
   const { data: turn, error: turnError } = await supabase
