@@ -93,6 +93,15 @@ export async function generateQuestion(params: {
     ? calculateQuestionsPerStage(totalQuestions, stagesPlanned)
     : totalQuestions;
 
+  // T91: Map stage name to question category
+  const stageCategory = stageName.toLowerCase().includes('technical')
+    ? 'technical'
+    : stageName.toLowerCase().includes('behavioral')
+      ? 'behavioral'
+      : stageName.toLowerCase().includes('system')
+        ? 'technical' // System Design questions are technical
+        : 'situational'; // Default fallback
+
   // T90: Build enriched context from previous turns
   // Include full answer text for the most recent turn to enable deep probing
   const conversationContext =
@@ -150,7 +159,7 @@ ${
 **FOCUS ON CURRENT STAGE:**
 This question MUST focus specifically on "${stageName}" competencies and skills.
 ${stages.length > 0 ? `- Other stages (${stages.filter((_, i) => i !== currentStage - 1).join(', ')}) will be covered later - do NOT ask about them now` : ''}
-- Ensure the question category and content align with the "${stageName}" theme
+- The question category MUST be "${stageCategory}" to match the "${stageName}" stage
 - Questions should progressively explore different aspects of "${stageName}"
 `
     : ''
@@ -191,14 +200,14 @@ ${
 - Make questions open-ended (avoid yes/no)
 - Be specific and clear
 - Connect to both their experience AND the role requirements
-- Mix question types: technical, behavioral, and situational
+${isMultiStage ? `- The question MUST be category "${stageCategory}" to match the current stage "${stageName}"` : '- Mix question types: technical, behavioral, and situational'}
 - Ensure the question can be answered in 90 seconds
 
 Return ONLY valid JSON with no additional text:
 
 {
   "text": "The interview question text",
-  "category": "technical|behavioral|situational",
+  "category": "${isMultiStage ? stageCategory : 'technical|behavioral|situational'}",
   "difficulty": "${targetDifficulty}",
   "time_limit": 90,
   "follow_up": ${previousTurns.length > 0 ? 'true' : 'false'}
@@ -232,6 +241,14 @@ Return ONLY valid JSON with no additional text:
     // Validate the question structure
     if (!question.text || !question.category || !question.difficulty) {
       throw new Error('Invalid question structure from OpenAI');
+    }
+
+    // T91: Enforce stage category for multi-stage interviews
+    if (isMultiStage && question.category !== stageCategory) {
+      console.warn(
+        `[T91] Question category mismatch: got "${question.category}", expected "${stageCategory}" for stage "${stageName}". Correcting...`
+      );
+      question.category = stageCategory;
     }
 
     return question;
