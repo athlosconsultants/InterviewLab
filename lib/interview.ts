@@ -340,6 +340,7 @@ export async function submitAnswer(params: {
     done: false,
     nextQuestion,
     turnId: nextTurn.id,
+    bridgeText, // T89: Return bridge text so UI can display it
   };
 }
 
