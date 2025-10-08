@@ -106,20 +106,32 @@ const ROLE_KEYWORDS: Record<string, { industry: string; subIndustry: string }> =
     'retail manager': { industry: 'Retail', subIndustry: 'Management' },
     cashier: { industry: 'Retail', subIndustry: 'Sales Floor' },
 
-    // Construction
+    // Construction & Engineering
     'project manager': {
-      industry: 'Construction',
-      subIndustry: 'Project Management',
+      industry: 'Consulting',
+      subIndustry: 'Construction Project Consulting',
+    },
+    'construction manager': {
+      industry: 'Consulting',
+      subIndustry: 'Construction Project Consulting',
     },
     'site manager': {
-      industry: 'Construction',
-      subIndustry: 'Project Management',
+      industry: 'Consulting',
+      subIndustry: 'Construction Project Consulting',
     },
-    engineer: { industry: 'Construction', subIndustry: 'Engineering' },
-    'civil engineer': { industry: 'Construction', subIndustry: 'Engineering' },
-    electrician: { industry: 'Construction', subIndustry: 'Trades' },
-    plumber: { industry: 'Construction', subIndustry: 'Trades' },
-    carpenter: { industry: 'Construction', subIndustry: 'Trades' },
+    'assistant project manager': {
+      industry: 'Consulting',
+      subIndustry: 'Construction Project Consulting',
+    },
+    engineer: { industry: 'Engineering', subIndustry: 'Civil' },
+    'civil engineer': { industry: 'Engineering', subIndustry: 'Civil' },
+    'mechanical engineer': {
+      industry: 'Engineering',
+      subIndustry: 'Mechanical',
+    },
+    electrician: { industry: 'Engineering', subIndustry: 'Civil' },
+    plumber: { industry: 'Engineering', subIndustry: 'Civil' },
+    carpenter: { industry: 'Engineering', subIndustry: 'Civil' },
 
     // Marketing
     'marketing manager': {
@@ -170,8 +182,30 @@ export function mapRoleToIndustryKit(
     }
   }
 
-  // Try industry hint matching
+  // Try industry hint matching with additional fuzzy logic
   if (normalizedIndustry) {
+    // T92: Special handling for construction/manufacturing/infrastructure
+    if (
+      normalizedIndustry.includes('construction') ||
+      normalizedIndustry.includes('infrastructure') ||
+      normalizedIndustry.includes('civil') ||
+      normalizedIndustry.includes('signage') ||
+      normalizedIndustry.includes('manufacturing')
+    ) {
+      const kit = getIndustryKit(
+        'Consulting',
+        'Construction Project Consulting'
+      );
+      if (kit) {
+        return {
+          industry: 'Consulting',
+          subIndustry: 'Construction Project Consulting',
+          kit,
+          confidence: 'high',
+        };
+      }
+    }
+
     for (const [industry, subIndustries] of Object.entries(industryKits)) {
       if (normalizedIndustry.includes(industry.toLowerCase())) {
         // Pick first sub-industry as fallback

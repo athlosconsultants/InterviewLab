@@ -120,6 +120,15 @@ export async function generateQuestion(params: {
           .join('\n\n')
       : 'No previous questions.';
 
+  // T92: Get industry-specific tone and styles
+  const interviewConfig = researchSnapshot.interview_config;
+  const industryTone =
+    interviewConfig?.tone || 'professional and conversational';
+  const interviewStyles = interviewConfig?.styles || [
+    'behavioral',
+    'technical',
+  ];
+
   // T90: Enhanced prompt for context-aware question generation
   const prompt = `You are an expert interview coach conducting a professional job interview. Generate the next interview question that builds naturally on the conversation so far.
 
@@ -137,6 +146,11 @@ Responsibilities: ${researchSnapshot.job_spec_summary.responsibilities.join(', '
 # Company Context:
 ${researchSnapshot.company_facts.name} - ${researchSnapshot.company_facts.industry || 'Technology'}
 ${researchSnapshot.company_facts.mission ? `Mission: ${researchSnapshot.company_facts.mission}` : ''}
+
+# T92 Industry-Specific Interview Style:
+**Tone:** ${industryTone}
+**Interview Styles:** ${interviewStyles.join(', ')}
+${interviewConfig ? `**Industry:** ${interviewConfig.industry} - ${interviewConfig.sub_industry}` : ''}
 
 # Competencies to Assess:
 Technical: ${researchSnapshot.competencies.technical.join(', ')}
@@ -200,6 +214,7 @@ ${
 - Make questions open-ended (avoid yes/no)
 - Be specific and clear
 - Connect to both their experience AND the role requirements
+- **IMPORTANT: Maintain a ${industryTone} tone throughout the question**
 ${isMultiStage ? `- The question MUST be category "${stageCategory}" to match the current stage "${stageName}"` : '- Mix question types: technical, behavioral, and situational'}
 - Ensure the question can be answered in 90 seconds
 
@@ -219,8 +234,7 @@ Return ONLY valid JSON with no additional text:
       messages: [
         {
           role: 'system',
-          content:
-            'You are a professional interview coach. You always respond with valid JSON only, no markdown formatting, no additional text.',
+          content: `You are a professional interview coach. Your interview style is ${industryTone}. You always respond with valid JSON only, no markdown formatting, no additional text.`,
         },
         {
           role: 'user',

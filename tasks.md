@@ -572,28 +572,28 @@
 
 ## Phase 9 — Payments (Optional for MVP)
 
-### T90 — Pricing UI + Upgrade Dialog
+### T100 — Pricing UI + Upgrade Dialog
 
 **Goal:** Trigger upgrade.  
 **Edits:** `components/UpgradeDialog.tsx`, `app/(marketing)/page.tsx`  
 **DoD:** Button opens dialog with plan details.  
 **Test:** Dialog appears.
 
-### T91 — Stripe Checkout Session
+### T101 — Stripe Checkout Session
 
 **Goal:** Create session.  
 **Edits:** `app/api/stripe/session/route.ts`  
 **DoD:** Returns Stripe URL for user.  
 **Test:** Clicking “Upgrade” redirects to Stripe.
 
-### T92 — Webhook & Plan Update
+### T102 — Webhook & Plan Update
 
 **Goal:** Persist plan.  
 **Edits:** `app/api/stripe-webhook/route.ts`  
 **DoD:** On successful payment, update `profiles.plan`.  
 **Test:** Webhook test event updates DB.
 
-### T93 — Gate by Plan
+### T103 — Gate by Plan
 
 **Goal:** Enforce limits.  
 **Edits:** `lib/interview.ts`  
@@ -604,63 +604,63 @@
 
 ## Phase 10 — Production Hardening
 
-### T100 — Security Headers
+### T104 — Security Headers
 
 **Goal:** Baseline security.  
 **Edits:** `next.config.mjs`, middleware for CSP/HSTS.  
 **DoD:** Security headers present.  
 **Test:** Observatory score improved.
 
-### T101 — Rate Limiting
+### T105 — Rate Limiting
 
 **Goal:** Abuse protection.  
 **Edits:** `lib/rate-limit.ts` (Supabase or Redis-based)  
 **DoD:** IP+user limits on interview routes.  
 **Test:** Exceeding rate returns 429.
 
-### T102 — Logging & Error Handling
+### T106 — Logging & Error Handling
 
 **Goal:** Insight + stability.  
 **Edits:** `lib/log.ts`, try/catch in API/actions.  
 **DoD:** Structured logs (PII redacted), central handler.  
 **Test:** Errors logged with request id.
 
-### T103 — Basic Analytics
+### T107 — Basic Analytics
 
 **Goal:** Usage tracking.  
 **Edits:** PostHog or Plausible integration.  
 **DoD:** Events: session start, question asked, answer submitted, interview complete.  
 **Test:** Events visible on dashboard.
 
-### T104 — Accessibility Pass
+### T108 — Accessibility Pass
 
 **Goal:** WCAG baseline.  
 **Edits:** aria labels, focus rings, captions.  
 **DoD:** axe audit: 0 critical issues.  
 **Test:** Keyboard-only flow works.
 
-### T105 — Mobile Polish
+### T109 — Mobile Polish
 
 **Goal:** UX on small screens.  
 **Edits:** responsive adjustments, fixed action bar.  
 **DoD:** iPhone/Android emulate clean; no overflow or clipped buttons.  
 **Test:** Manual pass on DevTools.
 
-### T106 — Seed Data & Fixtures
+### T110 — Seed Data & Fixtures
 
 **Goal:** Reliable demos.  
 **Edits:** `db/seed.ts`  
 **DoD:** Seed RoleKits and demo session.  
 **Test:** Run seed and load demo.
 
-### T107 — Staging Deploy
+### T111 — Staging Deploy
 
 **Goal:** End-to-end testbed.  
 **Steps:** Create staging Supabase, Storage, envs; deploy to Vercel preview.  
 **DoD:** Staging URL functional.  
 **Test:** Full run of short interview.
 
-### T108 — Prod Deploy
+### T112 — Prod Deploy
 
 **Goal:** Go-live.  
 **Steps:** Set prod env vars, Storage buckets, domain, analytics.  
