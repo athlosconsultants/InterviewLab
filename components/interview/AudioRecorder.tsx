@@ -104,13 +104,13 @@ export function AudioRecorder({
         setRecordingTime((prev) => prev + 1);
       }, 1000);
 
-      toast.success('Recording started', {
-        description: 'Speak your answer clearly',
+      toast.success('Recording', {
+        description: 'Speak clearly',
       });
     } catch (error) {
       console.error('Failed to start recording:', error);
       toast.error('Microphone access denied', {
-        description: 'Please allow microphone access to record your answer',
+        description: 'Allow access to record',
       });
     }
   };
@@ -129,7 +129,7 @@ export function AudioRecorder({
       }
 
       toast.success('Recording complete', {
-        description: 'You can play back your answer or re-record',
+        description: 'Review or re-record',
       });
     }
   };
@@ -186,8 +186,7 @@ export function AudioRecorder({
         audioElementRef.current.play().catch((error) => {
           console.error('Play failed:', error);
           toast.error('Playback failed', {
-            description:
-              'Unable to play the recording. Please try re-recording.',
+            description: 'Try re-recording',
           });
           setIsPlaying(false);
         });
@@ -231,7 +230,7 @@ export function AudioRecorder({
               className="gap-2"
             >
               <Mic className="h-4 w-4" />
-              Start Recording
+              Record
             </Button>
           ) : (
             <>

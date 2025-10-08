@@ -66,7 +66,7 @@ export function InterviewUI({
         const result = await initializeInterview(sessionId);
 
         if (result.error) {
-          toast.error('Failed to load interview', {
+          toast.error('Unable to load interview', {
             description: result.error,
           });
           return;
@@ -107,7 +107,7 @@ export function InterviewUI({
         }
       } catch (error) {
         console.error('Init error:', error);
-        toast.error('An error occurred', {
+        toast.error('Something went wrong', {
           description: 'Please refresh the page',
         });
       } finally {
@@ -147,7 +147,7 @@ export function InterviewUI({
       setTimeout(() => {
         setQuestionVisible(false);
         toast.info('Question hidden', {
-          description: 'Use "Replay" to review the question (2 times max)',
+          description: 'Use Replay to review (2× remaining)',
         });
       }, 18000) // 3s countdown + 15s reveal
     );
@@ -162,12 +162,12 @@ export function InterviewUI({
 
     // Validate we have an answer (text or audio)
     if (answerMode === 'text' && !answer.trim()) {
-      toast.error('Please provide an answer');
+      toast.error('Answer required');
       return;
     }
 
     if (answerMode === 'audio' && !audioBlob) {
-      toast.error('Please record your answer');
+      toast.error('Recording required');
       return;
     }
 
@@ -197,7 +197,7 @@ export function InterviewUI({
         const uploadData = await uploadResponse.json();
 
         if (!uploadData.success) {
-          toast.error('Failed to upload audio');
+          toast.error('Upload failed');
           setIsSubmitting(false);
           return;
         }
@@ -205,7 +205,7 @@ export function InterviewUI({
         audioKey = uploadData.storageKey;
 
         // Transcribe audio
-        toast.info('Transcribing your answer...');
+        toast.info('Transcribing...');
         const transcribeFormData = new FormData();
         transcribeFormData.append('audio', audioBlob, 'answer.webm');
 
@@ -217,13 +217,13 @@ export function InterviewUI({
         const transcribeData = await transcribeResponse.json();
 
         if (!transcribeData.success) {
-          toast.error('Failed to transcribe audio');
+          toast.error('Transcription failed');
           setIsSubmitting(false);
           return;
         }
 
         finalAnswer = transcribeData.text;
-        toast.success('Audio transcribed successfully');
+        toast.success('Transcribed');
       }
 
       // Submit the answer (including replay count for scoring)
@@ -236,7 +236,7 @@ export function InterviewUI({
       });
 
       if (result.error) {
-        toast.error('Failed to submit answer', {
+        toast.error('Unable to submit', {
           description: result.error,
         });
         return;
@@ -252,8 +252,8 @@ export function InterviewUI({
 
         // Check if interview is complete
         if (result.data.done) {
-          toast.success('Interview complete!', {
-            description: 'Great work on completing your interview.',
+          toast.success('Interview complete', {
+            description: 'Well done.',
           });
           // Show upgrade dialog for free plan users (3 questions)
           setShowUpgradeDialog(true);
@@ -262,7 +262,7 @@ export function InterviewUI({
 
         // T94: Show "Analyzing answer..." state
         setIsAnalyzing(true);
-        toast.info('Analyzing your answer...');
+        toast.info('Analyzing...');
 
         // If there's a next question, add it (T91)
         const nextData = result.data as {
@@ -283,11 +283,11 @@ export function InterviewUI({
             toast.success(
               `Stage ${nextData.currentStage}: ${nextData.stageName}`,
               {
-                description: 'Moving to the next interview stage!',
+                description: 'Next stage',
               }
             );
           } else {
-            toast.success('Next question ready!');
+            toast.success('Next question');
           }
 
           setTurns((prev) => [
@@ -314,7 +314,7 @@ export function InterviewUI({
       }
     } catch (error) {
       console.error('Submit error:', error);
-      toast.error('An error occurred', {
+      toast.error('Something went wrong', {
         description: 'Please try again',
       });
     } finally {
@@ -325,7 +325,7 @@ export function InterviewUI({
   // T93: Merged Replay - handles both TTS audio replay and text reveal
   const handleReplay = () => {
     if (replayCount >= replayCap) {
-      toast.error('No replays remaining');
+      toast.error('No replays left');
       return;
     }
 
@@ -333,8 +333,8 @@ export function InterviewUI({
     setQuestionVisible(true);
     setReplayCount((prev) => prev + 1);
 
-    toast.info(`Question replayed (${replayCount + 1}/${replayCap})`, {
-      description: 'Question will hide again in 5 seconds',
+    toast.info(`Replay ${replayCount + 1} of ${replayCap}`, {
+      description: 'Hiding in 5 seconds',
     });
 
     // Hide again after 5 seconds
@@ -347,7 +347,7 @@ export function InterviewUI({
     return (
       <div className="flex min-h-screen flex-col items-center justify-center p-4">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <p className="mt-4 text-muted-foreground">Loading interview...</p>
+        <p className="mt-4 text-muted-foreground">Loading...</p>
       </div>
     );
   }
@@ -497,7 +497,7 @@ export function InterviewUI({
             <Loader2 className="h-5 w-5 animate-spin text-primary" />
             <div className="flex flex-col">
               <span className="text-sm font-medium text-primary">
-                Analyzing your answer...
+                Analyzing
               </span>
               <span className="text-xs text-muted-foreground">
                 Generating next question
@@ -525,8 +525,8 @@ export function InterviewUI({
                   currentQuestion.timing?.started_at || new Date().toISOString()
                 }
                 onExpire={() => {
-                  toast.warning('Time is up!', {
-                    description: 'Please submit your answer',
+                  toast.warning('Time is up', {
+                    description: 'Submit your answer',
                   });
                 }}
               />
@@ -548,7 +548,7 @@ export function InterviewUI({
                 className="gap-2"
               >
                 <Type className="h-4 w-4" />
-                Type Answer
+                Text
               </Button>
               <Button
                 type="button"
@@ -562,7 +562,7 @@ export function InterviewUI({
                 className="gap-2"
               >
                 <Mic className="h-4 w-4" />
-                Record Answer
+                Voice
               </Button>
             </div>
 
@@ -572,7 +572,7 @@ export function InterviewUI({
                 <Textarea
                   value={answer}
                   onChange={(e) => setAnswer(e.target.value)}
-                  placeholder="Type your answer here..."
+                  placeholder="Type your answer"
                   rows={6}
                   disabled={isSubmitting}
                   className="resize-none"
@@ -588,12 +588,12 @@ export function InterviewUI({
                     {isSubmitting ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Submitting...
+                        Submitting
                       </>
                     ) : (
                       <>
                         <Send className="mr-2 h-4 w-4" />
-                        Submit Answer
+                        Submit
                       </>
                     )}
                   </Button>
@@ -613,12 +613,12 @@ export function InterviewUI({
                     {isSubmitting ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Submitting...
+                        Submitting
                       </>
                     ) : (
                       <>
                         <Send className="mr-2 h-4 w-4" />
-                        Submit Answer
+                        Submit
                       </>
                     )}
                   </Button>

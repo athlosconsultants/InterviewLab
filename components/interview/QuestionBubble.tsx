@@ -64,7 +64,7 @@ export function QuestionBubble({
       };
 
       audio.onerror = () => {
-        toast.error('Failed to play audio');
+        toast.error('Playback failed');
         setIsPlaying(false);
       };
 
@@ -72,7 +72,7 @@ export function QuestionBubble({
       setIsPlaying(true);
     } catch (error) {
       console.error('TTS error:', error);
-      toast.error('Failed to play question audio');
+      toast.error('Audio unavailable');
     } finally {
       setIsLoading(false);
     }
