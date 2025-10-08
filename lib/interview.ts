@@ -1,6 +1,11 @@
 import { openai, MODELS } from './openai';
 import { createClient } from './supabase-server';
-import type { ResearchSnapshot, Question, AnswerDigest } from './schema';
+import type {
+  ResearchSnapshot,
+  Question,
+  AnswerDigest,
+  PlanTier,
+} from './schema';
 
 /**
  * Generates an interview question using OpenAI based on the research snapshot
@@ -346,4 +351,100 @@ export async function getInterviewState(sessionId: string) {
     isComplete: session.status === 'feedback' || session.status === 'complete',
     currentTurn: turns.find((t) => !t.answer_text),
   };
+}
+
+/**
+ * Generates a realistic interview introduction for paid tier interviews (T88).
+ * Uses OpenAI to create a personalized, conversational opening based on
+ * the role, company, and candidate background.
+ */
+export async function generateIntro(sessionId: string): Promise<string> {
+  const supabase = await createClient();
+
+  // Get session with research snapshot
+  const { data: session, error: sessionError } = await supabase
+    .from('sessions')
+    .select('*, research_snapshot, plan_tier, mode, intro_text')
+    .eq('id', sessionId)
+    .single();
+
+  if (sessionError || !session) {
+    throw new Error('Session not found');
+  }
+
+  // If intro already exists, return it
+  if (session.intro_text) {
+    return session.intro_text;
+  }
+
+  const researchSnapshot = session.research_snapshot as ResearchSnapshot;
+  const planTier = (session as any).plan_tier as PlanTier;
+
+  // Only generate intros for paid tier
+  if (planTier !== 'paid') {
+    return ''; // Free tier doesn't get intros
+  }
+
+  const role = researchSnapshot.job_spec_summary.role;
+  const company = researchSnapshot.company_facts.name;
+  const candidateName = researchSnapshot.cv_summary.name || 'candidate';
+  const level = researchSnapshot.job_spec_summary.level || 'mid';
+  const industry =
+    researchSnapshot.interview_config?.industry ||
+    researchSnapshot.company_facts.industry ||
+    'Technology';
+  const tone = researchSnapshot.interview_config?.tone || 'professional';
+
+  const prompt = `You are conducting a ${level}-level interview for a ${role} position at ${company} in the ${industry} industry.
+
+Generate a natural, conversational interview introduction (2-3 sentences) that:
+1. Greets the candidate warmly
+2. References the specific role and company
+3. Sets expectations for the interview
+4. Maintains a ${tone} tone
+
+Candidate name: ${candidateName}
+Role: ${role}
+Company: ${company}
+Level: ${level}
+
+Return ONLY the introduction text, no additional formatting or explanations. Keep it concise and natural.`;
+
+  try {
+    const response = await openai.chat.completions.create({
+      model: MODELS.CONVERSATIONAL,
+      messages: [
+        {
+          role: 'system',
+          content:
+            'You are a professional interviewer. You create warm, natural interview introductions that make candidates feel comfortable while maintaining professionalism.',
+        },
+        {
+          role: 'user',
+          content: prompt,
+        },
+      ],
+      temperature: 0.7, // Higher temperature for more natural variation
+      max_tokens: 200,
+    });
+
+    const introText = response.choices[0]?.message?.content?.trim();
+
+    if (!introText) {
+      throw new Error('No introduction generated');
+    }
+
+    // Save intro to database
+    await supabase
+      .from('sessions')
+      .update({ intro_text: introText })
+      .eq('id', sessionId);
+
+    return introText;
+  } catch (error) {
+    console.error('Error generating interview introduction:', error);
+    throw new Error(
+      `Failed to generate introduction: ${error instanceof Error ? error.message : 'Unknown error'}`
+    );
+  }
 }

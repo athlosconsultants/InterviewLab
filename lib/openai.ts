@@ -13,6 +13,7 @@ export const DEFAULT_MODEL = 'gpt-4o-mini';
 export const MODELS = {
   CHAT: 'gpt-4o-mini', // Fast and cost-effective for chat
   ANALYSIS: 'gpt-4o', // More capable for complex analysis
+  CONVERSATIONAL: 'gpt-4o-mini', // For natural, conversational text (intros, bridges)
   WHISPER: 'whisper-1', // Speech to text
   TTS: 'tts-1', // Text to speech
 } as const;

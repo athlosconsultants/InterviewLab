@@ -72,6 +72,7 @@ export interface Database {
           stages_planned: number;
           current_stage: number;
           entitlement_id: string | null;
+          intro_text: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -89,6 +90,7 @@ export interface Database {
           stages_planned?: number;
           current_stage?: number;
           entitlement_id?: string | null;
+          intro_text?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -106,6 +108,7 @@ export interface Database {
           stages_planned?: number;
           current_stage?: number;
           entitlement_id?: string | null;
+          intro_text?: string | null;
           created_at?: string;
           updated_at?: string;
         };

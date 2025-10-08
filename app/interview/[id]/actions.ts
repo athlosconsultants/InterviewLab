@@ -5,6 +5,7 @@ import {
   startInterview,
   submitAnswer,
   getInterviewState,
+  generateIntro,
 } from '@/lib/interview';
 
 /**
@@ -21,10 +22,10 @@ export async function initializeInterview(sessionId: string) {
       return { error: 'Unauthorized', data: null };
     }
 
-    // Verify session belongs to user
+    // Verify session belongs to user (T88 - with plan_tier)
     const { data: session, error: sessionError } = await supabase
       .from('sessions')
-      .select('id, user_id, status')
+      .select('id, user_id, status, plan_tier, intro_text')
       .eq('id', sessionId)
       .eq('user_id', user.id)
       .single();
@@ -46,11 +47,25 @@ export async function initializeInterview(sessionId: string) {
       return { error: null, data: state };
     }
 
+    // T88: Generate intro for paid tier (before first question)
+    const planTier = (session as any).plan_tier || 'free';
+    let intro = '';
+    if (planTier === 'paid' && !session.intro_text) {
+      try {
+        intro = await generateIntro(sessionId);
+      } catch (error) {
+        console.error('Failed to generate intro:', error);
+        // Don't fail the interview if intro generation fails
+      }
+    } else if (session.intro_text) {
+      intro = session.intro_text;
+    }
+
     // No turns yet - generate the first question
     const result = await startInterview(sessionId);
     const state = await getInterviewState(sessionId);
 
-    return { error: null, data: state };
+    return { error: null, data: { ...state, intro } };
   } catch (error) {
     console.error('Initialize interview error:', error);
     return {
