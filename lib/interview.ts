@@ -418,15 +418,19 @@ export async function submitAnswer(params: {
     };
   }
 
-  // T91: Calculate questions in current stage (count all turns, then modulo by stage size)
+  // T91: Calculate questions in current stage
   const questionsPerStage =
     stagesPlanned > 1
       ? calculateQuestionsPerStage(questionCap, stagesPlanned)
       : questionCap;
 
-  // Count how many questions we've answered in total, then determine stage boundaries
+  // Count how many questions we've answered in total
   const totalAnswered = allTurns.length;
-  const questionsInCurrentStage = totalAnswered % questionsPerStage;
+
+  // T91: Calculate how many questions have been answered in the current stage
+  // Stage boundaries: Stage 1 starts at 0, Stage 2 starts at questionsPerStage, etc.
+  const stageStartIndex = (currentStage - 1) * questionsPerStage;
+  const questionsInCurrentStage = totalAnswered - stageStartIndex;
 
   // T91: Check if we should advance to the next stage
   let newStage = currentStage;
