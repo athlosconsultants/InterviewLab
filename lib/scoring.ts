@@ -53,6 +53,9 @@ export async function generateInterviewFeedback(
           role: 'system',
           content: `You are an expert interview evaluator and career coach. You analyze interview responses and provide structured, constructive feedback. Always be fair, specific, and actionable in your assessments.
 
+**T96 - Composure Evaluation:**
+When evaluating communication, factor in replay usage as a subtle composure signal. High replay counts (2 per question) should result in minor deductions (~5-10 points) in the communication dimension, as this reflects hesitation or lack of preparation in a real interview setting. Focus primarily on answer quality, but acknowledge composure as a secondary factor.
+
 Your feedback must be in JSON format matching this exact structure:
 {
   "overall": {
@@ -153,12 +156,22 @@ Evaluate this interview performance and provide structured feedback. Consider:
 
 1. **Technical Competency**: How well do the answers demonstrate required technical skills and domain knowledge?
 2. **Communication**: Clarity, structure, and professionalism of responses
+   - **T96 Composure Signal**: Consider replay usage as a composure indicator
+   - 0-1 replays per question = confident, composed (no penalty)
+   - 2 replays per question = slight hesitation (minor deduction, ~5-10 points in communication)
+   - Excessive replays suggest lack of preparation or composure
 3. **Problem Solving**: Analytical thinking, approach to challenges
 4. **Cultural Fit**: Alignment with company values and role expectations
 
+**T96 - Composure in Communication Scoring:**
+- In real interviews, composure and confidence matter
+- Replay count reflects question comprehension and preparation
+- Factor this subtly into the communication dimension score
+- Don't over-penalize - focus on answer quality first
+
 Provide an overall score (0-100), dimension scores, 3-5 actionable tips, and identify specific strengths and areas for improvement.
 
-Be fair but constructive. Reference specific answers when providing feedback.`;
+Be fair but constructive. Reference specific answers when providing feedback. If replay usage was high, mention composure/preparation as an improvement area.`;
 }
 
 /**
