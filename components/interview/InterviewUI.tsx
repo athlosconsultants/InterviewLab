@@ -55,6 +55,9 @@ export function InterviewUI({
   const [countdown, setCountdown] = useState<number | null>(null); // 3, 2, 1, or null
   const [questionVisible, setQuestionVisible] = useState(false);
 
+  // T94: Analyzing Answer transition state
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+
   // Initialize interview on mount
   useEffect(() => {
     const init = async () => {
@@ -257,6 +260,10 @@ export function InterviewUI({
           return;
         }
 
+        // T94: Show "Analyzing answer..." state
+        setIsAnalyzing(true);
+        toast.info('Analyzing your answer...');
+
         // If there's a next question, add it (T91)
         const nextData = result.data as {
           done: boolean;
@@ -268,6 +275,9 @@ export function InterviewUI({
           stageName?: string;
         };
         if (nextData.nextQuestion && nextData.turnId) {
+          // T94: Hide analyzing state
+          setIsAnalyzing(false);
+
           // T91: Check if stage advanced
           if (nextData.currentStage && nextData.currentStage !== currentStage) {
             toast.success(
@@ -277,9 +287,7 @@ export function InterviewUI({
               }
             );
           } else {
-            toast.success('Answer submitted!', {
-              description: 'Next question generated.',
-            });
+            toast.success('Next question ready!');
           }
 
           setTurns((prev) => [
@@ -482,8 +490,25 @@ export function InterviewUI({
         ))}
       </div>
 
+      {/* T94: Analyzing Answer Transition */}
+      {isAnalyzing && (
+        <div className="flex justify-center py-8">
+          <div className="flex items-center space-x-3 rounded-lg bg-primary/10 px-6 py-4 border border-primary/20">
+            <Loader2 className="h-5 w-5 animate-spin text-primary" />
+            <div className="flex flex-col">
+              <span className="text-sm font-medium text-primary">
+                Analyzing your answer...
+              </span>
+              <span className="text-xs text-muted-foreground">
+                Generating next question
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Answer Input */}
-      {currentQuestion && (
+      {currentQuestion && !isAnalyzing && (
         <div className="sticky bottom-0 bg-background border-t pt-4">
           {/* Timer and Replay Controls */}
           <div className="mb-4 flex items-center justify-between">
