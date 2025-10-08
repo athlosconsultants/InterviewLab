@@ -258,13 +258,6 @@ export async function submitAnswer(params: {
   const questionCap = (session.limits as any)?.question_cap || 3;
   const planTier = (session as any).plan_tier || 'free';
 
-  console.log(
-    '[DEBUG] Session plan_tier:',
-    planTier,
-    'Question cap:',
-    questionCap
-  );
-
   // T85: Enforce free tier restrictions (3 questions max)
   if (planTier === 'free' && allTurns.length >= 3) {
     // End interview for free tier
@@ -303,18 +296,13 @@ export async function submitAnswer(params: {
 
   // T89: Generate bridge text referencing the previous answer (paid tier only)
   let bridgeText: string | null = null;
-  console.log('[DEBUG] Checking bridge generation. PlanTier:', planTier);
   if (planTier === 'paid') {
-    console.log('[DEBUG] Generating bridge for turn:', turnId);
     try {
       bridgeText = await generateBridge(sessionId, turnId);
-      console.log('[DEBUG] Bridge generated successfully:', bridgeText);
     } catch (error) {
       console.error('Failed to generate bridge:', error);
       // Continue without bridge if generation fails
     }
-  } else {
-    console.log('[DEBUG] Skipping bridge generation - not paid tier');
   }
 
   // Create next turn (T89: with bridge_text)
