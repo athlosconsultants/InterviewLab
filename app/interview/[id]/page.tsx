@@ -16,7 +16,7 @@ export default async function InterviewPage({
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect('/auth/sign-in');
+    redirect('/sign-in');
   }
 
   const { data: session, error } = await supabase
