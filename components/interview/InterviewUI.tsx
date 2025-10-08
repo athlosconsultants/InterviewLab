@@ -9,7 +9,7 @@ import {
   initializeInterview,
   submitInterviewAnswer,
 } from '@/app/interview/[id]/actions';
-import type { Question, Turn } from '@/lib/schema';
+import type { Question, Turn, Timing } from '@/lib/schema';
 import { toast } from 'sonner';
 import { QuestionBubble } from './QuestionBubble';
 import { TimerRing } from './TimerRing';
@@ -522,7 +522,8 @@ export function InterviewUI({
               <TimerRing
                 timeLimit={timerSec}
                 startTime={
-                  currentQuestion.timing?.started_at || new Date().toISOString()
+                  (currentQuestion.timing as Timing | null)?.started_at ||
+                  new Date().toISOString()
                 }
                 onExpire={() => {
                   toast.warning('Time is up', {

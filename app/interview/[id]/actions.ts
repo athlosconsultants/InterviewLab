@@ -46,7 +46,19 @@ export async function initializeInterview(sessionId: string) {
     // If there are already turns, just get the current state
     if (existingTurns && existingTurns.length > 0) {
       const state = await getInterviewState(sessionId);
-      return { error: null, data: state };
+
+      // T91: Extract stage information for existing interview
+      const currentStage = (session as any).current_stage || 1;
+      const stagesPlanned = (session as any).stages_planned || 1;
+      const researchSnapshot = (session as any).research_snapshot as any;
+      const stages = researchSnapshot?.interview_config?.stages || [];
+      const stageName = stages[currentStage - 1] || `Stage ${currentStage}`;
+      const intro = session.intro_text || '';
+
+      return {
+        error: null,
+        data: { ...state, intro, currentStage, stagesPlanned, stageName },
+      };
     }
 
     // T88: Generate intro for paid tier (before first question)
