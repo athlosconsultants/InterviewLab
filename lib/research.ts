@@ -1,6 +1,7 @@
 import { openai, MODELS } from './openai';
 import type { ResearchSnapshot } from './schema';
 import { mapRoleToIndustryKit } from './industryMap';
+import { researchCache } from './cache'; // T98: Server-side caching
 
 /**
  * Generates a research snapshot by analyzing CV and job description using OpenAI.
@@ -14,6 +15,12 @@ export async function generateResearchSnapshot(params: {
   location: string;
 }): Promise<ResearchSnapshot> {
   const { cvText, jobDescriptionText, jobTitle, company, location } = params;
+
+  // T98: Check cache first for role+company combination
+  const cachedSnapshot = researchCache.get<ResearchSnapshot>(jobTitle, company);
+  if (cachedSnapshot) {
+    return cachedSnapshot;
+  }
 
   // Construct the prompt for OpenAI
   const prompt = `You are an expert career counselor and interview coach. Analyze the following CV and job description to create a structured research snapshot for interview preparation.
@@ -145,6 +152,9 @@ Return only the JSON object, no other text.`;
         }
       });
     }
+
+    // T98: Cache the generated snapshot for 24 hours
+    researchCache.set(jobTitle, company, snapshot);
 
     return snapshot;
   } catch (error) {

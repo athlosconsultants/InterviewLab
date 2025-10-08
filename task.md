@@ -570,30 +570,215 @@
    **DoD:** No critical bugs before payments integration.  
    **Test:** QA checklist passes 100%.
 
-## Phase 9 — Payments (Optional for MVP)
+## Phase 9 — Mode-Specific Interview UX & Reveal System
 
-### T100 — Pricing UI + Upgrade Dialog
+### T100 — Reveal Window & Replay-Extend
+
+**Goal:** Make the reveal timer functional and extend visibility when replaying.  
+**Edits:** `app/interview/[id]/page.tsx`, `components/interview/QuestionReveal.tsx`, `components/interview/ReplayButton.tsx`.  
+**Steps:**
+
+1. Implement `useQuestionReveal()` hook to manage states: `preCountdown(3s) → revealed(for N seconds) → hidden`.
+2. Default **N = 20s** for the first reveal. On **Replay**, extend current visible window by **+8s** (max 2 replays).
+3. Persist `reveal_count` per turn; expose in `turns.timing` (server) for scoring.
+4. Emit events: `reveal_started`, `reveal_hidden`, `replay_used` for analytics.  
+   **DoD:** Question text hides after reveal window; each replay extends visibility by 8s (up to 2x).  
+   **Test:** Manual: countdown→reveal→auto-hide; pressing replay twice extends and respects cap.
+
+---
+
+### T102 — Current-Question-Only Display (Both Modes)
+
+**Goal:** Show only the current question; hide all previous Q/As in the UI.  
+**Edits:** `components/interview/ChatThread.tsx`, `app/interview/[id]/page.tsx`.  
+**Steps:**
+
+1. Replace thread list with a **single panel** rendering the active turn only.
+2. Keep prior turns in memory for backend context, but do **not** render them.
+3. Add a small “Section”/“Stage” label to indicate progress (e.g., “Stage 1 • Q3”).  
+   **DoD:** UI only shows the current question and the answer composer.  
+   **Test:** After answering, prior Q/A disappear; next question replaces panel.
+
+---
+
+### T103 — Mode Router (Text vs Voice)
+
+**Goal:** Clean split between Text UI and Voice UI.  
+**Edits:** `app/interview/[id]/page.tsx`, `components/interview/mode/VoiceUI.tsx`, `components/interview/mode/TextUI.tsx`.  
+**Steps:**
+
+1. Read `session.mode` and render **TextUI** or **VoiceUI**.
+2. Share common service hooks (fetch turns, submit answers), keep **distinct** UIs.  
+   **DoD:** Mode switch verified via session setting.  
+   **Test:** Start two sessions (text/voice); correct UI renders.
+
+---
+
+### T104 — Voice Mode “Orb” UI (No Text Questions)
+
+**Goal:** Conversational voice experience with auto TTS; no question text displayed.  
+**Edits:** `components/interview/mode/VoiceUI.tsx`, `app/api/tts/route.ts`.  
+**Steps:**
+
+1. Build **VoiceOrb** component (idle → greet → speak → listen → bridge) with subtle pulse animation.
+2. Auto-play TTS for every intro, bridge, and question **without user click** (use `AudioContext`/`autoplay` handling; gracefully prompt for interaction if blocked).
+3. Do **not** render question text; only the orb, mic button, and optional **“Type your answer”** control.
+4. On “Replay”, re-speak via TTS; **do not** reveal text.
+5. Accept voice or text answers; show minimal transcript chip (may auto-hide after submit).  
+   **DoD:** Voice interview flows hands-free; questions are spoken, never shown as text.  
+   **Test:** Start paid voice session → hear greeting → hear Q1 → answer by voice → hear bridge → Q2.
+
+---
+
+### T105 — Text Mode UI Rewrite (Current Question Focus)
+
+**Goal:** Refine text UI to integrate countdown, reveal, analyzing states cohesively.  
+**Edits:** `components/interview/mode/TextUI.tsx`, `components/interview/QuestionReveal.tsx`, `components/interview/AnalyzingState.tsx`.  
+**Steps:**
+
+1. Layout: header (stage + progress), **Question card** (countdown → reveal window → hidden), **Answer composer**, footer (actions).
+2. Add “Show Again” button (max 2) which re-reveals text for **5s** each time.
+3. Add explicit **“Analyzing answer…”** state after submit until next question arrives.  
+   **DoD:** Smooth flow: countdown → reveal → hidden → compose → analyzing → next.  
+   **Test:** UX demo run; show-again capped at 2; analyzing spinner visible.
+
+---
+
+### T106 — Small-Talk Welcome Flow (Pre-Interview)
+
+**Goal:** Welcome message and brief small talk before starting.  
+**Edits:** `lib/interview.ts`, `app/interview/[id]/page.tsx`.  
+**Steps:**
+
+1. Add `generateSmallTalk(sessionId)` to produce 1–2 light prompts (“Tell me a bit about you”, “How’s your day going?”).
+2. Render **welcome** → **small talk**; then ask, “Ready to begin the interview?” with Yes/No.
+3. Do **not** count small talk toward stage question totals.  
+   **DoD:** Welcome and small-talk appear before Q1; user confirms to proceed.  
+   **Test:** Small talk saved as non-scored turns; Q1 begins after confirm.
+
+---
+
+### T107 — Stage Question Caps & Variability
+
+**Goal:** Limit per-stage to **max 8** and vary actual count (5–8).  
+**Edits:** `lib/interview.ts`.  
+**Steps:**
+
+1. Set `QUESTIONS_PER_STAGE: { min: 5, max: 8 }` for paid sessions.
+2. On stage start, sample a target in range; track and enforce cap.
+3. Ensure categories/competencies coverage within shorter window.  
+   **DoD:** Stages finish between 5–8 questions, not always the same count.  
+   **Test:** Multiple runs show varying per-stage totals; never exceed 8.
+
+---
+
+### T108 — Replay-Driven Reveal Behavior (Mode-Specific)
+
+**Goal:** Align replay with visibility per mode.  
+**Edits:** `components/interview/ReplayButton.tsx`, `components/interview/QuestionReveal.tsx`, `lib/interview.ts`.  
+**Steps:**
+
+1. **Text mode:** replay increments `reveal_count` and extends visible window by +8s; “Show Again” still capped at 2.
+2. **Voice mode:** replay triggers orb to re-speak; no text revealed. Track `replay_count` for scoring.  
+   **DoD:** Replay semantics differ by mode as specified.  
+   **Test:** Voice replay re-speaks only; Text replay extends visibility.
+
+---
+
+### T109 — Prompt & Backend Adjustments (Mode-Aware)
+
+**Goal:** Ensure backend prompts respect mode and small-talk.  
+**Edits:** `lib/interview.ts`, `lib/scoring.ts`.  
+**Steps:**
+
+1. For **voice mode**, avoid returning long textual preambles; keep `question_text` for TTS only, never sent to UI.
+2. Include `reveal_count`, `replay_count`, and `small_talk_turns` in scoring signals.
+3. Ensure bridges/intro are **spoken** in voice mode (no text assumptions).  
+   **DoD:** Prompts produce mode-appropriate content; scoring uses new signals.  
+   **Test:** Prompt logs reflect mode flags; scoring JSON includes new fields.
+
+---
+
+### T110 — QA & Telemetry
+
+**Goal:** Validate new UX and collect metrics.  
+**Edits:** `lib/analytics.ts`, e2e tests.  
+**Steps:**
+
+1. Track events: `small_talk_shown`, `proceed_confirmed`, `reveal_elapsed`, `show_again_used`, `orb_autoplay_ok`.
+2. Add Cypress/Playwright tests for both modes.
+3. Create a basic **admin debug view** to inspect session timing signals.  
+   **DoD:** Tests pass; key metrics visible.  
+   **Test:** Run e2e on text + voice happy paths.
+
+---
+
+## Phase 10 — Post-MVP Enhancements
+
+### T111 — Session Resume System
+
+**Goal:** Allow users to resume an interrupted interview seamlessly.  
+**Edits:** `lib/interview.ts`, `lib/session.ts`, `app/interview/[id]/page.tsx`.  
+**Steps:**
+
+1. Track `turn_index`, `current_stage`, and `progress_state` in `sessions`.
+2. When user reconnects, load latest turn and resume flow.
+3. Auto-save every 10 s or on each answer submission.  
+   **DoD:** User can refresh or reconnect without losing context.  
+   **Test:** Start interview, refresh browser → resume from same question.
+
+---
+
+### T112 — Adaptive Difficulty Feedback Loop
+
+**Goal:** Dynamically adjust question difficulty based on prior answer quality.  
+**Edits:** `lib/interview.ts`, `lib/scoring.ts`.  
+**Steps:**
+
+1. Use interim scoring or keyword match to classify last answer as “strong / medium / weak”.
+2. Adjust next question difficulty accordingly (harder for strong answers, easier for weak).
+3. Track `difficulty_curve` in `sessions`.  
+   **DoD:** Question difficulty responds intelligently to candidate performance.  
+   **Test:** Multiple runs show adaptive variation; logged difficulty_curve reflects adjustments.
+
+---
+
+### T113 — Low-Latency / Pre-Fetch Mode
+
+**Goal:** Reduce waiting time between questions by pre-fetching next prompt.  
+**Edits:** `lib/interview.ts`, `app/interview/[id]/page.tsx`.  
+**Steps:**
+
+1. After answer submission, immediately trigger next-question generation in background.
+2. Cache `next_question_preview` while showing “Analyzing answer…” state.
+3. When ready, replace analyzing view instantly with next question.  
+   **DoD:** Perceived delay between questions ≤ 1.5 s.  
+   **Test:** Network logs show next-question API pre-called; UI transition smooth.
+
+## Phase 11 — Payments (Optional for MVP)
+
+### T114 — Pricing UI + Upgrade Dialog
 
 **Goal:** Trigger upgrade.  
 **Edits:** `components/UpgradeDialog.tsx`, `app/(marketing)/page.tsx`  
 **DoD:** Button opens dialog with plan details.  
 **Test:** Dialog appears.
 
-### T101 — Stripe Checkout Session
+### T115 — Stripe Checkout Session
 
 **Goal:** Create session.  
 **Edits:** `app/api/stripe/session/route.ts`  
 **DoD:** Returns Stripe URL for user.  
 **Test:** Clicking “Upgrade” redirects to Stripe.
 
-### T102 — Webhook & Plan Update
+### T116 — Webhook & Plan Update
 
 **Goal:** Persist plan.  
 **Edits:** `app/api/stripe-webhook/route.ts`  
 **DoD:** On successful payment, update `profiles.plan`.  
 **Test:** Webhook test event updates DB.
 
-### T103 — Gate by Plan
+### T117 — Gate by Plan
 
 **Goal:** Enforce limits.  
 **Edits:** `lib/interview.ts`  
@@ -602,65 +787,65 @@
 
 ---
 
-## Phase 10 — Production Hardening
+## Phase 12 — Production Hardening
 
-### T104 — Security Headers
+### T118 — Security Headers
 
 **Goal:** Baseline security.  
 **Edits:** `next.config.mjs`, middleware for CSP/HSTS.  
 **DoD:** Security headers present.  
 **Test:** Observatory score improved.
 
-### T105 — Rate Limiting
+### T119 — Rate Limiting
 
 **Goal:** Abuse protection.  
 **Edits:** `lib/rate-limit.ts` (Supabase or Redis-based)  
 **DoD:** IP+user limits on interview routes.  
 **Test:** Exceeding rate returns 429.
 
-### T106 — Logging & Error Handling
+### T120 — Logging & Error Handling
 
 **Goal:** Insight + stability.  
 **Edits:** `lib/log.ts`, try/catch in API/actions.  
 **DoD:** Structured logs (PII redacted), central handler.  
 **Test:** Errors logged with request id.
 
-### T107 — Basic Analytics
+### T121 — Basic Analytics
 
 **Goal:** Usage tracking.  
 **Edits:** PostHog or Plausible integration.  
 **DoD:** Events: session start, question asked, answer submitted, interview complete.  
 **Test:** Events visible on dashboard.
 
-### T108 — Accessibility Pass
+### T122 — Accessibility Pass
 
 **Goal:** WCAG baseline.  
 **Edits:** aria labels, focus rings, captions.  
 **DoD:** axe audit: 0 critical issues.  
 **Test:** Keyboard-only flow works.
 
-### T109 — Mobile Polish
+### T123 — Mobile Polish
 
 **Goal:** UX on small screens.  
 **Edits:** responsive adjustments, fixed action bar.  
 **DoD:** iPhone/Android emulate clean; no overflow or clipped buttons.  
 **Test:** Manual pass on DevTools.
 
-### T110 — Seed Data & Fixtures
+### T124 — Seed Data & Fixtures
 
 **Goal:** Reliable demos.  
 **Edits:** `db/seed.ts`  
 **DoD:** Seed RoleKits and demo session.  
 **Test:** Run seed and load demo.
 
-### T111 — Staging Deploy
+### T125 — Staging Deploy
 
 **Goal:** End-to-end testbed.  
 **Steps:** Create staging Supabase, Storage, envs; deploy to Vercel preview.  
 **DoD:** Staging URL functional.  
 **Test:** Full run of short interview.
 
-### T112 — Prod Deploy
+### T126 — Prod Deploy
 
 **Goal:** Go-live.  
 **Steps:** Set prod env vars, Storage buckets, domain, analytics.  
