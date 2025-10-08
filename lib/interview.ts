@@ -9,11 +9,15 @@ import type {
 
 /**
  * Generates an interview question using OpenAI based on the research snapshot
- * and previous conversation context.
+ * and previous conversation context. (T90: Context-aware with progressive difficulty)
  */
 export async function generateQuestion(params: {
   researchSnapshot: ResearchSnapshot;
-  previousTurns?: Array<{ question: Question; answer_digest?: AnswerDigest }>;
+  previousTurns?: Array<{
+    question: Question;
+    answer_digest?: AnswerDigest;
+    answer_text?: string;
+  }>;
   questionNumber: number;
   totalQuestions: number;
 }): Promise<Question> {
@@ -24,22 +28,36 @@ export async function generateQuestion(params: {
     totalQuestions,
   } = params;
 
-  // Build context from previous turns
+  // T90: Calculate interview progress for progressive difficulty
+  const progress = questionNumber / totalQuestions;
+  const targetDifficulty =
+    progress < 0.33 ? 'easy' : progress < 0.66 ? 'medium' : 'hard';
+
+  // T90: Build enriched context from previous turns
+  // Include full answer text for the most recent turn to enable deep probing
   const conversationContext =
     previousTurns.length > 0
       ? previousTurns
-          .map(
-            (turn, idx) =>
-              `Q${idx + 1}: ${turn.question.text}\nA${idx + 1}: ${turn.answer_digest?.summary || 'No answer provided'}`
-          )
+          .map((turn, idx) => {
+            const isLastTurn = idx === previousTurns.length - 1;
+            // T90: For the most recent answer, include full text for context-aware probing
+            const answerText =
+              isLastTurn && turn.answer_text
+                ? turn.answer_text
+                : turn.answer_digest?.summary || 'No answer provided';
+
+            return `Q${idx + 1}: ${turn.question.text}\nA${idx + 1}: ${answerText}`;
+          })
           .join('\n\n')
       : 'No previous questions.';
 
-  const prompt = `You are an expert interview coach conducting a professional job interview. Generate the next interview question based on the candidate's background and the role requirements.
+  // T90: Enhanced prompt for context-aware question generation
+  const prompt = `You are an expert interview coach conducting a professional job interview. Generate the next interview question that builds naturally on the conversation so far.
 
 # Candidate Background:
 ${researchSnapshot.cv_summary.summary}
 Key Skills: ${researchSnapshot.cv_summary.key_skills.join(', ')}
+Experience: ${researchSnapshot.cv_summary.experience_years} years
 
 # Role Requirements:
 Position: ${researchSnapshot.job_spec_summary.role}
@@ -60,24 +78,54 @@ Domain: ${researchSnapshot.competencies.domain.join(', ')}
 ${conversationContext}
 
 # Task:
-Generate question ${questionNumber} of ${totalQuestions}. 
+Generate question ${questionNumber} of ${totalQuestions} (Progress: ${Math.round(progress * 100)}%)
 
-Guidelines:
-- Make questions relevant to both the candidate's experience and the role requirements
+## T90 Context-Aware Guidelines:
+${
+  previousTurns.length > 0
+    ? `
+**IMPORTANT - Build on Previous Answers:**
+- Analyze the candidate's most recent answer for specific topics, experiences, or challenges mentioned
+- If they mentioned a specific project, technology, team, or situation, ask a follow-up question that probes deeper
+- Look for gaps or areas where more detail would be valuable
+- If they mentioned leadership experience, ask about specific leadership challenges
+- If they mentioned technical work, ask about technical decisions or tradeoffs
+- If they mentioned stakeholders/teams, ask about conflict resolution or communication
+- Reference their previous answer naturally to show you're listening
+
+**Examples of Context-Aware Questions:**
+- "You mentioned working with a team of 5 on that project - how did you handle disagreements?"
+- "Regarding the migration you described, what technical challenges did you face?"
+- "You said stakeholder communication was challenging - can you give me a specific example?"
+`
+    : `
+**First Question Guidelines:**
+- Start with a warm, open question that helps the candidate settle in
+- Focus on recent, relevant experience
+- Allow them to showcase their strengths
+`
+}
+
+**Progressive Difficulty (Target: ${targetDifficulty}):**
+- Questions 1-${Math.ceil(totalQuestions / 3)}: Easy - broad, experience-based, allow candidate to warm up
+- Questions ${Math.ceil(totalQuestions / 3) + 1}-${Math.ceil((totalQuestions * 2) / 3)}: Medium - specific scenarios, problem-solving, trade-offs
+- Questions ${Math.ceil((totalQuestions * 2) / 3) + 1}-${totalQuestions}: Hard - complex situations, judgment calls, leadership challenges
+
+**Question Quality:**
+- Make questions open-ended (avoid yes/no)
+- Be specific and clear
+- Connect to both their experience AND the role requirements
 - Mix question types: technical, behavioral, and situational
-- Start with easier questions and increase difficulty
-- Build on previous answers when relevant
-- Keep questions clear and focused
-- Avoid yes/no questions
+- Ensure the question can be answered in 90 seconds
 
 Return ONLY valid JSON with no additional text:
 
 {
   "text": "The interview question text",
   "category": "technical|behavioral|situational",
-  "difficulty": "easy|medium|hard",
+  "difficulty": "${targetDifficulty}",
   "time_limit": 90,
-  "follow_up": false
+  "follow_up": ${previousTurns.length > 0 ? 'true' : 'false'}
 }`;
 
   try {
@@ -245,9 +293,10 @@ export async function submitAnswer(params: {
     throw new Error('Session not found');
   }
 
+  // T90: Fetch turns with answer_text for context-aware question generation
   const { data: allTurns, error: turnsError } = await supabase
     .from('turns')
-    .select('question, answer_digest')
+    .select('question, answer_digest, answer_text')
     .eq('session_id', sessionId)
     .order('created_at', { ascending: true });
 
