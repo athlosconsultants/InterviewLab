@@ -199,11 +199,12 @@ export function InterviewUI({
           return;
         }
 
-        // If there's a next question, add it (T85)
+        // If there's a next question, add it (T89)
         const nextData = result.data as {
           done: boolean;
           nextQuestion: Question;
           turnId: string;
+          bridgeText?: string | null;
         };
         if (nextData.nextQuestion && nextData.turnId) {
           toast.success('Answer submitted!', {
@@ -214,7 +215,8 @@ export function InterviewUI({
             {
               id: nextData.turnId,
               question: nextData.nextQuestion,
-            },
+              bridge_text: nextData.bridgeText || null, // T89: Include bridge text
+            } as Turn,
           ]);
           setCurrentTurnId(nextData.turnId);
           setQuestionNumber((prev) => prev + 1);
