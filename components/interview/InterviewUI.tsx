@@ -51,6 +51,12 @@ export function InterviewUI({
   const [stagesPlanned, setStagesPlanned] = useState(1);
   const [stageName, setStageName] = useState<string | null>(null);
 
+  // T93: Question Reveal System
+  const [countdown, setCountdown] = useState<number | null>(null); // 3, 2, 1, or null
+  const [questionVisible, setQuestionVisible] = useState(false);
+  const [showAgainCount, setShowAgainCount] = useState(0);
+  const [showAgainCap] = useState(2); // Max 2 "Show Again" uses
+
   // Initialize interview on mount
   useEffect(() => {
     const init = async () => {
@@ -110,6 +116,67 @@ export function InterviewUI({
 
     init();
   }, [sessionId]);
+
+  // T93: Countdown and Reveal Logic for Current Question
+  useEffect(() => {
+    if (!currentTurnId || accessibilityMode) {
+      // Skip reveal logic if no question or accessibility mode is on
+      return;
+    }
+
+    // Start countdown: 3 -> 2 -> 1 -> reveal
+    setCountdown(3);
+    setQuestionVisible(false);
+    setShowAgainCount(0); // Reset "Show Again" count for new question
+
+    const countdownTimers: NodeJS.Timeout[] = [];
+
+    // Countdown: 3 seconds
+    countdownTimers.push(setTimeout(() => setCountdown(2), 1000));
+    countdownTimers.push(setTimeout(() => setCountdown(1), 2000));
+    countdownTimers.push(
+      setTimeout(() => {
+        setCountdown(null);
+        setQuestionVisible(true);
+      }, 3000)
+    );
+
+    // Auto-hide question after 15 seconds (3s countdown + 15s reveal = 18s total)
+    countdownTimers.push(
+      setTimeout(() => {
+        setQuestionVisible(false);
+        toast.info('Question hidden', {
+          description: 'Use "Show Again" to review the question (2 times max)',
+        });
+      }, 18000) // 3s countdown + 15s reveal
+    );
+
+    return () => {
+      countdownTimers.forEach((timer) => clearTimeout(timer));
+    };
+  }, [currentTurnId, accessibilityMode]);
+
+  // T93: Handle "Show Again" button
+  const handleShowAgain = () => {
+    if (showAgainCount >= showAgainCap) {
+      toast.error('No more reveals available', {
+        description: 'You\'ve used all 2 "Show Again" attempts',
+      });
+      return;
+    }
+
+    setQuestionVisible(true);
+    setShowAgainCount((prev) => prev + 1);
+
+    toast.info(`Question revealed (${showAgainCount + 1}/${showAgainCap})`, {
+      description: 'Question will hide again in 5 seconds',
+    });
+
+    // Hide again after 5 seconds
+    setTimeout(() => {
+      setQuestionVisible(false);
+    }, 5000);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -325,7 +392,7 @@ export function InterviewUI({
               htmlFor="accessibility-mode"
               className="text-sm cursor-pointer"
             >
-              No Timer
+              No Timer/Reveals
             </Label>
           </div>
         </div>
@@ -362,12 +429,64 @@ export function InterviewUI({
               </div>
             )}
 
-            {/* Question */}
-            <QuestionBubble
-              question={turn.question}
-              questionNumber={index + 1}
-              turnId={turn.id}
-            />
+            {/* Question - T93: With Countdown & Reveal System */}
+            {turn.id === currentTurnId && !accessibilityMode ? (
+              <div className="space-y-4">
+                {/* T93: Countdown Display */}
+                {countdown !== null && (
+                  <div className="flex justify-start">
+                    <div className="max-w-[85%] rounded-lg bg-gradient-to-r from-primary/20 to-primary/10 p-8 border-2 border-primary/30">
+                      <div className="flex flex-col items-center justify-center">
+                        <p className="text-sm font-medium text-muted-foreground mb-2">
+                          Question {index + 1} starting in...
+                        </p>
+                        <div className="text-6xl font-bold text-primary animate-pulse">
+                          {countdown}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* T93: Question (conditionally visible) */}
+                {countdown === null && questionVisible && (
+                  <QuestionBubble
+                    question={turn.question}
+                    questionNumber={index + 1}
+                    turnId={turn.id}
+                  />
+                )}
+
+                {/* T93: "Show Again" Button (when question is hidden) */}
+                {countdown === null && !questionVisible && (
+                  <div className="flex justify-start">
+                    <div className="max-w-[85%] rounded-lg bg-muted/50 p-6 border-2 border-dashed border-muted-foreground/30">
+                      <div className="space-y-3">
+                        <p className="text-sm font-medium text-muted-foreground">
+                          Question hidden. Answer from memory or use &quot;Show
+                          Again&quot;.
+                        </p>
+                        <Button
+                          onClick={handleShowAgain}
+                          disabled={showAgainCount >= showAgainCap}
+                          variant="outline"
+                          size="sm"
+                        >
+                          Show Again ({showAgainCount}/{showAgainCap})
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              /* Past questions or accessibility mode - always visible */
+              <QuestionBubble
+                question={turn.question}
+                questionNumber={index + 1}
+                turnId={turn.id}
+              />
+            )}
 
             {/* Answer */}
             {turn.answer_text && (
