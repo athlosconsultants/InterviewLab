@@ -9,7 +9,7 @@ import {
   initializeInterview,
   submitInterviewAnswer,
 } from '@/app/interview/[id]/actions';
-import type { Question } from '@/lib/schema';
+import type { Question, Turn } from '@/lib/schema';
 import { toast } from 'sonner';
 import { QuestionBubble } from './QuestionBubble';
 import { TimerRing } from './TimerRing';
@@ -23,13 +23,6 @@ interface InterviewUIProps {
   sessionId: string;
   jobTitle: string;
   company: string;
-}
-
-interface Turn {
-  id: string;
-  question: Question;
-  answer_text?: string;
-  timing?: any;
 }
 
 export function InterviewUI({
@@ -52,6 +45,7 @@ export function InterviewUI({
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [accessibilityMode, setAccessibilityMode] = useState(false);
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
+  const [introText, setIntroText] = useState<string | null>(null);
 
   // Initialize interview on mount
   useEffect(() => {
@@ -70,6 +64,11 @@ export function InterviewUI({
         if (result.data) {
           setTurns(result.data.turns || []);
           setCurrentTurnId(result.data.currentTurn?.id || null);
+
+          // Extract intro text if available (T88)
+          if (result.data.intro) {
+            setIntroText(result.data.intro);
+          }
 
           // Find the current unanswered question
           const unansweredIndex = result.data.turns?.findIndex(
@@ -290,8 +289,35 @@ export function InterviewUI({
 
       {/* Conversation Thread */}
       <div className="space-y-6">
+        {/* Interview Introduction (T88) */}
+        {introText && (
+          <div className="flex justify-start">
+            <div className="max-w-[85%] rounded-lg bg-blue-50 dark:bg-blue-950/30 p-5 border-l-4 border-blue-500">
+              <div className="mb-2">
+                <span className="text-xs font-semibold text-blue-700 dark:text-blue-300 uppercase tracking-wide">
+                  Welcome
+                </span>
+              </div>
+              <p className="text-base leading-relaxed text-foreground whitespace-pre-wrap">
+                {introText}
+              </p>
+            </div>
+          </div>
+        )}
+
         {turns.map((turn, index) => (
           <div key={turn.id} className="space-y-4">
+            {/* Bridge Text (T89) - appears before questions 2+ */}
+            {turn.bridge_text && index > 0 && (
+              <div className="flex justify-start">
+                <div className="max-w-[75%] rounded-lg bg-muted/50 p-4 border-l-2 border-primary/40">
+                  <p className="text-sm italic text-muted-foreground leading-relaxed">
+                    {turn.bridge_text}
+                  </p>
+                </div>
+              </div>
+            )}
+
             {/* Question */}
             <QuestionBubble
               question={turn.question}

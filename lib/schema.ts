@@ -291,3 +291,38 @@ export interface Entitlement {
   consumed_at: string | null;
   created_at: string;
 }
+
+// Session type (from sessions table)
+export interface Session {
+  id: string;
+  user_id: string;
+  status: SessionStatus;
+  job_title: string | null;
+  company: string | null;
+  location: string | null;
+  research_snapshot: ResearchSnapshot | Json | null;
+  limits: SessionLimits | Json | null;
+  plan_tier: PlanTier;
+  mode: InterviewMode;
+  stages_planned: number;
+  current_stage: number;
+  entitlement_id: string | null;
+  intro_text: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+// Turn type (from turns table) - T89: Added bridge_text
+export interface Turn {
+  id: string;
+  session_id: string;
+  user_id: string;
+  question: Question;
+  tts_key: string | null;
+  answer_text: string | null;
+  answer_audio_key: string | null;
+  answer_digest: AnswerDigest | Json | null;
+  timing: Timing | Json | null;
+  bridge_text: string | null; // T89: Conversational transition referencing previous answer
+  created_at: string;
+}

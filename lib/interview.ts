@@ -294,13 +294,25 @@ export async function submitAnswer(params: {
     totalQuestions: questionCap,
   });
 
-  // Create next turn
+  // T89: Generate bridge text referencing the previous answer (paid tier only)
+  let bridgeText: string | null = null;
+  if (planTier === 'paid') {
+    try {
+      bridgeText = await generateBridge(sessionId, turnId);
+    } catch (error) {
+      console.error('Failed to generate bridge:', error);
+      // Continue without bridge if generation fails
+    }
+  }
+
+  // Create next turn (T89: with bridge_text)
   const { data: nextTurn, error: nextTurnError } = await supabase
     .from('turns')
     .insert({
       session_id: sessionId,
       user_id: session.user_id,
       question: nextQuestion,
+      bridge_text: bridgeText, // T89: Add bridge text
       timing: {
         started_at: new Date().toISOString(),
       },
@@ -446,5 +458,113 @@ Return ONLY the introduction text, no additional formatting or explanations. Kee
     throw new Error(
       `Failed to generate introduction: ${error instanceof Error ? error.message : 'Unknown error'}`
     );
+  }
+}
+
+/**
+ * Generates a conversational bridge between questions that references
+ * the candidate's previous answer (T89).
+ * This makes the interview feel more natural and connected.
+ * @param sessionId The session ID
+ * @param lastTurnId The ID of the previous turn (to reference the answer)
+ * @returns A short, natural bridge text (1-2 sentences)
+ */
+export async function generateBridge(
+  sessionId: string,
+  lastTurnId: string
+): Promise<string> {
+  const supabase = await createClient();
+
+  // Get session with research snapshot and plan_tier
+  const { data: session, error: sessionError } = await supabase
+    .from('sessions')
+    .select('*, research_snapshot, plan_tier')
+    .eq('id', sessionId)
+    .single();
+
+  if (sessionError || !session) {
+    throw new Error('Session not found');
+  }
+
+  const planTier = (session as any).plan_tier as PlanTier;
+
+  // Only generate bridges for paid tier
+  if (planTier !== 'paid') {
+    return ''; // Free tier doesn't get bridges
+  }
+
+  // Get the last turn with the answer
+  const { data: lastTurn, error: turnError } = await supabase
+    .from('turns')
+    .select('*')
+    .eq('id', lastTurnId)
+    .single();
+
+  if (turnError || !lastTurn) {
+    throw new Error('Previous turn not found');
+  }
+
+  const researchSnapshot = session.research_snapshot as ResearchSnapshot;
+  const lastQuestion = (lastTurn as any).question as Question;
+  const lastAnswer = (lastTurn as any).answer_text as string;
+
+  if (!lastAnswer) {
+    return ''; // No answer to reference
+  }
+
+  const role = researchSnapshot.job_spec_summary.role;
+  const tone = researchSnapshot.interview_config?.tone || 'professional';
+
+  const prompt = `You are a professional interviewer conducting a ${role} interview.
+
+The candidate just answered the following question:
+"${lastQuestion.text}"
+
+Their response was:
+"${lastAnswer.substring(0, 500)}${lastAnswer.length > 500 ? '...' : ''}"
+
+Generate a brief, natural conversational bridge (1-2 sentences) that:
+1. Acknowledges or reflects on something specific from their answer
+2. Creates a smooth transition to the next question
+3. Maintains a ${tone} tone
+4. Sounds like a real interviewer would speak
+
+Examples of good bridges:
+- "That's an interesting approach to stakeholder management. Building on that experience..."
+- "I appreciate your insight on technical debt. Let's explore another aspect of your work..."
+- "Your experience with cross-functional teams sounds valuable. Moving forward..."
+
+Return ONLY the bridge text, no quotes, no additional formatting. Keep it concise and conversational.`;
+
+  try {
+    const response = await openai.chat.completions.create({
+      model: MODELS.CONVERSATIONAL,
+      messages: [
+        {
+          role: 'system',
+          content:
+            "You are a professional interviewer. You create natural, contextual transitions between interview questions that acknowledge the candidate's previous answers. You always respond with just the bridge text, nothing else.",
+        },
+        {
+          role: 'user',
+          content: prompt,
+        },
+      ],
+      temperature: 0.7, // Higher temperature for natural variation
+      max_tokens: 100,
+    });
+
+    const bridgeText = response.choices[0]?.message?.content?.trim();
+
+    if (!bridgeText) {
+      throw new Error('No bridge text generated');
+    }
+
+    return bridgeText;
+  } catch (error) {
+    console.error('Error generating interview bridge:', error);
+    // Don't throw error - bridges are nice-to-have, not essential
+    // Return empty string so interview can continue
+    return '';
   }
 }

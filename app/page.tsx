@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 
 export default function Home() {
   return (
@@ -8,7 +9,9 @@ export default function Home() {
         <p className="text-lg text-muted-foreground">
           AI-driven interview simulation platform
         </p>
-        <Button>Get Started</Button>
+        <Link href="/setup">
+          <Button>Get Started</Button>
+        </Link>
       </div>
     </main>
   );
