@@ -46,6 +46,10 @@ export function InterviewUI({
   const [accessibilityMode, setAccessibilityMode] = useState(false);
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   const [introText, setIntroText] = useState<string | null>(null);
+  // T91: Stage tracking
+  const [currentStage, setCurrentStage] = useState(1);
+  const [stagesPlanned, setStagesPlanned] = useState(1);
+  const [stageName, setStageName] = useState<string | null>(null);
 
   // Initialize interview on mount
   useEffect(() => {
@@ -68,6 +72,17 @@ export function InterviewUI({
           // Extract intro text if available (T88)
           if (result.data.intro) {
             setIntroText(result.data.intro);
+          }
+
+          // T91: Extract stage information
+          if (result.data.currentStage) {
+            setCurrentStage(result.data.currentStage);
+          }
+          if (result.data.stagesPlanned) {
+            setStagesPlanned(result.data.stagesPlanned);
+          }
+          if (result.data.stageName) {
+            setStageName(result.data.stageName);
           }
 
           // Find the current unanswered question
@@ -199,17 +214,31 @@ export function InterviewUI({
           return;
         }
 
-        // If there's a next question, add it (T89)
+        // If there's a next question, add it (T91)
         const nextData = result.data as {
           done: boolean;
           nextQuestion: Question;
           turnId: string;
           bridgeText?: string | null;
+          currentStage?: number;
+          stagesPlanned?: number;
+          stageName?: string;
         };
         if (nextData.nextQuestion && nextData.turnId) {
-          toast.success('Answer submitted!', {
-            description: 'Next question generated.',
-          });
+          // T91: Check if stage advanced
+          if (nextData.currentStage && nextData.currentStage !== currentStage) {
+            toast.success(
+              `Stage ${nextData.currentStage}: ${nextData.stageName}`,
+              {
+                description: 'Moving to the next interview stage!',
+              }
+            );
+          } else {
+            toast.success('Answer submitted!', {
+              description: 'Next question generated.',
+            });
+          }
+
           setTurns((prev) => [
             ...prev,
             {
@@ -220,6 +249,11 @@ export function InterviewUI({
           ]);
           setCurrentTurnId(nextData.turnId);
           setQuestionNumber((prev) => prev + 1);
+
+          // T91: Update stage information
+          if (nextData.currentStage) setCurrentStage(nextData.currentStage);
+          if (nextData.stagesPlanned) setStagesPlanned(nextData.stagesPlanned);
+          if (nextData.stageName) setStageName(nextData.stageName);
         }
 
         // Clear answer and reset state
@@ -268,9 +302,17 @@ export function InterviewUI({
           <div>
             <h1 className="text-2xl font-bold">{jobTitle}</h1>
             <p className="text-muted-foreground">{company}</p>
-            <p className="text-sm text-muted-foreground mt-2">
-              Question {questionNumber} of {totalQuestions}
-            </p>
+            <div className="mt-2 space-y-1">
+              <p className="text-sm text-muted-foreground">
+                Question {questionNumber} of {totalQuestions}
+              </p>
+              {/* T91: Display stage information for multi-stage interviews */}
+              {stagesPlanned > 1 && stageName && (
+                <p className="text-sm font-medium text-primary">
+                  Stage {currentStage} of {stagesPlanned}: {stageName}
+                </p>
+              )}
+            </div>
           </div>
           <div className="flex items-center space-x-2">
             <AccessibilityIcon className="h-4 w-4 text-muted-foreground" />

@@ -22,10 +22,12 @@ export async function initializeInterview(sessionId: string) {
       return { error: 'Unauthorized', data: null };
     }
 
-    // Verify session belongs to user (T88 - with plan_tier)
+    // T91: Verify session belongs to user (with stage information)
     const { data: session, error: sessionError } = await supabase
       .from('sessions')
-      .select('id, user_id, status, plan_tier, intro_text')
+      .select(
+        'id, user_id, status, plan_tier, intro_text, current_stage, stages_planned, research_snapshot'
+      )
       .eq('id', sessionId)
       .eq('user_id', user.id)
       .single();
@@ -65,7 +67,17 @@ export async function initializeInterview(sessionId: string) {
     const result = await startInterview(sessionId);
     const state = await getInterviewState(sessionId);
 
-    return { error: null, data: { ...state, intro } };
+    // T91: Extract stage information
+    const currentStage = (session as any).current_stage || 1;
+    const stagesPlanned = (session as any).stages_planned || 1;
+    const researchSnapshot = (session as any).research_snapshot as any;
+    const stages = researchSnapshot?.interview_config?.stages || [];
+    const stageName = stages[currentStage - 1] || `Stage ${currentStage}`;
+
+    return {
+      error: null,
+      data: { ...state, intro, currentStage, stagesPlanned, stageName },
+    };
   } catch (error) {
     console.error('Initialize interview error:', error);
     return {

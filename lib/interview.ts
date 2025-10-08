@@ -8,8 +8,54 @@ import type {
 } from './schema';
 
 /**
+ * T91: Calculate questions per stage based on total questions and number of stages
+ */
+function calculateQuestionsPerStage(
+  totalQuestions: number,
+  numStages: number
+): number {
+  // Distribute questions evenly across stages (5-10 per stage)
+  const questionsPerStage = Math.floor(totalQuestions / numStages);
+  // Ensure minimum of 5 questions per stage
+  return Math.max(5, questionsPerStage);
+}
+
+/**
+ * T91: Determine if we should advance to the next stage
+ */
+function shouldAdvanceStage(
+  currentStage: number,
+  stagesPlanned: number,
+  questionsInCurrentStage: number,
+  questionsPerStage: number
+): boolean {
+  // Don't advance if we're at the last stage
+  if (currentStage >= stagesPlanned) {
+    return false;
+  }
+
+  // Advance when we've reached the target number of questions for this stage
+  return questionsInCurrentStage >= questionsPerStage;
+}
+
+/**
+ * T91: Get the name of the current stage from interview config
+ */
+function getStageName(
+  researchSnapshot: ResearchSnapshot,
+  stageIndex: number
+): string {
+  const stages = researchSnapshot.interview_config?.stages || [];
+  if (stageIndex > 0 && stageIndex <= stages.length) {
+    return stages[stageIndex - 1];
+  }
+  return `Stage ${stageIndex}`;
+}
+
+/**
  * Generates an interview question using OpenAI based on the research snapshot
  * and previous conversation context. (T90: Context-aware with progressive difficulty)
+ * (T91: Stage-aware question generation)
  */
 export async function generateQuestion(params: {
   researchSnapshot: ResearchSnapshot;
@@ -20,18 +66,32 @@ export async function generateQuestion(params: {
   }>;
   questionNumber: number;
   totalQuestions: number;
+  currentStage?: number;
+  stagesPlanned?: number;
+  questionsInStage?: number;
 }): Promise<Question> {
   const {
     researchSnapshot,
     previousTurns = [],
     questionNumber,
     totalQuestions,
+    currentStage = 1,
+    stagesPlanned = 1,
+    questionsInStage = 0,
   } = params;
 
   // T90: Calculate interview progress for progressive difficulty
   const progress = questionNumber / totalQuestions;
   const targetDifficulty =
     progress < 0.33 ? 'easy' : progress < 0.66 ? 'medium' : 'hard';
+
+  // T91: Get current stage information
+  const stageName = getStageName(researchSnapshot, currentStage);
+  const stages = researchSnapshot.interview_config?.stages || [];
+  const isMultiStage = stagesPlanned > 1;
+  const questionsPerStage = isMultiStage
+    ? calculateQuestionsPerStage(totalQuestions, stagesPlanned)
+    : totalQuestions;
 
   // T90: Build enriched context from previous turns
   // Include full answer text for the most recent turn to enable deep probing
@@ -79,6 +139,22 @@ ${conversationContext}
 
 # Task:
 Generate question ${questionNumber} of ${totalQuestions} (Progress: ${Math.round(progress * 100)}%)
+${
+  isMultiStage
+    ? `
+**T91 MULTI-STAGE INTERVIEW**
+- Current Stage: ${currentStage} of ${stagesPlanned} - "${stageName}"
+- Question ${questionsInStage + 1} of ~${questionsPerStage} in this stage
+- All stages: ${stages.join(', ')}
+
+**FOCUS ON CURRENT STAGE:**
+This question MUST focus specifically on "${stageName}" competencies and skills.
+${stages.length > 0 ? `- Other stages (${stages.filter((_, i) => i !== currentStage - 1).join(', ')}) will be covered later - do NOT ask about them now` : ''}
+- Ensure the question category and content align with the "${stageName}" theme
+- Questions should progressively explore different aspects of "${stageName}"
+`
+    : ''
+}
 
 ## T90 Context-Aware Guidelines:
 ${
@@ -282,10 +358,12 @@ export async function submitAnswer(params: {
     throw new Error('Failed to update turn');
   }
 
-  // Get session and all turns (T85 - with plan_tier)
+  // T91: Get session with stage information
   const { data: session, error: sessionError } = await supabase
     .from('sessions')
-    .select('*, research_snapshot, limits, plan_tier')
+    .select(
+      '*, research_snapshot, limits, plan_tier, current_stage, stages_planned'
+    )
     .eq('id', sessionId)
     .single();
 
@@ -306,6 +384,11 @@ export async function submitAnswer(params: {
 
   const questionCap = (session.limits as any)?.question_cap || 3;
   const planTier = (session as any).plan_tier || 'free';
+
+  // T91: Get stage information
+  const currentStage = (session as any).current_stage || 1;
+  const stagesPlanned = (session as any).stages_planned || 1;
+  const researchSnapshot = session.research_snapshot as ResearchSnapshot;
 
   // T85: Enforce free tier restrictions (3 questions max)
   if (planTier === 'free' && allTurns.length >= 3) {
@@ -335,12 +418,47 @@ export async function submitAnswer(params: {
     };
   }
 
-  // Generate next question
+  // T91: Calculate questions in current stage (count all turns, then modulo by stage size)
+  const questionsPerStage =
+    stagesPlanned > 1
+      ? calculateQuestionsPerStage(questionCap, stagesPlanned)
+      : questionCap;
+
+  // Count how many questions we've answered in total, then determine stage boundaries
+  const totalAnswered = allTurns.length;
+  const questionsInCurrentStage = totalAnswered % questionsPerStage;
+
+  // T91: Check if we should advance to the next stage
+  let newStage = currentStage;
+  if (
+    shouldAdvanceStage(
+      currentStage,
+      stagesPlanned,
+      questionsInCurrentStage,
+      questionsPerStage
+    )
+  ) {
+    newStage = currentStage + 1;
+    console.log(
+      `[T91] Advancing from stage ${currentStage} to stage ${newStage}`
+    );
+
+    // Update session with new stage
+    await supabase
+      .from('sessions')
+      .update({ current_stage: newStage })
+      .eq('id', sessionId);
+  }
+
+  // Generate next question (T91: with stage information)
   const nextQuestion = await generateQuestion({
-    researchSnapshot: session.research_snapshot as ResearchSnapshot,
+    researchSnapshot,
     previousTurns: allTurns as any,
     questionNumber: allTurns.length + 1,
     totalQuestions: questionCap,
+    currentStage: newStage,
+    stagesPlanned,
+    questionsInStage: newStage !== currentStage ? 0 : questionsInCurrentStage,
   });
 
   // T89: Generate bridge text referencing the previous answer (paid tier only)
@@ -378,6 +496,9 @@ export async function submitAnswer(params: {
     nextQuestion,
     turnId: nextTurn.id,
     bridgeText, // T89: Return bridge text so UI can display it
+    currentStage: newStage, // T91: Return current stage for UI
+    stagesPlanned, // T91: Return total stages for UI
+    stageName: getStageName(researchSnapshot, newStage), // T91: Return stage name
   };
 }
 
