@@ -54,8 +54,6 @@ export function InterviewUI({
   // T93: Question Reveal System
   const [countdown, setCountdown] = useState<number | null>(null); // 3, 2, 1, or null
   const [questionVisible, setQuestionVisible] = useState(false);
-  const [showAgainCount, setShowAgainCount] = useState(0);
-  const [showAgainCap] = useState(2); // Max 2 "Show Again" uses
 
   // Initialize interview on mount
   useEffect(() => {
@@ -127,7 +125,7 @@ export function InterviewUI({
     // Start countdown: 3 -> 2 -> 1 -> reveal
     setCountdown(3);
     setQuestionVisible(false);
-    setShowAgainCount(0); // Reset "Show Again" count for new question
+    setReplayCount(0); // Reset replay count for new question
 
     const countdownTimers: NodeJS.Timeout[] = [];
 
@@ -146,7 +144,7 @@ export function InterviewUI({
       setTimeout(() => {
         setQuestionVisible(false);
         toast.info('Question hidden', {
-          description: 'Use "Show Again" to review the question (2 times max)',
+          description: 'Use "Replay" to review the question (2 times max)',
         });
       }, 18000) // 3s countdown + 15s reveal
     );
@@ -155,28 +153,6 @@ export function InterviewUI({
       countdownTimers.forEach((timer) => clearTimeout(timer));
     };
   }, [currentTurnId, accessibilityMode]);
-
-  // T93: Handle "Show Again" button
-  const handleShowAgain = () => {
-    if (showAgainCount >= showAgainCap) {
-      toast.error('No more reveals available', {
-        description: 'You\'ve used all 2 "Show Again" attempts',
-      });
-      return;
-    }
-
-    setQuestionVisible(true);
-    setShowAgainCount((prev) => prev + 1);
-
-    toast.info(`Question revealed (${showAgainCount + 1}/${showAgainCap})`, {
-      description: 'Question will hide again in 5 seconds',
-    });
-
-    // Hide again after 5 seconds
-    setTimeout(() => {
-      setQuestionVisible(false);
-    }, 5000);
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -338,16 +314,25 @@ export function InterviewUI({
     }
   };
 
+  // T93: Merged Replay - handles both TTS audio replay and text reveal
   const handleReplay = () => {
     if (replayCount >= replayCap) {
       toast.error('No replays remaining');
       return;
     }
 
+    // Reveal the question text for 5 seconds
+    setQuestionVisible(true);
     setReplayCount((prev) => prev + 1);
-    toast.info('Question replayed', {
-      description: `${replayCap - replayCount - 1} replays remaining`,
+
+    toast.info(`Question replayed (${replayCount + 1}/${replayCap})`, {
+      description: 'Question will hide again in 5 seconds',
     });
+
+    // Hide again after 5 seconds
+    setTimeout(() => {
+      setQuestionVisible(false);
+    }, 5000);
   };
 
   if (isLoading) {
@@ -457,24 +442,14 @@ export function InterviewUI({
                   />
                 )}
 
-                {/* T93: "Show Again" Button (when question is hidden) */}
+                {/* T93: Hidden question message */}
                 {countdown === null && !questionVisible && (
                   <div className="flex justify-start">
                     <div className="max-w-[85%] rounded-lg bg-muted/50 p-6 border-2 border-dashed border-muted-foreground/30">
-                      <div className="space-y-3">
-                        <p className="text-sm font-medium text-muted-foreground">
-                          Question hidden. Answer from memory or use &quot;Show
-                          Again&quot;.
-                        </p>
-                        <Button
-                          onClick={handleShowAgain}
-                          disabled={showAgainCount >= showAgainCap}
-                          variant="outline"
-                          size="sm"
-                        >
-                          Show Again ({showAgainCount}/{showAgainCap})
-                        </Button>
-                      </div>
+                      <p className="text-sm font-medium text-muted-foreground">
+                        Question hidden. Answer from memory or use the Replay
+                        button below to review.
+                      </p>
                     </div>
                   </div>
                 )}
