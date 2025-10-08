@@ -53,6 +53,87 @@ function getStageName(
 }
 
 /**
+ * T95: Generate a compact summary of the latest Q&A for rolling context
+ */
+async function generateQASummary(
+  question: string,
+  answer: string
+): Promise<string> {
+  try {
+    const response = await openai.chat.completions.create({
+      model: MODELS.CONVERSATIONAL,
+      messages: [
+        {
+          role: 'system',
+          content:
+            'You are a summarizer. Create a 1-sentence summary of the following interview Q&A exchange. Focus on the key points of the answer.',
+        },
+        {
+          role: 'user',
+          content: `Question: ${question}\n\nAnswer: ${answer}`,
+        },
+      ],
+      max_tokens: 50,
+      temperature: 0.3,
+    });
+
+    return response.choices[0]?.message?.content?.trim() || '';
+  } catch (error) {
+    console.error('[T95] Failed to generate Q&A summary:', error);
+    // Return a simple fallback summary
+    return `Q${question.length > 50 ? question.substring(0, 50) + '...' : question} → A: ${answer.length > 50 ? answer.substring(0, 50) + '...' : answer}`;
+  }
+}
+
+/**
+ * T95: Update the rolling conversation summary in the session
+ */
+async function updateConversationSummary(
+  sessionId: string,
+  newQASummary: string,
+  existingSummary: string | null
+): Promise<void> {
+  const supabase = await createClient();
+
+  let updatedSummary: string;
+
+  if (!existingSummary) {
+    // First Q&A - just use the new summary
+    updatedSummary = `1. ${newQASummary}`;
+  } else {
+    // Append the new Q&A summary
+    const summaryLines = existingSummary.split('\n');
+    const nextNumber = summaryLines.length + 1;
+    updatedSummary = `${existingSummary}\n${nextNumber}. ${newQASummary}`;
+
+    // T95: Keep summary compact (< 1KB target)
+    // If summary is getting too long, condense it
+    if (updatedSummary.length > 1024) {
+      console.log(
+        `[T95] Summary exceeds 1KB (${updatedSummary.length} bytes), condensing...`
+      );
+      // Keep only the last 5 Q&As for context
+      const recentLines = summaryLines.slice(-4);
+      updatedSummary =
+        recentLines.join('\n') + `\n${nextNumber}. ${newQASummary}`;
+    }
+  }
+
+  console.log(
+    `[T95] Updating conversation summary (${updatedSummary.length} bytes)`
+  );
+
+  const { error } = await supabase
+    .from('sessions')
+    .update({ conversation_summary: updatedSummary })
+    .eq('id', sessionId);
+
+  if (error) {
+    console.error('[T95] Failed to update conversation summary:', error);
+  }
+}
+
+/**
  * Generates an interview question using OpenAI based on the research snapshot
  * and previous conversation context. (T90: Context-aware with progressive difficulty)
  * (T91: Stage-aware question generation)
@@ -407,11 +488,15 @@ export async function submitAnswer(params: {
     throw new Error('Failed to update turn');
   }
 
-  // T91: Get session with stage information
+  // T95: Generate and update conversation summary
+  const questionText = (turn.question as Question).text;
+  const qaSummary = await generateQASummary(questionText, answerText);
+
+  // T91: Get session with stage information (including conversation_summary for T95)
   const { data: session, error: sessionError } = await supabase
     .from('sessions')
     .select(
-      '*, research_snapshot, limits, plan_tier, current_stage, stages_planned'
+      '*, research_snapshot, limits, plan_tier, current_stage, stages_planned, conversation_summary'
     )
     .eq('id', sessionId)
     .single();
@@ -419,6 +504,13 @@ export async function submitAnswer(params: {
   if (sessionError || !session) {
     throw new Error('Session not found');
   }
+
+  // T95: Update rolling conversation summary
+  await updateConversationSummary(
+    sessionId,
+    qaSummary,
+    (session as any).conversation_summary || null
+  );
 
   // T90: Fetch turns with answer_text for context-aware question generation
   const { data: allTurns, error: turnsError } = await supabase

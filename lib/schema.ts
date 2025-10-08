@@ -308,6 +308,7 @@ export interface Session {
   current_stage: number;
   entitlement_id: string | null;
   intro_text: string | null;
+  conversation_summary: string | null; // T95: Rolling summary of conversation
   created_at: string;
   updated_at: string;
 }
