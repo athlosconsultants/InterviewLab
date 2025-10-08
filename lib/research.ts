@@ -1,5 +1,6 @@
 import { openai, MODELS } from './openai';
 import type { ResearchSnapshot } from './schema';
+import { mapRoleToIndustryKit } from './industryMap';
 
 /**
  * Generates a research snapshot by analyzing CV and job description using OpenAI.
@@ -110,6 +111,39 @@ Return only the JSON object, no other text.`;
       !snapshot.company_facts
     ) {
       throw new Error('Invalid snapshot structure from OpenAI');
+    }
+
+    // T87: Enrich snapshot with industry-specific interview configuration
+    const industryMatch = mapRoleToIndustryKit(
+      snapshot.job_spec_summary.role,
+      snapshot.company_facts.industry
+    );
+
+    if (industryMatch) {
+      snapshot.interview_config = {
+        industry: industryMatch.industry,
+        sub_industry: industryMatch.subIndustry,
+        styles: industryMatch.kit.styles,
+        tone: industryMatch.kit.tone,
+        stages: industryMatch.kit.stages,
+        confidence: industryMatch.confidence,
+      };
+
+      // Optionally enrich competencies with industry-specific ones
+      // Merge without duplicates
+      const industryCompetencies = industryMatch.kit.competencies;
+      const existingCompetencies = new Set([
+        ...snapshot.competencies.technical,
+        ...snapshot.competencies.behavioral,
+        ...snapshot.competencies.domain,
+      ]);
+
+      industryCompetencies.forEach((comp) => {
+        if (!existingCompetencies.has(comp)) {
+          // Add to behavioral by default (could be more sophisticated)
+          snapshot.competencies.behavioral.push(comp);
+        }
+      });
     }
 
     return snapshot;

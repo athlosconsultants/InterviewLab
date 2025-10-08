@@ -211,6 +211,16 @@ export interface ResearchSnapshot {
     domain: string[]; // e.g., ['FinTech', 'Healthcare', 'E-commerce']
   };
 
+  // T87: Industry-specific interview configuration
+  interview_config?: {
+    industry: string; // e.g., 'Technology', 'Finance', 'Construction'
+    sub_industry: string; // e.g., 'Software', 'Investment Banking', 'Project Management'
+    styles: string[]; // e.g., ['technical', 'behavioral', 'system_design']
+    tone: string; // e.g., 'analytical and formal with conversational clarity'
+    stages: string[]; // e.g., ['Technical', 'Behavioral', 'System Design']
+    confidence: 'high' | 'medium' | 'low'; // Confidence level of the mapping
+  };
+
   // Sources used for research
   sources: {
     company_website?: string;
