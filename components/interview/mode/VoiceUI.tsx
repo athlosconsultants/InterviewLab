@@ -48,6 +48,9 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [currentAudioUrl, setCurrentAudioUrl] = useState<string | null>(null);
 
+  // T108: Replay count tracking for voice mode scoring
+  const [replayCount, setReplayCount] = useState(0);
+
   // Initialize interview
   useEffect(() => {
     const loadInterview = async () => {
@@ -88,6 +91,8 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
         const firstUnanswered = turnsWithTiming.find((t) => !t.answer_text);
         if (firstUnanswered) {
           setCurrentTurnId(firstUnanswered.id);
+          // T108: Reset replay count for voice mode when setting initial turn
+          setReplayCount(0);
         }
       }
 
@@ -228,6 +233,15 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
       return;
     }
 
+    // T108: Increment replay count for voice mode
+    setReplayCount((prev) => {
+      const newCount = prev + 1;
+      console.log(
+        `[T108 Voice Replay] Incrementing replay count: ${prev} -> ${newCount}`
+      );
+      return newCount;
+    });
+
     setOrbState('speaking');
     audioRef.current.currentTime = 0;
     audioRef.current.play().catch(() => {
@@ -307,13 +321,13 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
           toast.success('Transcribed');
         }
 
-        // Submit the answer
+        // Submit the answer (T108: include replay count in voice mode)
         const result = await submitInterviewAnswer({
           sessionId,
           turnId: currentTurnId,
           answerText: finalAnswer,
           audioKey,
-          replayCount: 0, // Voice mode doesn't have replay limits
+          replayCount, // T108: Pass voice mode replay count for scoring
         });
 
         if (result.error) {
@@ -384,6 +398,8 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
 
             setTurns((prev) => [...prev, newTurn]);
             setCurrentTurnId(nextData.turnId);
+            // T108: Reset replay count for voice mode when setting new turn
+            setReplayCount(0);
 
             if (nextData.currentStage) setCurrentStage(nextData.currentStage);
             if (nextData.stagesPlanned)
@@ -450,7 +466,7 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
           <VoiceOrb state={orbState} size="lg" />
 
           {currentQuestion && (
-            <div className="mt-8">
+            <div className="mt-8 flex items-center gap-3">
               <Button
                 variant="outline"
                 size="sm"
@@ -460,6 +476,12 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
                 <RotateCcw className="mr-2 h-4 w-4" />
                 Replay Question
               </Button>
+              {/* T108: Show replay count for voice mode (no limit, just tracking) */}
+              {replayCount > 0 && (
+                <span className="text-xs text-muted-foreground">
+                  {replayCount} {replayCount === 1 ? 'replay' : 'replays'}
+                </span>
+              )}
             </div>
           )}
         </div>
