@@ -346,10 +346,10 @@ export function InterviewUI({
         </div>
       </div>
 
-      {/* Conversation Thread */}
+      {/* T102: Current Question Only Display */}
       <div className="space-y-6">
-        {/* Interview Introduction (T88) */}
-        {introText && (
+        {/* Interview Introduction (T88) - shown only at start */}
+        {introText && turns.length === 0 && (
           <div className="flex justify-start">
             <div className="max-w-[85%] rounded-lg bg-blue-50 dark:bg-blue-950/30 p-5 border-l-4 border-blue-500">
               <div className="mb-2">
@@ -364,40 +364,67 @@ export function InterviewUI({
           </div>
         )}
 
-        {turns.map((turn, index) => (
-          <div key={turn.id} className="space-y-4">
-            {/* Bridge Text (T89) - appears before questions 2+ */}
-            {turn.bridge_text && index > 0 && (
-              <div className="flex justify-start">
-                <div className="max-w-[75%] rounded-lg bg-muted/50 p-4 border-l-2 border-primary/40">
-                  <p className="text-sm italic text-muted-foreground leading-relaxed">
-                    {turn.bridge_text}
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {/* Question - T93: With Countdown & Reveal System */}
-            {turn.id === currentTurnId && !accessibilityMode ? (
-              <div className="space-y-4">
-                {/* T93: Countdown Display */}
-                {countdown !== null && (
+        {/* T102: Render only the current turn (question without answer) */}
+        {turns
+          .filter((t) => !t.answer_text)
+          .map((turn, _, filteredTurns) => {
+            // Find the index in the original turns array for progress tracking
+            const index = turns.findIndex((t) => t.id === turn.id);
+            return (
+              <div key={turn.id} className="space-y-4">
+                {/* Bridge Text (T89) - appears before questions 2+ */}
+                {turn.bridge_text && index > 0 && (
                   <div className="flex justify-start">
-                    <div className="max-w-[85%] rounded-lg bg-gradient-to-r from-primary/20 to-primary/10 p-8 border-2 border-primary/30">
-                      <div className="flex flex-col items-center justify-center">
-                        <p className="text-sm font-medium text-muted-foreground mb-2">
-                          Question {index + 1} starting in...
-                        </p>
-                        <div className="text-6xl font-bold text-primary animate-pulse">
-                          {countdown}
-                        </div>
-                      </div>
+                    <div className="max-w-[75%] rounded-lg bg-muted/50 p-4 border-l-2 border-primary/40">
+                      <p className="text-sm italic text-muted-foreground leading-relaxed">
+                        {turn.bridge_text}
+                      </p>
                     </div>
                   </div>
                 )}
 
-                {/* T93: Question (conditionally visible) */}
-                {countdown === null && questionVisible && (
+                {/* Question - T93: With Countdown & Reveal System */}
+                {turn.id === currentTurnId && !accessibilityMode ? (
+                  <div className="space-y-4">
+                    {/* T93: Countdown Display */}
+                    {countdown !== null && (
+                      <div className="flex justify-start">
+                        <div className="max-w-[85%] rounded-lg bg-gradient-to-r from-primary/20 to-primary/10 p-8 border-2 border-primary/30">
+                          <div className="flex flex-col items-center justify-center">
+                            <p className="text-sm font-medium text-muted-foreground mb-2">
+                              Question {index + 1} starting in...
+                            </p>
+                            <div className="text-6xl font-bold text-primary animate-pulse">
+                              {countdown}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* T93: Question (conditionally visible) */}
+                    {countdown === null && questionVisible && (
+                      <QuestionBubble
+                        question={turn.question}
+                        questionNumber={index + 1}
+                        turnId={turn.id}
+                      />
+                    )}
+
+                    {/* T93: Hidden question message */}
+                    {countdown === null && !questionVisible && (
+                      <div className="flex justify-start">
+                        <div className="max-w-[85%] rounded-lg bg-muted/50 p-6 border-2 border-dashed border-muted-foreground/30">
+                          <p className="text-sm font-medium text-muted-foreground">
+                            Question hidden. Answer from memory or use the
+                            Replay button below to review.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  /* Past questions or accessibility mode - always visible */
                   <QuestionBubble
                     question={turn.question}
                     questionNumber={index + 1}
@@ -405,44 +432,24 @@ export function InterviewUI({
                   />
                 )}
 
-                {/* T93: Hidden question message */}
-                {countdown === null && !questionVisible && (
-                  <div className="flex justify-start">
-                    <div className="max-w-[85%] rounded-lg bg-muted/50 p-6 border-2 border-dashed border-muted-foreground/30">
-                      <p className="text-sm font-medium text-muted-foreground">
-                        Question hidden. Answer from memory or use the Replay
-                        button below to review.
+                {/* Answer */}
+                {turn.answer_text && (
+                  <div className="flex justify-end">
+                    <div className="max-w-[80%] rounded-lg bg-primary/10 p-4">
+                      <div className="mb-2">
+                        <span className="text-xs font-medium text-muted-foreground uppercase">
+                          Your Answer
+                        </span>
+                      </div>
+                      <p className="text-base whitespace-pre-wrap">
+                        {turn.answer_text}
                       </p>
                     </div>
                   </div>
                 )}
               </div>
-            ) : (
-              /* Past questions or accessibility mode - always visible */
-              <QuestionBubble
-                question={turn.question}
-                questionNumber={index + 1}
-                turnId={turn.id}
-              />
-            )}
-
-            {/* Answer */}
-            {turn.answer_text && (
-              <div className="flex justify-end">
-                <div className="max-w-[80%] rounded-lg bg-primary/10 p-4">
-                  <div className="mb-2">
-                    <span className="text-xs font-medium text-muted-foreground uppercase">
-                      Your Answer
-                    </span>
-                  </div>
-                  <p className="text-base whitespace-pre-wrap">
-                    {turn.answer_text}
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
-        ))}
+            );
+          })}
       </div>
 
       {/* T94: Analyzing Answer Transition */}
