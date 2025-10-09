@@ -83,7 +83,24 @@ export function InterviewUI({
         }
 
         if (result.data) {
-          setTurns(result.data.turns || []);
+          // T102: Ensure all turns have timing.started_at for countdown timer
+          const turnsWithTiming = (result.data.turns || []).map((turn) => {
+            const timing = turn.timing as Timing | null;
+            if (!timing?.started_at && !turn.answer_text) {
+              // If it's an unanswered question without timing, set it now
+              return {
+                ...turn,
+                timing: {
+                  started_at: new Date().toISOString(),
+                  completed_at: '',
+                  duration_ms: 0,
+                  replay_count: 0,
+                } as Timing,
+              };
+            }
+            return turn;
+          });
+          setTurns(turnsWithTiming);
           setCurrentTurnId(result.data.currentTurn?.id || null);
 
           // Extract intro text if available (T88)
@@ -264,14 +281,27 @@ export function InterviewUI({
             toast.success('Next question');
           }
 
-          setTurns((prev) => [
-            ...prev,
-            {
-              id: nextData.turnId,
-              question: nextData.nextQuestion,
-              bridge_text: nextData.bridgeText || null, // T89: Include bridge text
-            } as Turn,
-          ]);
+          // T102: Set timing.started_at immediately when question appears for countdown timer
+          const newTurn = {
+            id: nextData.turnId,
+            session_id: sessionId,
+            user_id: '', // Will be populated by server
+            question: nextData.nextQuestion,
+            tts_key: null,
+            answer_text: null,
+            answer_audio_key: null,
+            answer_digest: null,
+            bridge_text: nextData.bridgeText || null,
+            timing: {
+              started_at: new Date().toISOString(), // Start timer immediately
+              completed_at: '',
+              duration_ms: 0,
+              replay_count: 0,
+            } as Timing,
+            created_at: new Date().toISOString(),
+          } as Turn;
+
+          setTurns((prev) => [...prev, newTurn]);
           setCurrentTurnId(nextData.turnId);
           setQuestionNumber((prev) => prev + 1);
 
@@ -483,22 +513,20 @@ export function InterviewUI({
               onReplay={handleReplay}
               disabled={isSubmitting || !canReplay}
             />
-            {!accessibilityMode && (
-              <TimerRing
-                timeLimit={timerSec}
-                startTime={
-                  (currentQuestion.timing as Timing | null)?.started_at ||
-                  new Date().toISOString()
-                }
-                onExpire={() => {
-                  toast.warning('Time is up', {
-                    description: 'Auto-submitting...',
-                  });
-                  // Auto-submit the current answer
-                  handleSubmit();
-                }}
-              />
-            )}
+            {!accessibilityMode &&
+              (currentQuestion.timing as Timing | null)?.started_at && (
+                <TimerRing
+                  timeLimit={timerSec}
+                  startTime={(currentQuestion.timing as Timing).started_at}
+                  onExpire={() => {
+                    toast.warning('Time is up', {
+                      description: 'Auto-submitting...',
+                    });
+                    // Auto-submit the current answer
+                    handleSubmit();
+                  }}
+                />
+              )}
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
