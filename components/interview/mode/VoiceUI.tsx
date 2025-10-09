@@ -396,6 +396,10 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
           });
         }
 
+        // T113: Track submission time for latency monitoring
+        const submitStartTime = Date.now();
+        setOrbState('processing'); // T113: Show processing immediately
+
         // Submit the answer (T108: include replay count in voice mode)
         const result = await submitInterviewAnswer({
           sessionId,
@@ -404,6 +408,12 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
           audioKey,
           replayCount, // T108: Pass voice mode replay count for scoring
         });
+
+        // T113: Calculate actual latency
+        const actualLatency = Date.now() - submitStartTime;
+        console.log(
+          `[T113 VoiceUI] Question generation latency: ${actualLatency}ms`
+        );
 
         if (result.error) {
           toast.error('Unable to submit', {
@@ -428,6 +438,10 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
             setShowUpgradeDialog(true);
             return;
           }
+
+          // T113: Ensure minimum processing time for smooth UX (500ms)
+          const minProcessingTime = 500;
+          const remainingTime = Math.max(0, minProcessingTime - actualLatency);
 
           const nextData = result.data as {
             done: boolean;
@@ -480,6 +494,11 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
             if (nextData.stagesPlanned)
               setStagesPlanned(nextData.stagesPlanned);
             if (nextData.stageName) setStageName(nextData.stageName);
+          }
+
+          // T113: Ensure smooth transition with dynamic timing
+          if (remainingTime > 0) {
+            await new Promise((resolve) => setTimeout(resolve, remainingTime));
           }
 
           setAnswer('');

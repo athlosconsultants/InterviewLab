@@ -256,6 +256,10 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
           toast.success('Transcribed');
         }
 
+        // T113: Track submission time for latency monitoring
+        const submitStartTime = Date.now();
+        setIsAnalyzing(true); // T113: Show analyzing immediately for better UX
+
         // Submit the answer (including reveal count for scoring)
         const result = await submitInterviewAnswer({
           sessionId,
@@ -265,7 +269,14 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
           replayCount: revealCount, // T100: Track reveal count for composure scoring
         });
 
+        // T113: Calculate actual latency
+        const actualLatency = Date.now() - submitStartTime;
+        console.log(
+          `[T113 TextUI] Question generation latency: ${actualLatency}ms`
+        );
+
         if (result.error) {
+          setIsAnalyzing(false);
           toast.error('Unable to submit', {
             description: result.error,
           });
@@ -282,6 +293,7 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
 
           // Check if interview is complete
           if (result.data.done) {
+            setIsAnalyzing(false);
             toast.success('Interview complete', {
               description: 'Well done.',
             });
@@ -290,8 +302,10 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
             return;
           }
 
-          // T94: Show "Analyzing answer..." state
-          setIsAnalyzing(true);
+          // T113: Ensure minimum analyzing time for smooth UX (500ms)
+          // If latency was fast, still show analyzing briefly
+          const minAnalyzingTime = 500;
+          const remainingTime = Math.max(0, minAnalyzingTime - actualLatency);
           // T106: Don't show toast for small talk/confirmation transitions
           const currentQuestionType = turns.find((t) => t.id === currentTurnId);
           const isSpecialTurn =
@@ -333,8 +347,12 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
               (t) => t.id !== currentTurnId && !t.answer_text
             );
 
-            // T102: Show analyzing animation for 2 seconds for smoother transitions
-            await new Promise((resolve) => setTimeout(resolve, 2000));
+            // T113: Ensure smooth transition with dynamic timing (max 1.5s total)
+            if (remainingTime > 0) {
+              await new Promise((resolve) =>
+                setTimeout(resolve, remainingTime)
+              );
+            }
 
             // Update to the next turn (if found)
             if (nextUnanswered) {
@@ -382,8 +400,12 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
               setStagesPlanned(nextData.stagesPlanned);
             if (nextData.stageName) setStageName(nextData.stageName);
 
-            // T102: Show analyzing animation for 2 seconds for smoother transitions
-            await new Promise((resolve) => setTimeout(resolve, 2000));
+            // T113: Ensure smooth transition with dynamic timing (max 1.5s total)
+            if (remainingTime > 0) {
+              await new Promise((resolve) =>
+                setTimeout(resolve, remainingTime)
+              );
+            }
 
             // T94: Hide analyzing state AFTER updating turn
             setIsAnalyzing(false);

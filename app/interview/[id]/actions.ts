@@ -104,6 +104,7 @@ export async function initializeInterview(sessionId: string) {
 
 /**
  * Server action to submit an answer and get the next question.
+ * T113: Optimized for low-latency with performance tracking
  */
 export async function submitInterviewAnswer(params: {
   sessionId: string;
@@ -112,6 +113,8 @@ export async function submitInterviewAnswer(params: {
   audioKey?: string;
   replayCount?: number;
 }) {
+  const startTime = Date.now(); // T113: Track latency
+
   try {
     const supabase = await createClient();
     const {
@@ -153,11 +156,52 @@ export async function submitInterviewAnswer(params: {
     // Submit answer (including audio key and replay count if provided)
     const result = await submitAnswer(params);
 
-    return { error: null, data: result };
+    // T113: Log latency for monitoring
+    const latency = Date.now() - startTime;
+    console.log(
+      `[T113] Answer submission + next question generation: ${latency}ms`
+    );
+
+    if (latency > 1500) {
+      console.warn(`[T113] Latency exceeded target: ${latency}ms > 1500ms`);
+    }
+
+    return { error: null, data: result, latency }; // T113: Include latency in response
   } catch (error) {
     console.error('Submit answer error:', error);
     return {
       error: error instanceof Error ? error.message : 'Failed to submit answer',
+      data: null,
+    };
+  }
+}
+
+/**
+ * T113: Fetch the next available question for a session
+ * Used for polling if pre-fetch didn't complete in time
+ */
+export async function fetchNextQuestion(sessionId: string) {
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return { error: 'Unauthorized', data: null };
+    }
+
+    // Get current interview state
+    const state = await getInterviewState(sessionId);
+
+    return { error: null, data: state };
+  } catch (error) {
+    console.error('Fetch next question error:', error);
+    return {
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Failed to fetch next question',
       data: null,
     };
   }
