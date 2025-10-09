@@ -8,7 +8,9 @@ import { Loader2, Send, Mic, Type, AccessibilityIcon } from 'lucide-react';
 import {
   initializeInterview,
   submitInterviewAnswer,
-} from '@/app/interview/[id]/actions';
+  getResumeData,
+  autoSaveSession,
+} from '@/app/interview/[id]/actions'; // T111: Including server actions for resume
 import type { Question, Turn, Timing } from '@/lib/schema';
 import { toast } from 'sonner';
 import { QuestionBubble } from '../QuestionBubble';
@@ -20,7 +22,6 @@ import { Label } from '@/components/ui/label';
 import { UpgradeDialog } from '../UpgradeDialog';
 import { useQuestionReveal } from '@/hooks/useQuestionReveal';
 import { trackEvent } from '@/lib/analytics'; // T110: Analytics tracking
-import { getResumeData, autoSaveSession } from '@/lib/session'; // T111: Session resume
 
 interface InterviewUIProps {
   sessionId: string;
@@ -96,15 +97,18 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
       // T111: Check if interview can be resumed before initializing
       if (!resumeChecked) {
         try {
-          const resumeData = await getResumeData(sessionId);
+          const result = await getResumeData(sessionId);
           setResumeChecked(true);
-          setCanResume(resumeData.canResume);
-          setResumeMessage(resumeData.message);
 
-          if (resumeData.canResume) {
-            toast.info('Interview resumed', {
-              description: resumeData.message,
-            });
+          if (result.data) {
+            setCanResume(result.data.canResume);
+            setResumeMessage(result.data.message);
+
+            if (result.data.canResume) {
+              toast.info('Interview resumed', {
+                description: result.data.message,
+              });
+            }
           }
         } catch (error) {
           console.error('[T111] Resume check failed:', error);

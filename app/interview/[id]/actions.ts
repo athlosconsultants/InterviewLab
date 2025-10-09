@@ -7,6 +7,10 @@ import {
   getInterviewState,
   generateIntro,
 } from '@/lib/interview';
+import {
+  getResumeData as getResumeDataServer,
+  autoSaveSession as autoSaveSessionServer,
+} from '@/lib/session'; // T111: Server-side resume functions
 
 /**
  * Server action to initialize the interview and get the first question.
@@ -203,6 +207,58 @@ export async function fetchNextQuestion(sessionId: string) {
           ? error.message
           : 'Failed to fetch next question',
       data: null,
+    };
+  }
+}
+
+/**
+ * T111: Server action to check if an interview can be resumed
+ */
+export async function getResumeData(sessionId: string) {
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return { error: 'Unauthorized', data: null };
+    }
+
+    const resumeData = await getResumeDataServer(sessionId);
+    return { error: null, data: resumeData };
+  } catch (error) {
+    console.error('Get resume data error:', error);
+    return {
+      error:
+        error instanceof Error ? error.message : 'Failed to get resume data',
+      data: null,
+    };
+  }
+}
+
+/**
+ * T111: Server action to auto-save session progress
+ */
+export async function autoSaveSession(sessionId: string) {
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return { error: 'Unauthorized', success: false };
+    }
+
+    await autoSaveSessionServer(sessionId);
+    return { error: null, success: true };
+  } catch (error) {
+    console.error('Auto-save session error:', error);
+    return {
+      error:
+        error instanceof Error ? error.message : 'Failed to auto-save session',
+      success: false,
     };
   }
 }
