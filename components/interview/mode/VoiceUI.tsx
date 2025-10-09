@@ -104,7 +104,7 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
     }
   }, [introText, turns.length, isLoading]);
 
-  // Auto-play TTS for new questions
+  // Auto-play TTS for new questions (bridge shown visually, not spoken)
   useEffect(() => {
     const currentQuestion = turns.find(
       (t) => t.id === currentTurnId && !t.answer_text
@@ -112,19 +112,10 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
 
     if (currentQuestion && !isLoading) {
       const questionText = currentQuestion.question.text;
-      const bridgeText = currentQuestion.bridge_text;
 
-      // Play bridge first if it exists
-      if (bridgeText) {
-        playTextToSpeech(bridgeText, 'bridge', () => {
-          // After bridge, play question
-          setTimeout(() => {
-            playQuestionTTS(currentQuestion.id, questionText);
-          }, 500);
-        });
-      } else {
-        playQuestionTTS(currentQuestion.id, questionText);
-      }
+      // Don't play bridge audio - it will be shown visually
+      // Just play the question directly
+      playQuestionTTS(currentQuestion.id, questionText);
     }
   }, [currentTurnId, turns, isLoading]);
 
@@ -403,6 +394,9 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
     (t) => t.id === currentTurnId && !t.answer_text
   );
 
+  // Get the bridge text for the current question (if any)
+  const currentBridge = currentQuestion?.bridge_text;
+
   return (
     <>
       <div className="mx-auto w-full max-w-4xl p-4 space-y-8">
@@ -426,6 +420,17 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
             </div>
           </div>
         </div>
+
+        {/* Bridge Text - shown as visual thought bubble between questions */}
+        {currentBridge && !isSubmitting && (
+          <div className="flex justify-center">
+            <div className="max-w-md rounded-lg bg-muted/50 p-4 border-l-4 border-primary/40">
+              <p className="text-sm italic text-muted-foreground leading-relaxed">
+                {currentBridge}
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Voice Orb */}
         <div className="flex flex-col items-center justify-center py-12">
