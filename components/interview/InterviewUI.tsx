@@ -18,6 +18,7 @@ import { AudioRecorder } from './AudioRecorder';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { UpgradeDialog } from './UpgradeDialog';
+import { useQuestionReveal } from '@/hooks/useQuestionReveal';
 
 interface InterviewUIProps {
   sessionId: string;
@@ -38,7 +39,6 @@ export function InterviewUI({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [questionNumber, setQuestionNumber] = useState(1);
   const [totalQuestions, setTotalQuestions] = useState(3);
-  const [replayCount, setReplayCount] = useState(0);
   const [replayCap, setReplayCap] = useState(2);
   const [timerSec, setTimerSec] = useState(90);
   const [answerMode, setAnswerMode] = useState<'text' | 'audio'>('text');
@@ -51,12 +51,22 @@ export function InterviewUI({
   const [stagesPlanned, setStagesPlanned] = useState(1);
   const [stageName, setStageName] = useState<string | null>(null);
 
-  // T93: Question Reveal System
-  const [countdown, setCountdown] = useState<number | null>(null); // 3, 2, 1, or null
-  const [questionVisible, setQuestionVisible] = useState(false);
-
   // T94: Analyzing Answer transition state
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+
+  // T100: Question Reveal System
+  const {
+    countdown,
+    questionVisible,
+    revealCount,
+    maxReveals,
+    canReplay,
+    handleReplay: handleRevealReplay,
+    remainingTime,
+  } = useQuestionReveal({
+    currentTurnId,
+    accessibilityMode,
+  });
 
   // Initialize interview on mount
   useEffect(() => {
@@ -117,45 +127,6 @@ export function InterviewUI({
 
     init();
   }, [sessionId]);
-
-  // T93: Countdown and Reveal Logic for Current Question
-  useEffect(() => {
-    if (!currentTurnId || accessibilityMode) {
-      // Skip reveal logic if no question or accessibility mode is on
-      return;
-    }
-
-    // Start countdown: 3 -> 2 -> 1 -> reveal
-    setCountdown(3);
-    setQuestionVisible(false);
-    setReplayCount(0); // Reset replay count for new question
-
-    const countdownTimers: NodeJS.Timeout[] = [];
-
-    // Countdown: 3 seconds
-    countdownTimers.push(setTimeout(() => setCountdown(2), 1000));
-    countdownTimers.push(setTimeout(() => setCountdown(1), 2000));
-    countdownTimers.push(
-      setTimeout(() => {
-        setCountdown(null);
-        setQuestionVisible(true);
-      }, 3000)
-    );
-
-    // Auto-hide question after 15 seconds (3s countdown + 15s reveal = 18s total)
-    countdownTimers.push(
-      setTimeout(() => {
-        setQuestionVisible(false);
-        toast.info('Question hidden', {
-          description: 'Use Replay to review (2× remaining)',
-        });
-      }, 18000) // 3s countdown + 15s reveal
-    );
-
-    return () => {
-      countdownTimers.forEach((timer) => clearTimeout(timer));
-    };
-  }, [currentTurnId, accessibilityMode]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -226,13 +197,13 @@ export function InterviewUI({
         toast.success('Transcribed');
       }
 
-      // Submit the answer (including replay count for scoring)
+      // Submit the answer (including reveal count for scoring)
       const result = await submitInterviewAnswer({
         sessionId,
         turnId: currentTurnId,
         answerText: finalAnswer,
         audioKey,
-        replayCount,
+        replayCount: revealCount, // T100: Track reveal count for composure scoring
       });
 
       if (result.error) {
@@ -310,7 +281,7 @@ export function InterviewUI({
         // Clear answer and reset state
         setAnswer('');
         setAudioBlob(null);
-        setReplayCount(0); // Reset replay count for next question
+        // Note: Reveal count is automatically reset by useQuestionReveal hook
       }
     } catch (error) {
       console.error('Submit error:', error);
@@ -322,25 +293,9 @@ export function InterviewUI({
     }
   };
 
-  // T93: Merged Replay - handles both TTS audio replay and text reveal
+  // T100: Replay handler - extends reveal window
   const handleReplay = () => {
-    if (replayCount >= replayCap) {
-      toast.error('No replays left');
-      return;
-    }
-
-    // Reveal the question text for 5 seconds
-    setQuestionVisible(true);
-    setReplayCount((prev) => prev + 1);
-
-    toast.info(`Replay ${replayCount + 1} of ${replayCap}`, {
-      description: 'Hiding in 5 seconds',
-    });
-
-    // Hide again after 5 seconds
-    setTimeout(() => {
-      setQuestionVisible(false);
-    }, 5000);
+    handleRevealReplay();
   };
 
   if (isLoading) {
@@ -513,10 +468,10 @@ export function InterviewUI({
           {/* Timer and Replay Controls */}
           <div className="mb-4 flex items-center justify-between">
             <ReplayButton
-              replayCount={replayCount}
-              replayCap={replayCap}
+              replayCount={revealCount}
+              replayCap={maxReveals}
               onReplay={handleReplay}
-              disabled={isSubmitting}
+              disabled={isSubmitting || !canReplay}
             />
             {!accessibilityMode && (
               <TimerRing
