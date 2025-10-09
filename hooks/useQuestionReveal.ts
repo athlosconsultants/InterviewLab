@@ -51,76 +51,6 @@ export function useQuestionReveal({
     }
   }, []);
 
-  // Start countdown and reveal sequence
-  const startRevealSequence = useCallback(
-    (duration: number) => {
-      clearAllTimers();
-
-      // 3-2-1 countdown
-      setCountdown(3);
-      setQuestionVisible(false);
-
-      timersRef.current.push(setTimeout(() => setCountdown(2), 1000));
-      timersRef.current.push(setTimeout(() => setCountdown(1), 2000));
-      timersRef.current.push(
-        setTimeout(() => {
-          setCountdown(null);
-          setQuestionVisible(true);
-
-          // Set reveal end time
-          const endTime = Date.now() + duration;
-          revealEndTimeRef.current = endTime;
-
-          // Start tick interval to update remaining time
-          tickIntervalRef.current = setInterval(() => {
-            const now = Date.now();
-            const remaining = Math.max(0, Math.ceil((endTime - now) / 1000));
-            setRemainingTime(remaining);
-
-            if (remaining === 0) {
-              if (tickIntervalRef.current) {
-                clearInterval(tickIntervalRef.current);
-                tickIntervalRef.current = null;
-              }
-            }
-          }, 100); // Update every 100ms for smooth countdown
-
-          // Emit reveal_started event
-          if (typeof window !== 'undefined') {
-            window.dispatchEvent(
-              new CustomEvent('reveal_started', {
-                detail: { turnId: currentTurnId, duration },
-              })
-            );
-          }
-        }, COUNTDOWN_DURATION)
-      );
-
-      // Auto-hide after reveal duration
-      timersRef.current.push(
-        setTimeout(() => {
-          setQuestionVisible(false);
-          setRemainingTime(null);
-          revealEndTimeRef.current = null;
-
-          toast.info('Question hidden', {
-            description: `Use Replay to review (${MAX_REPLAYS - revealCount}× remaining)`,
-          });
-
-          // Emit reveal_hidden event
-          if (typeof window !== 'undefined') {
-            window.dispatchEvent(
-              new CustomEvent('reveal_hidden', {
-                detail: { turnId: currentTurnId },
-              })
-            );
-          }
-        }, COUNTDOWN_DURATION + duration)
-      );
-    },
-    [clearAllTimers, currentTurnId, revealCount]
-  );
-
   // Handle replay (extends current window)
   const handleReplay = useCallback(() => {
     // Check if we've exceeded replay limit (belt and suspenders with button disable)
@@ -251,13 +181,83 @@ export function useQuestionReveal({
 
     // Reset state for new question
     setRevealCount(0);
-    startRevealSequence(INITIAL_REVEAL_DURATION);
+
+    // Start reveal sequence inline (avoid circular dependency)
+    const duration = INITIAL_REVEAL_DURATION;
+    setCountdown(3);
+    setQuestionVisible(false);
+    revealEndTimeRef.current = null;
+
+    // Countdown: 3, 2, 1
+    timersRef.current.push(setTimeout(() => setCountdown(2), 1000));
+    timersRef.current.push(setTimeout(() => setCountdown(1), 2000));
+
+    // Reveal question after countdown
+    timersRef.current.push(
+      setTimeout(() => {
+        setCountdown(null);
+        setQuestionVisible(true);
+
+        // Set reveal end time
+        const endTime = Date.now() + duration;
+        revealEndTimeRef.current = endTime;
+
+        // Start tick interval to update remaining time
+        tickIntervalRef.current = setInterval(() => {
+          const now = Date.now();
+          const remaining = Math.max(0, Math.ceil((endTime - now) / 1000));
+          setRemainingTime(remaining);
+
+          if (remaining === 0) {
+            if (tickIntervalRef.current) {
+              clearInterval(tickIntervalRef.current);
+              tickIntervalRef.current = null;
+            }
+          }
+        }, 100);
+
+        // Emit reveal_started event
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(
+            new CustomEvent('reveal_started', {
+              detail: { turnId: currentTurnId, duration },
+            })
+          );
+        }
+      }, COUNTDOWN_DURATION)
+    );
+
+    // Auto-hide after reveal duration
+    timersRef.current.push(
+      setTimeout(() => {
+        setQuestionVisible(false);
+        setRemainingTime(null);
+        revealEndTimeRef.current = null;
+
+        const remaining = MAX_REPLAYS;
+        toast.info('Question hidden', {
+          description:
+            remaining > 0
+              ? `Use Replay to review (${remaining}× remaining)`
+              : 'No replays remaining',
+        });
+
+        // Emit reveal_hidden event
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(
+            new CustomEvent('reveal_hidden', {
+              detail: { turnId: currentTurnId },
+            })
+          );
+        }
+      }, COUNTDOWN_DURATION + duration)
+    );
 
     // Cleanup on unmount or turn change
     return () => {
       clearAllTimers();
     };
-  }, [currentTurnId, accessibilityMode, startRevealSequence, clearAllTimers]);
+  }, [currentTurnId, accessibilityMode, clearAllTimers]);
 
   // Show question immediately in accessibility mode
   useEffect(() => {
