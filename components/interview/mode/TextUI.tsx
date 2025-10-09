@@ -19,6 +19,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { UpgradeDialog } from '../UpgradeDialog';
 import { useQuestionReveal } from '@/hooks/useQuestionReveal';
+import { trackEvent } from '@/lib/analytics'; // T110: Analytics tracking
 
 interface InterviewUIProps {
   sessionId: string;
@@ -68,6 +69,17 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
   } = useQuestionReveal({
     currentTurnId: isCurrentQuestionSpecial ? null : currentTurnId, // Disable for small talk/confirmation
     accessibilityMode,
+    // T110: Track when reveal window expires
+    onRevealExpired: () => {
+      if (currentTurnId) {
+        trackEvent('reveal_elapsed', sessionId, {
+          mode: 'text',
+          turn_id: currentTurnId,
+          reveal_count: revealCount + 1,
+          question_number: questionNumber,
+        });
+      }
+    },
   });
 
   // Initialize interview on mount
@@ -261,6 +273,18 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
             ((currentQuestionType as any).turn_type === 'small_talk' ||
               (currentQuestionType as any).turn_type === 'confirmation');
 
+          // T110: Track proceed confirmation
+          if (
+            currentQuestionType &&
+            (currentQuestionType as any).turn_type === 'confirmation'
+          ) {
+            trackEvent('proceed_confirmed', sessionId, {
+              mode: 'text',
+              turn_id: currentTurnId,
+              question_number: questionNumber,
+            });
+          }
+
           if (!isSpecialTurn) {
             toast.info('Analyzing...');
           }
@@ -381,8 +405,29 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
 
   // T100: Replay handler - extends reveal window
   const handleReplay = () => {
+    // T110: Track show again usage
+    trackEvent('show_again_used', sessionId, {
+      mode: 'text',
+      turn_id: currentTurnId,
+      replay_count: revealCount + 1,
+      question_number: questionNumber,
+    });
     handleRevealReplay();
   };
+
+  // T110: Track when small talk or confirmation turns are shown
+  useEffect(() => {
+    if (currentQuestion) {
+      const turnType = (currentQuestion as any).turn_type;
+      if (turnType === 'small_talk') {
+        trackEvent('small_talk_shown', sessionId, {
+          mode: 'text',
+          turn_id: currentQuestion.id,
+          question_number: questionNumber,
+        });
+      }
+    }
+  }, [currentQuestion?.id, sessionId, questionNumber]);
 
   if (isLoading) {
     return (

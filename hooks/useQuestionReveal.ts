@@ -10,6 +10,7 @@ interface UseQuestionRevealOptions {
   currentTurnId: string | null;
   accessibilityMode: boolean;
   onRevealCountChange?: (count: number) => void;
+  onRevealExpired?: () => void; // T110: Callback for when reveal window expires
 }
 
 interface UseQuestionRevealReturn {
@@ -31,6 +32,7 @@ export function useQuestionReveal({
   currentTurnId,
   accessibilityMode,
   onRevealCountChange,
+  onRevealExpired,
 }: UseQuestionRevealOptions): UseQuestionRevealReturn {
   const [countdown, setCountdown] = useState<number | null>(null);
   const [questionVisible, setQuestionVisible] = useState(false);
@@ -95,6 +97,9 @@ export function useQuestionReveal({
       setQuestionVisible(false);
       setRemainingTime(null);
       revealEndTimeRef.current = null;
+
+      // T110: Track reveal elapsed
+      onRevealExpired?.();
 
       const remaining = MAX_REPLAYS - (revealCount + 1); // Calculate remaining after this replay
       toast.info('Question hidden', {
@@ -211,6 +216,9 @@ export function useQuestionReveal({
         setQuestionVisible(false);
         setRemainingTime(null);
         revealEndTimeRef.current = null;
+
+        // T110: Track reveal elapsed
+        onRevealExpired?.();
 
         const remaining = MAX_REPLAYS;
         toast.info('Question hidden', {

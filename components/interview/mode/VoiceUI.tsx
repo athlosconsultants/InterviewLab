@@ -14,6 +14,7 @@ import { toast } from 'sonner';
 import { VoiceOrb } from '../VoiceOrb';
 import { AudioRecorder } from '../AudioRecorder';
 import { UpgradeDialog } from '../UpgradeDialog';
+import { trackEvent } from '@/lib/analytics'; // T110: Analytics tracking
 
 interface VoiceUIProps {
   sessionId: string;
@@ -104,6 +105,21 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
 
   // Track if intro has been played to prevent double playback on Q1
   const [introPlayed, setIntroPlayed] = useState(false);
+
+  // T110: Track when small talk is shown in voice mode
+  useEffect(() => {
+    const currentQuestion = turns.find((t) => !t.answer_text);
+    if (
+      currentQuestion &&
+      (currentQuestion as any).turn_type === 'small_talk'
+    ) {
+      trackEvent('small_talk_shown', sessionId, {
+        mode: 'voice',
+        turn_id: currentQuestion.id,
+        question_number: turns.filter((t) => !t.answer_text).length,
+      });
+    }
+  }, [turns, sessionId]);
 
   // Auto-play TTS for intro, then play first question after completion
   useEffect(() => {
@@ -210,6 +226,13 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
       audio.onended = () => {
         setOrbState('idle');
         setIsPlayingAudio(false);
+
+        // T110: Track successful orb autoplay completion
+        trackEvent('orb_autoplay_ok', sessionId, {
+          mode: 'voice',
+          turn_id: turnId,
+          question_number: turns.filter((t) => !t.answer_text).length + 1,
+        });
       };
 
       audio.onerror = () => {
@@ -319,6 +342,16 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
 
           finalAnswer = transcribeData.text;
           toast.success('Transcribed');
+        }
+
+        // T110: Track proceed confirmation in voice mode
+        const currentTurn = turns.find((t) => t.id === currentTurnId);
+        if (currentTurn && (currentTurn as any).turn_type === 'confirmation') {
+          trackEvent('proceed_confirmed', sessionId, {
+            mode: 'voice',
+            turn_id: currentTurnId,
+            question_number: turns.filter((t) => !t.answer_text).length,
+          });
         }
 
         // Submit the answer (T108: include replay count in voice mode)
