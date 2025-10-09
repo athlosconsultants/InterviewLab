@@ -305,6 +305,21 @@ export interface ResumeProgressState {
   last_save_timestamp: string;
 }
 
+// T112: Difficulty curve tracking
+export interface DifficultyAdjustment {
+  turn_index: number;
+  question_number: number;
+  previous_difficulty: 'easy' | 'medium' | 'hard';
+  new_difficulty: 'easy' | 'medium' | 'hard';
+  adjustment_reason:
+    | 'strong_answer'
+    | 'weak_answer'
+    | 'baseline'
+    | 'stage_progression';
+  answer_quality?: 'strong' | 'medium' | 'weak';
+  timestamp: string;
+}
+
 // Session type (from sessions table)
 export interface Session {
   id: string;
@@ -326,6 +341,7 @@ export interface Session {
   turn_index: number; // T111: Current turn index for resume
   progress_state: ResumeProgressState | Json | null; // T111: Resume state data
   last_activity: string; // T111: Last activity timestamp
+  difficulty_curve: DifficultyAdjustment[] | Json | null; // T112: Difficulty adjustment tracking
   created_at: string;
   updated_at: string;
 }

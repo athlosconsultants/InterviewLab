@@ -254,3 +254,6 @@ export function scoreToGrade(score: number): 'A' | 'B' | 'C' | 'D' | 'F' {
   if (score >= 60) return 'D';
   return 'F';
 }
+
+// T112: Adaptive difficulty functions moved to lib/adaptive-difficulty.ts
+// to avoid server-side dependency conflicts

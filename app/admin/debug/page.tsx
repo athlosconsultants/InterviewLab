@@ -209,6 +209,81 @@ export default function AdminDebugPage() {
               </div>
             </div>
 
+            {/* T112: Difficulty Curve */}
+            {sessionData.session.difficulty_curve &&
+              sessionData.session.difficulty_curve.length > 0 && (
+                <div className="bg-white rounded-lg shadow p-6">
+                  <h2 className="text-xl font-semibold mb-4">
+                    Difficulty Curve (T112)
+                  </h2>
+                  <div className="space-y-3">
+                    {sessionData.session.difficulty_curve.map(
+                      (adjustment: any, index: number) => (
+                        <div
+                          key={index}
+                          className="flex items-center justify-between border-b pb-2 last:border-b-0"
+                        >
+                          <div className="flex items-center space-x-4">
+                            <span className="font-medium">
+                              Q{adjustment.question_number}
+                            </span>
+                            <span className="text-sm text-gray-500">
+                              {new Date(
+                                adjustment.timestamp
+                              ).toLocaleTimeString()}
+                            </span>
+                          </div>
+                          <div className="flex items-center space-x-4">
+                            <div className="flex items-center space-x-2">
+                              <span
+                                className={`px-2 py-1 text-xs rounded ${
+                                  adjustment.previous_difficulty === 'easy'
+                                    ? 'bg-green-100 text-green-800'
+                                    : adjustment.previous_difficulty ===
+                                        'medium'
+                                      ? 'bg-yellow-100 text-yellow-800'
+                                      : 'bg-red-100 text-red-800'
+                                }`}
+                              >
+                                {adjustment.previous_difficulty}
+                              </span>
+                              <span>→</span>
+                              <span
+                                className={`px-2 py-1 text-xs rounded ${
+                                  adjustment.new_difficulty === 'easy'
+                                    ? 'bg-green-100 text-green-800'
+                                    : adjustment.new_difficulty === 'medium'
+                                      ? 'bg-yellow-100 text-yellow-800'
+                                      : 'bg-red-100 text-red-800'
+                                }`}
+                              >
+                                {adjustment.new_difficulty}
+                              </span>
+                            </div>
+                            {adjustment.answer_quality && (
+                              <span
+                                className={`px-2 py-1 text-xs rounded ${
+                                  adjustment.answer_quality === 'strong'
+                                    ? 'bg-blue-100 text-blue-800'
+                                    : adjustment.answer_quality === 'medium'
+                                      ? 'bg-gray-100 text-gray-800'
+                                      : 'bg-orange-100 text-orange-800'
+                                }`}
+                              >
+                                {adjustment.answer_quality} answer
+                              </span>
+                            )}
+                            <span className="text-xs text-gray-500 capitalize">
+                              {adjustment.adjustment_reason.replace('_', ' ')}
+                            </span>
+                          </div>
+                        </div>
+                      )
+                    )}
+                  </div>
+                </div>
+              )}
+
             {/* Turns Timeline */}
             <div className="bg-white rounded-lg shadow p-6">
               <h2 className="text-xl font-semibold mb-4">Turns Timeline</h2>

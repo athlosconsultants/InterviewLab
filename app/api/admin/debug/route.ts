@@ -51,6 +51,7 @@ export async function GET(request: NextRequest) {
         plan_tier: (session as any).plan_tier,
         current_stage: (session as any).current_stage,
         stages_planned: (session as any).stages_planned,
+        difficulty_curve: (session as any).difficulty_curve || null, // T112: Include difficulty curve
         created_at: session.created_at,
         updated_at: session.updated_at,
       },

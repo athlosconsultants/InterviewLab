@@ -1,11 +1,16 @@
 import { openai, MODELS } from './openai';
 import { createClient } from './supabase-server';
 import { saveSessionProgress } from './session'; // T111: Session resume functionality
+import {
+  assessAnswerQuality,
+  getAdaptiveDifficulty,
+} from './adaptive-difficulty'; // T112: Adaptive difficulty
 import type {
   ResearchSnapshot,
   Question,
   AnswerDigest,
   PlanTier,
+  DifficultyAdjustment,
 } from './schema';
 
 /**
@@ -201,6 +206,7 @@ export async function generateQuestion(params: {
   stagesPlanned?: number;
   questionsInStage?: number;
   mode?: 'text' | 'voice'; // T109: Mode-aware question generation
+  targetDifficulty?: 'easy' | 'medium' | 'hard'; // T112: Adaptive difficulty
 }): Promise<Question> {
   const {
     researchSnapshot,
@@ -211,12 +217,15 @@ export async function generateQuestion(params: {
     stagesPlanned = 1,
     questionsInStage = 0,
     mode = 'text', // T109: Default to text mode if not specified
+    targetDifficulty, // T112: Adaptive difficulty (optional)
   } = params;
 
   // T90: Calculate interview progress for progressive difficulty
   const progress = questionNumber / totalQuestions;
-  const targetDifficulty =
-    progress < 0.33 ? 'easy' : progress < 0.66 ? 'medium' : 'hard';
+  // T112: Use adaptive difficulty if provided, otherwise use original progression
+  const finalDifficulty =
+    targetDifficulty ||
+    (progress < 0.33 ? 'easy' : progress < 0.66 ? 'medium' : 'hard');
 
   // T91: Get current stage information
   const stageName = getStageName(researchSnapshot, currentStage);
@@ -362,7 +371,7 @@ ${
 `
 }
 
-**Progressive Difficulty (Target: ${targetDifficulty}):**
+**Progressive Difficulty (Target: ${finalDifficulty}):**
 - Questions 1-${Math.ceil(totalQuestions / 3)}: Easy - broad, experience-based, allow candidate to warm up
 - Questions ${Math.ceil(totalQuestions / 3) + 1}-${Math.ceil((totalQuestions * 2) / 3)}: Medium - specific scenarios, problem-solving, trade-offs
 - Questions ${Math.ceil((totalQuestions * 2) / 3) + 1}-${totalQuestions}: Hard - complex situations, judgment calls, leadership challenges
@@ -380,7 +389,7 @@ Return ONLY valid JSON with no additional text:
 {
   "text": "The interview question text",
   "category": "${isMultiStage ? stageCategory : 'technical|behavioral|situational'}",
-  "difficulty": "${targetDifficulty}",
+  "difficulty": "${finalDifficulty}",
   "time_limit": 90,
   "follow_up": ${previousTurns.length > 0 ? 'true' : 'false'}
 }`;
@@ -573,6 +582,7 @@ export async function startInterview(sessionId: string) {
       stagesPlanned, // T91: Pass stage info
       questionsInStage: 0, // T91: First question in stage
       mode, // T109: Pass interview mode for mode-aware prompts
+      targetDifficulty: 'easy', // T112: Start with easy difficulty
     });
 
     console.log(
@@ -599,10 +609,23 @@ export async function startInterview(sessionId: string) {
       throw new Error('Failed to create interview turn');
     }
 
-    // Update session status to running
+    // T112: Initialize difficulty curve with first question
+    const initialDifficultyEntry: DifficultyAdjustment = {
+      turn_index: 1,
+      question_number: 1,
+      previous_difficulty: 'medium', // Baseline
+      new_difficulty: 'easy',
+      adjustment_reason: 'baseline',
+      timestamp: new Date().toISOString(),
+    };
+
+    // Update session status to running and initialize difficulty curve
     await supabase
       .from('sessions')
-      .update({ status: 'running' })
+      .update({
+        status: 'running',
+        difficulty_curve: [initialDifficultyEntry], // T112: Initialize curve
+      })
       .eq('id', sessionId);
 
     return {
@@ -871,6 +894,60 @@ export async function submitAnswer(params: {
       .eq('id', sessionId);
   }
 
+  // T112: Assess answer quality and determine adaptive difficulty
+  let nextDifficulty: 'easy' | 'medium' | 'hard' | undefined;
+  let difficultyAdjustment: DifficultyAdjustment | null = null;
+
+  try {
+    // Assess the quality of the current answer
+    const answerQuality = await assessAnswerQuality(
+      (turn as any).question,
+      answerText,
+      researchSnapshot
+    );
+
+    // Get current question's difficulty (default to medium if not specified)
+    const currentDifficulty =
+      ((turn as any).question?.difficulty as 'easy' | 'medium' | 'hard') ||
+      'medium';
+
+    // Determine adaptive difficulty for next question
+    const adaptiveResult = getAdaptiveDifficulty(
+      currentDifficulty,
+      answerQuality,
+      actualQuestions.length + 1, // Next question number
+      questionCap
+    );
+
+    nextDifficulty = adaptiveResult.difficulty;
+
+    // Create difficulty adjustment record
+    difficultyAdjustment = {
+      turn_index: actualQuestions.length + 1,
+      question_number: actualQuestions.length + 1,
+      previous_difficulty: currentDifficulty,
+      new_difficulty: adaptiveResult.difficulty,
+      adjustment_reason:
+        answerQuality === 'strong'
+          ? 'strong_answer'
+          : answerQuality === 'weak'
+            ? 'weak_answer'
+            : 'baseline',
+      answer_quality: answerQuality,
+      timestamp: new Date().toISOString(),
+    };
+
+    console.log(
+      `[T112] Answer quality: ${answerQuality}, Difficulty: ${currentDifficulty} → ${nextDifficulty} (${adaptiveResult.reason})`
+    );
+  } catch (error) {
+    console.error(
+      '[T112] Failed to assess answer quality, using default difficulty:',
+      error
+    );
+    // Continue without adaptive difficulty if assessment fails
+  }
+
   // Generate next question (T91: with stage information, T106: using actualQuestions count)
   // NOTE: Pass allTurns (including small talk) for context, but use actualQuestions for counting
   const nextQuestion = await generateQuestion({
@@ -882,6 +959,7 @@ export async function submitAnswer(params: {
     stagesPlanned,
     questionsInStage: newStage !== currentStage ? 0 : questionsInCurrentStage,
     mode, // T109: Pass interview mode for mode-aware prompts
+    targetDifficulty: nextDifficulty, // T112: Adaptive difficulty
   });
 
   // T89: Generate bridge text referencing the previous answer (paid tier only)
@@ -913,6 +991,35 @@ export async function submitAnswer(params: {
 
   if (nextTurnError) {
     throw new Error('Failed to create next turn');
+  }
+
+  // T112: Save difficulty curve adjustment to session
+  if (difficultyAdjustment) {
+    try {
+      // Get current difficulty curve
+      const { data: currentSession } = await supabase
+        .from('sessions')
+        .select('difficulty_curve')
+        .eq('id', sessionId)
+        .single();
+
+      const currentCurve =
+        (currentSession?.difficulty_curve as DifficultyAdjustment[]) || [];
+      const updatedCurve = [...currentCurve, difficultyAdjustment];
+
+      // Update session with new difficulty curve
+      await supabase
+        .from('sessions')
+        .update({ difficulty_curve: updatedCurve })
+        .eq('id', sessionId);
+
+      console.log(
+        `[T112] Difficulty curve updated: ${updatedCurve.length} adjustments tracked`
+      );
+    } catch (error) {
+      console.error('[T112] Failed to save difficulty curve:', error);
+      // Continue without saving curve - don't break the flow
+    }
   }
 
   return {
