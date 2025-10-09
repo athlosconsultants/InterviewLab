@@ -839,18 +839,19 @@ The candidate just answered the following question:
 Their response was:
 "${lastAnswer.substring(0, 500)}${lastAnswer.length > 500 ? '...' : ''}"
 
-Generate a brief, natural conversational bridge (1-2 sentences) that:
+Generate a brief, natural conversational bridge (1-2 sentences maximum) that:
 1. Acknowledges or reflects on something specific from their answer
 2. Creates a smooth transition to the next question
 3. Maintains a ${tone} tone
 4. Sounds like a real interviewer would speak
+5. IMPORTANT: Do NOT include a question. This is just a contextual comment that will lead into the next question.
 
 Examples of good bridges:
-- "That's an interesting approach to stakeholder management. Building on that experience..."
-- "I appreciate your insight on technical debt. Let's explore another aspect of your work..."
-- "Your experience with cross-functional teams sounds valuable. Moving forward..."
+- "That's an interesting approach to stakeholder management."
+- "I appreciate your insight on technical debt and the trade-offs you mentioned."
+- "Your experience with cross-functional teams sounds valuable."
 
-Return ONLY the bridge text, no quotes, no additional formatting. Keep it concise and conversational.`;
+Return ONLY the bridge text, no quotes, no additional formatting. Keep it concise and conversational. Do not end with a question.`;
 
   try {
     const response = await openai.chat.completions.create({

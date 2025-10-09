@@ -104,7 +104,7 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
     }
   }, [introText, turns.length, isLoading]);
 
-  // Auto-play TTS for new questions (bridge shown visually, not spoken)
+  // Auto-play TTS for new questions (merge bridge into spoken question)
   useEffect(() => {
     const currentQuestion = turns.find(
       (t) => t.id === currentTurnId && !t.answer_text
@@ -112,10 +112,14 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
 
     if (currentQuestion && !isLoading) {
       const questionText = currentQuestion.question.text;
+      const bridgeText = currentQuestion.bridge_text;
 
-      // Don't play bridge audio - it will be shown visually
-      // Just play the question directly
-      playQuestionTTS(currentQuestion.id, questionText);
+      // Merge bridge + question for seamless TTS playback
+      const fullText = bridgeText
+        ? `${bridgeText} ${questionText}`
+        : questionText;
+
+      playQuestionTTS(currentQuestion.id, fullText);
     }
   }, [currentTurnId, turns, isLoading]);
 
@@ -394,9 +398,6 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
     (t) => t.id === currentTurnId && !t.answer_text
   );
 
-  // Get the bridge text for the current question (if any)
-  const currentBridge = currentQuestion?.bridge_text;
-
   return (
     <>
       <div className="mx-auto w-full max-w-4xl p-4 space-y-8">
@@ -420,17 +421,6 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
             </div>
           </div>
         </div>
-
-        {/* Bridge Text - shown as visual thought bubble between questions */}
-        {currentBridge && !isSubmitting && (
-          <div className="flex justify-center">
-            <div className="max-w-md rounded-lg bg-muted/50 p-4 border-l-4 border-primary/40">
-              <p className="text-sm italic text-muted-foreground leading-relaxed">
-                {currentBridge}
-              </p>
-            </div>
-          </div>
-        )}
 
         {/* Voice Orb */}
         <div className="flex flex-col items-center justify-center py-12">
