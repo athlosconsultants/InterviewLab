@@ -8,33 +8,82 @@ import type {
 } from './schema';
 
 /**
- * T91: Calculate questions per stage based on total questions and number of stages
+ * T107: Generate variable stage targets for paid sessions
+ * Each stage gets a random target between 5-8 questions
+ */
+function generateStageTargets(
+  numStages: number,
+  planTier: string = 'free'
+): number[] {
+  if (planTier !== 'paid' || numStages <= 1) {
+    // Free tier or single stage: no variability needed
+    return [0]; // Not used for free tier
+  }
+
+  const targets: number[] = [];
+  for (let i = 0; i < numStages; i++) {
+    // T107: Random between 5-8 questions per stage
+    const stageTarget = Math.floor(Math.random() * 4) + 5; // 5, 6, 7, or 8
+    targets.push(stageTarget);
+  }
+
+  console.log(
+    `[T107] Generated stage targets for ${numStages} stages:`,
+    targets
+  );
+  return targets;
+}
+
+/**
+ * T107: Enhanced stage question calculation with variability for paid sessions
+ * For paid sessions: vary questions per stage (5-8), for free sessions: keep simple distribution
  */
 function calculateQuestionsPerStage(
   totalQuestions: number,
-  numStages: number
+  numStages: number,
+  planTier: string = 'free'
 ): number {
-  // Distribute questions evenly across stages (5-10 per stage)
+  if (planTier === 'paid' && numStages > 1) {
+    // T107: For paid multi-stage interviews, use variability (5-8 per stage, max 8)
+    return Math.min(8, Math.max(5, Math.floor(totalQuestions / numStages)));
+  }
+
+  // Original logic for free tier or single stage
   const questionsPerStage = Math.floor(totalQuestions / numStages);
-  // Ensure minimum of 5 questions per stage
   return Math.max(5, questionsPerStage);
 }
 
 /**
- * T91: Determine if we should advance to the next stage
+ * T107: Enhanced stage advancement logic with variable targets
  */
 function shouldAdvanceStage(
   currentStage: number,
   stagesPlanned: number,
   questionsInCurrentStage: number,
-  questionsPerStage: number
+  questionsPerStage: number,
+  stageTargets: number[] | null = null,
+  planTier: string = 'free'
 ): boolean {
   // Don't advance if we're at the last stage
   if (currentStage >= stagesPlanned) {
     return false;
   }
 
-  // Advance when we've reached the target number of questions for this stage
+  // T107: For paid sessions with stage targets, use the specific target for this stage
+  if (
+    planTier === 'paid' &&
+    stageTargets &&
+    Array.isArray(stageTargets) &&
+    currentStage <= stageTargets.length
+  ) {
+    const currentStageTarget = stageTargets[currentStage - 1]; // 0-indexed array
+    console.log(
+      `[T107] Stage ${currentStage} target: ${currentStageTarget}, current: ${questionsInCurrentStage}`
+    );
+    return questionsInCurrentStage >= currentStageTarget;
+  }
+
+  // Original logic: advance when we've reached the target number of questions for this stage
   return questionsInCurrentStage >= questionsPerStage;
 }
 
@@ -170,8 +219,11 @@ export async function generateQuestion(params: {
   const stageName = getStageName(researchSnapshot, currentStage);
   const stages = researchSnapshot.interview_config?.stages || [];
   const isMultiStage = stagesPlanned > 1;
+
+  // T107: Get plan tier from research snapshot or default
+  const planTier = (researchSnapshot as any).plan_tier || 'free';
   const questionsPerStage = isMultiStage
-    ? calculateQuestionsPerStage(totalQuestions, stagesPlanned)
+    ? calculateQuestionsPerStage(totalQuestions, stagesPlanned, planTier)
     : totalQuestions;
 
   // T91: Map stage name to question category
@@ -361,11 +413,11 @@ Return ONLY valid JSON with no additional text:
 export async function startInterview(sessionId: string) {
   const supabase = await createClient();
 
-  // Get the session with research snapshot, stage info, and plan_tier
+  // Get the session with research snapshot, stage info, plan_tier, and stage_targets
   const { data: session, error: sessionError } = await supabase
     .from('sessions')
     .select(
-      'id, user_id, status, research_snapshot, limits, current_stage, stages_planned, plan_tier'
+      'id, user_id, status, research_snapshot, limits, current_stage, stages_planned, plan_tier, stage_targets'
     )
     .eq('id', sessionId)
     .single();
@@ -383,10 +435,27 @@ export async function startInterview(sessionId: string) {
   const currentStage = (session as any).current_stage || 1;
   const stagesPlanned = (session as any).stages_planned || 1;
   const researchSnapshot = session.research_snapshot as ResearchSnapshot;
+  let stageTargets = (session as any).stage_targets as number[] | null;
 
   console.log(
     `[T91] Starting interview - Stage ${currentStage} of ${stagesPlanned}`
   );
+
+  // T107: Generate stage targets for paid multi-stage interviews if not already set
+  if (planTier === 'paid' && stagesPlanned > 1 && !stageTargets) {
+    stageTargets = generateStageTargets(stagesPlanned, planTier);
+
+    // Store the stage targets in the session
+    const { error: updateError } = await supabase
+      .from('sessions')
+      .update({ stage_targets: stageTargets })
+      .eq('id', sessionId);
+
+    if (updateError) {
+      console.error('[T107] Failed to store stage targets:', updateError);
+      // Continue without storing (graceful degradation)
+    }
+  }
 
   // T106: Check if small talk turns already exist
   const { data: existingTurns } = await supabase
@@ -600,7 +669,7 @@ export async function submitAnswer(params: {
   const { data: session, error: sessionError } = await supabase
     .from('sessions')
     .select(
-      '*, research_snapshot, limits, plan_tier, current_stage, stages_planned, conversation_summary'
+      '*, research_snapshot, limits, plan_tier, current_stage, stages_planned, conversation_summary, stage_targets'
     )
     .eq('id', sessionId)
     .single();
@@ -666,6 +735,7 @@ export async function submitAnswer(params: {
   const currentStage = (session as any).current_stage || 1;
   const stagesPlanned = (session as any).stages_planned || 1;
   const researchSnapshot = session.research_snapshot as ResearchSnapshot;
+  const stageTargets = (session as any).stage_targets as number[] | null;
 
   // T106: Filter out small talk and confirmation turns from the question count
   const actualQuestions = allTurns.filter(
@@ -703,7 +773,7 @@ export async function submitAnswer(params: {
   // T91: Calculate questions in current stage
   const questionsPerStage =
     stagesPlanned > 1
-      ? calculateQuestionsPerStage(questionCap, stagesPlanned)
+      ? calculateQuestionsPerStage(questionCap, stagesPlanned, planTier)
       : questionCap;
 
   // T106: Count only actual interview questions (not small talk)
@@ -721,7 +791,9 @@ export async function submitAnswer(params: {
       currentStage,
       stagesPlanned,
       questionsInCurrentStage,
-      questionsPerStage
+      questionsPerStage,
+      stageTargets,
+      planTier
     )
   ) {
     newStage = currentStage + 1;

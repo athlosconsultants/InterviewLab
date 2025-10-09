@@ -71,6 +71,7 @@ export interface Database {
           mode: string;
           stages_planned: number;
           current_stage: number;
+          stage_targets: Json | null; // T107: Array of target question counts per stage [5,7,6,8]
           entitlement_id: string | null;
           intro_text: string | null;
           created_at: string;
@@ -89,6 +90,7 @@ export interface Database {
           mode?: string;
           stages_planned?: number;
           current_stage?: number;
+          stage_targets?: Json | null; // T107: Array of target question counts per stage
           entitlement_id?: string | null;
           intro_text?: string | null;
           created_at?: string;
@@ -107,6 +109,7 @@ export interface Database {
           mode?: string;
           stages_planned?: number;
           current_stage?: number;
+          stage_targets?: Json | null; // T107: Array of target question counts per stage
           entitlement_id?: string | null;
           intro_text?: string | null;
           created_at?: string;
@@ -306,6 +309,7 @@ export interface Session {
   mode: InterviewMode;
   stages_planned: number;
   current_stage: number;
+  stage_targets: number[] | Json | null; // T107: Array of target question counts per stage
   entitlement_id: string | null;
   intro_text: string | null;
   conversation_summary: string | null; // T95: Rolling summary of conversation
