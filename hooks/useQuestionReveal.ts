@@ -123,6 +123,7 @@ export function useQuestionReveal({
 
   // Handle replay (extends current window)
   const handleReplay = useCallback(() => {
+    // Check if we've exceeded replay limit (belt and suspenders with button disable)
     if (revealCount >= MAX_REPLAYS) {
       toast.error('No replays left');
       return;
@@ -158,8 +159,12 @@ export function useQuestionReveal({
         setRemainingTime(null);
         revealEndTimeRef.current = null;
 
+        const remaining = MAX_REPLAYS - revealCount;
         toast.info('Question hidden', {
-          description: `Use Replay to review (${MAX_REPLAYS - revealCount - 1}× remaining)`,
+          description:
+            remaining > 0
+              ? `Use Replay to review (${remaining}× remaining)`
+              : 'No replays remaining',
         });
       }, duration);
 
@@ -181,8 +186,12 @@ export function useQuestionReveal({
           setRemainingTime(null);
           revealEndTimeRef.current = null;
 
+          const remaining = MAX_REPLAYS - revealCount;
           toast.info('Question hidden', {
-            description: `Use Replay to review (${MAX_REPLAYS - revealCount - 1}× remaining)`,
+            description:
+              remaining > 0
+                ? `Use Replay to review (${remaining}× remaining)`
+                : 'No replays remaining',
           });
         }, currentRemaining + REPLAY_EXTENSION);
 
@@ -190,26 +199,37 @@ export function useQuestionReveal({
       }
     }
 
-    const newCount = revealCount + 1;
-    setRevealCount(newCount);
+    // Use functional update to avoid stale closure issues
+    setRevealCount((prev) => {
+      const newCount = prev + 1;
+      console.log(
+        `[T100 Replay] Incrementing replay count: ${prev} -> ${newCount} (max: ${MAX_REPLAYS})`
+      );
 
-    toast.info(`Replay ${newCount} of ${MAX_REPLAYS}`, {
-      description: `+${REPLAY_EXTENSION / 1000}s added`,
+      // Notify parent of count change
+      if (onRevealCountChange) {
+        onRevealCountChange(newCount);
+      }
+
+      // Emit replay_used event
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(
+          new CustomEvent('replay_used', {
+            detail: { turnId: currentTurnId, count: newCount },
+          })
+        );
+      }
+
+      return newCount;
     });
 
-    // Emit replay_used event
-    if (typeof window !== 'undefined') {
-      window.dispatchEvent(
-        new CustomEvent('replay_used', {
-          detail: { turnId: currentTurnId, count: newCount },
-        })
-      );
-    }
-
-    // Notify parent of count change
-    if (onRevealCountChange) {
-      onRevealCountChange(newCount);
-    }
+    // Toast notification (use revealCount + 1 for immediate feedback)
+    const newCount = revealCount + 1;
+    const remaining = MAX_REPLAYS - newCount;
+    toast.info(`Replay ${newCount} of ${MAX_REPLAYS}`, {
+      description:
+        remaining > 0 ? `${remaining} remaining` : 'Final replay used',
+    });
   }, [
     revealCount,
     questionVisible,
