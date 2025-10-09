@@ -49,7 +49,7 @@ export async function initializeInterview(sessionId: string) {
 
     // If there are already turns, just get the current state
     if (existingTurns && existingTurns.length > 0) {
-      const state = await getInterviewState(sessionId);
+      const state = await getInterviewState(sessionId, supabase);
 
       // T91: Extract stage information for existing interview
       const currentStage = (session as any).current_stage || 1;
@@ -80,8 +80,9 @@ export async function initializeInterview(sessionId: string) {
     }
 
     // No turns yet - generate the first question
-    const result = await startInterview(sessionId);
-    const state = await getInterviewState(sessionId);
+    // Pass the authenticated supabase client to avoid session mismatch
+    const result = await startInterview(sessionId, supabase);
+    const state = await getInterviewState(sessionId, supabase);
 
     // T91: Extract stage information
     const currentStage = (session as any).current_stage || 1;
@@ -195,8 +196,8 @@ export async function fetchNextQuestion(sessionId: string) {
       return { error: 'Unauthorized', data: null };
     }
 
-    // Get current interview state
-    const state = await getInterviewState(sessionId);
+    // Get current interview state - pass authenticated client
+    const state = await getInterviewState(sessionId, supabase);
 
     return { error: null, data: state };
   } catch (error) {

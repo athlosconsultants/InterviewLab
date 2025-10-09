@@ -443,8 +443,8 @@ Return ONLY valid JSON with no additional text:
 /**
  * Starts an interview session by generating the first question.
  */
-export async function startInterview(sessionId: string) {
-  const supabase = await createClient();
+export async function startInterview(sessionId: string, supabaseClient?: any) {
+  const supabase = supabaseClient || (await createClient());
 
   // Get the session with research snapshot, stage info, plan_tier, stage_targets, and mode
   const { data: session, error: sessionError } = await supabase
@@ -456,7 +456,14 @@ export async function startInterview(sessionId: string) {
     .single();
 
   if (sessionError || !session) {
-    throw new Error('Session not found');
+    console.error('[startInterview] Session fetch error:', {
+      sessionId,
+      error: sessionError,
+      hasSession: !!session,
+    });
+    throw new Error(
+      `Session not found: ${sessionError?.message || 'No session data'}`
+    );
   }
 
   // Check if session is in correct state
@@ -1036,8 +1043,11 @@ export async function submitAnswer(params: {
 /**
  * Gets the current state of an interview session.
  */
-export async function getInterviewState(sessionId: string) {
-  const supabase = await createClient();
+export async function getInterviewState(
+  sessionId: string,
+  supabaseClient?: any
+) {
+  const supabase = supabaseClient || (await createClient());
 
   const { data: session, error: sessionError } = await supabase
     .from('sessions')
