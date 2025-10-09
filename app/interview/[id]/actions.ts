@@ -29,9 +29,7 @@ export async function initializeInterview(sessionId: string) {
     // T91: Verify session belongs to user (with stage information)
     const { data: session, error: sessionError } = await supabase
       .from('sessions')
-      .select(
-        'id, user_id, status, plan_tier, intro_text, current_stage, stages_planned, research_snapshot'
-      )
+      .select('*')
       .eq('id', sessionId)
       .eq('user_id', user.id)
       .single();
@@ -133,7 +131,7 @@ export async function submitInterviewAnswer(params: {
     // Verify session belongs to user (T85 - fetch plan_tier and limits)
     const { data: session, error: sessionError } = await supabase
       .from('sessions')
-      .select('id, user_id, plan_tier, limits')
+      .select('*')
       .eq('id', params.sessionId)
       .eq('user_id', user.id)
       .single();

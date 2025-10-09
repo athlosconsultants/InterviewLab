@@ -446,12 +446,11 @@ Return ONLY valid JSON with no additional text:
 export async function startInterview(sessionId: string, supabaseClient?: any) {
   const supabase = supabaseClient || (await createClient());
 
-  // Get the session with research snapshot, stage info, plan_tier, stage_targets, and mode
+  // Get the session with research snapshot and stage info
+  // Note: Some columns (stage_targets, mode) may not exist if migrations haven't been run
   const { data: session, error: sessionError } = await supabase
     .from('sessions')
-    .select(
-      'id, user_id, status, research_snapshot, limits, current_stage, stages_planned, plan_tier, stage_targets, mode'
-    )
+    .select('*')
     .eq('id', sessionId)
     .single();
 
@@ -724,9 +723,7 @@ export async function submitAnswer(params: {
   // T91: Get session with stage information (including conversation_summary for T95)
   const { data: session, error: sessionError } = await supabase
     .from('sessions')
-    .select(
-      '*, research_snapshot, limits, plan_tier, current_stage, stages_planned, conversation_summary, stage_targets'
-    )
+    .select('*')
     .eq('id', sessionId)
     .single();
 
@@ -745,7 +742,7 @@ export async function submitAnswer(params: {
   try {
     const allTurnsForProgress = await supabase
       .from('turns')
-      .select('id, answer_text, turn_type')
+      .select('*')
       .eq('session_id', sessionId)
       .order('created_at', { ascending: true });
 
@@ -793,7 +790,7 @@ export async function submitAnswer(params: {
   // T106: Fetch turn_type to exclude small talk from counts
   const { data: allTurns, error: turnsError } = await supabase
     .from('turns')
-    .select('id, question, answer_digest, answer_text, turn_type')
+    .select('*')
     .eq('session_id', sessionId)
     .order('created_at', { ascending: true });
 
@@ -1006,7 +1003,7 @@ export async function submitAnswer(params: {
       // Get current difficulty curve
       const { data: currentSession } = await supabase
         .from('sessions')
-        .select('difficulty_curve')
+        .select('*')
         .eq('id', sessionId)
         .single();
 

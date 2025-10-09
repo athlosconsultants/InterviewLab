@@ -80,7 +80,7 @@ export async function getResumeData(sessionId: string): Promise<{
     // Get session with progress state
     const { data: session, error: sessionError } = await supabase
       .from('sessions')
-      .select('turn_index, progress_state, status, last_activity')
+      .select('*')
       .eq('id', sessionId)
       .single();
 
@@ -179,7 +179,7 @@ export async function autoSaveSession(sessionId: string): Promise<void> {
     // Get current turns
     const { data: turns } = await supabase
       .from('turns')
-      .select('id, answer_text, turn_type')
+      .select('*')
       .eq('session_id', sessionId)
       .order('created_at', { ascending: true });
 
