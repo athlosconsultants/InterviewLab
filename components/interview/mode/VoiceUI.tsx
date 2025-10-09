@@ -97,18 +97,41 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
     loadInterview();
   }, [sessionId, router]);
 
-  // Auto-play TTS for intro
+  // Track if intro has been played to prevent double playback on Q1
+  const [introPlayed, setIntroPlayed] = useState(false);
+
+  // Auto-play TTS for intro, then play first question after completion
   useEffect(() => {
-    if (introText && turns.length === 0 && !isLoading) {
-      playTextToSpeech(introText, 'intro');
+    if (introText && turns.length > 0 && !introPlayed && !isLoading) {
+      const firstQuestion = turns.find((t) => !t.answer_text);
+      if (firstQuestion) {
+        // Play intro first, then chain to first question
+        playTextToSpeech(introText, 'intro', () => {
+          setIntroPlayed(true);
+          const questionText = firstQuestion.question.text;
+          const bridgeText = firstQuestion.bridge_text;
+          const fullText = bridgeText
+            ? `${bridgeText} ${questionText}`
+            : questionText;
+          playQuestionTTS(firstQuestion.id, fullText);
+        });
+      }
     }
-  }, [introText, turns.length, isLoading]);
+  }, [introText, turns, introPlayed, isLoading]);
 
   // Auto-play TTS for new questions (merge bridge into spoken question)
+  // Skip first question if intro exists (it's chained after intro)
   useEffect(() => {
     const currentQuestion = turns.find(
       (t) => t.id === currentTurnId && !t.answer_text
     );
+
+    // Skip if this is the first question and we have an intro (it will be chained)
+    const isFirstQuestion =
+      turns.length > 0 && currentQuestion?.id === turns[0].id;
+    if (isFirstQuestion && introText && !introPlayed) {
+      return;
+    }
 
     if (currentQuestion && !isLoading) {
       const questionText = currentQuestion.question.text;
@@ -121,7 +144,7 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
 
       playQuestionTTS(currentQuestion.id, fullText);
     }
-  }, [currentTurnId, turns, isLoading]);
+  }, [currentTurnId, turns, isLoading, introText, introPlayed]);
 
   const playTextToSpeech = async (
     text: string,
