@@ -17,9 +17,9 @@ test.describe('Interview Flow Tests', () => {
       window.analyticsEvents = [];
       console.log = (...args: any[]) => {
         if (args[0] && args[0].includes('[Analytics]')) {
-          window.analyticsEvents.push(args);
+          window.analyticsEvents?.push(args);
         }
-        window.originalConsoleLog(...args);
+        window.originalConsoleLog?.(...args);
       };
     });
   });
