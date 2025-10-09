@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Clock } from 'lucide-react';
 
 interface TimerRingProps {
@@ -11,6 +11,13 @@ interface TimerRingProps {
 
 export function TimerRing({ timeLimit, onExpire, startTime }: TimerRingProps) {
   const [timeRemaining, setTimeRemaining] = useState(timeLimit);
+  // T102: Use ref for onExpire to prevent re-render issues
+  const onExpireRef = useRef(onExpire);
+
+  // Keep ref updated
+  useEffect(() => {
+    onExpireRef.current = onExpire;
+  }, [onExpire]);
 
   useEffect(() => {
     // Calculate initial time remaining based on start time
@@ -21,8 +28,8 @@ export function TimerRing({ timeLimit, onExpire, startTime }: TimerRingProps) {
 
     setTimeRemaining(remaining);
 
-    if (remaining <= 0 && onExpire) {
-      onExpire();
+    if (remaining <= 0 && onExpireRef.current) {
+      onExpireRef.current();
       return;
     }
 
@@ -36,14 +43,14 @@ export function TimerRing({ timeLimit, onExpire, startTime }: TimerRingProps) {
 
       if (remaining <= 0) {
         clearInterval(interval);
-        if (onExpire) {
-          onExpire();
+        if (onExpireRef.current) {
+          onExpireRef.current();
         }
       }
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [timeLimit, startTime, onExpire]);
+  }, [timeLimit, startTime]);
 
   const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -145,186 +145,202 @@ export function InterviewUI({
     init();
   }, [sessionId]);
 
-  const handleSubmit = async (e?: React.FormEvent) => {
-    e?.preventDefault();
+  // T102: Wrap handleSubmit in useCallback to stabilize timer onExpire callback
+  const handleSubmit = useCallback(
+    async (e?: React.FormEvent) => {
+      e?.preventDefault();
 
-    // Validate we have an answer (text or audio)
-    if (answerMode === 'text' && !answer.trim()) {
-      toast.error('Answer required');
-      return;
-    }
-
-    if (answerMode === 'audio' && !audioBlob) {
-      toast.error('Recording required');
-      return;
-    }
-
-    if (!currentTurnId) {
-      toast.error('No active question');
-      return;
-    }
-
-    setIsSubmitting(true);
-
-    try {
-      let finalAnswer = answer.trim();
-      let audioKey: string | undefined = undefined;
-
-      // Handle audio mode
-      if (answerMode === 'audio' && audioBlob) {
-        // Upload audio
-        const audioFormData = new FormData();
-        audioFormData.append('audio', audioBlob, 'answer.webm');
-        audioFormData.append('turnId', currentTurnId);
-
-        const uploadResponse = await fetch('/api/upload-audio', {
-          method: 'POST',
-          body: audioFormData,
-        });
-
-        const uploadData = await uploadResponse.json();
-
-        if (!uploadData.success) {
-          toast.error('Upload failed');
-          setIsSubmitting(false);
-          return;
-        }
-
-        audioKey = uploadData.storageKey;
-
-        // Transcribe audio
-        toast.info('Transcribing...');
-        const transcribeFormData = new FormData();
-        transcribeFormData.append('audio', audioBlob, 'answer.webm');
-
-        const transcribeResponse = await fetch('/api/transcribe', {
-          method: 'POST',
-          body: transcribeFormData,
-        });
-
-        const transcribeData = await transcribeResponse.json();
-
-        if (!transcribeData.success) {
-          toast.error('Transcription failed');
-          setIsSubmitting(false);
-          return;
-        }
-
-        finalAnswer = transcribeData.text;
-        toast.success('Transcribed');
-      }
-
-      // Submit the answer (including reveal count for scoring)
-      const result = await submitInterviewAnswer({
-        sessionId,
-        turnId: currentTurnId,
-        answerText: finalAnswer,
-        audioKey,
-        replayCount: revealCount, // T100: Track reveal count for composure scoring
-      });
-
-      if (result.error) {
-        toast.error('Unable to submit', {
-          description: result.error,
-        });
+      // Validate we have an answer (text or audio)
+      if (answerMode === 'text' && !answer.trim()) {
+        toast.error('Answer required');
         return;
       }
 
-      if (result.data) {
-        // Update turns with the answer
-        setTurns((prev) =>
-          prev.map((t) =>
-            t.id === currentTurnId ? { ...t, answer_text: finalAnswer } : t
-          )
-        );
+      if (answerMode === 'audio' && !audioBlob) {
+        toast.error('Recording required');
+        return;
+      }
 
-        // Check if interview is complete
-        if (result.data.done) {
-          toast.success('Interview complete', {
-            description: 'Well done.',
+      if (!currentTurnId) {
+        toast.error('No active question');
+        return;
+      }
+
+      setIsSubmitting(true);
+
+      try {
+        let finalAnswer = answer.trim();
+        let audioKey: string | undefined = undefined;
+
+        // Handle audio mode
+        if (answerMode === 'audio' && audioBlob) {
+          // Upload audio
+          const audioFormData = new FormData();
+          audioFormData.append('audio', audioBlob, 'answer.webm');
+          audioFormData.append('turnId', currentTurnId);
+
+          const uploadResponse = await fetch('/api/upload-audio', {
+            method: 'POST',
+            body: audioFormData,
           });
-          // Show upgrade dialog for free plan users (3 questions)
-          setShowUpgradeDialog(true);
+
+          const uploadData = await uploadResponse.json();
+
+          if (!uploadData.success) {
+            toast.error('Upload failed');
+            setIsSubmitting(false);
+            return;
+          }
+
+          audioKey = uploadData.storageKey;
+
+          // Transcribe audio
+          toast.info('Transcribing...');
+          const transcribeFormData = new FormData();
+          transcribeFormData.append('audio', audioBlob, 'answer.webm');
+
+          const transcribeResponse = await fetch('/api/transcribe', {
+            method: 'POST',
+            body: transcribeFormData,
+          });
+
+          const transcribeData = await transcribeResponse.json();
+
+          if (!transcribeData.success) {
+            toast.error('Transcription failed');
+            setIsSubmitting(false);
+            return;
+          }
+
+          finalAnswer = transcribeData.text;
+          toast.success('Transcribed');
+        }
+
+        // Submit the answer (including reveal count for scoring)
+        const result = await submitInterviewAnswer({
+          sessionId,
+          turnId: currentTurnId,
+          answerText: finalAnswer,
+          audioKey,
+          replayCount: revealCount, // T100: Track reveal count for composure scoring
+        });
+
+        if (result.error) {
+          toast.error('Unable to submit', {
+            description: result.error,
+          });
           return;
         }
 
-        // T94: Show "Analyzing answer..." state
-        setIsAnalyzing(true);
-        toast.info('Analyzing...');
+        if (result.data) {
+          // Update turns with the answer
+          setTurns((prev) =>
+            prev.map((t) =>
+              t.id === currentTurnId ? { ...t, answer_text: finalAnswer } : t
+            )
+          );
 
-        // If there's a next question, add it (T91)
-        const nextData = result.data as {
-          done: boolean;
-          nextQuestion: Question;
-          turnId: string;
-          bridgeText?: string | null;
-          currentStage?: number;
-          stagesPlanned?: number;
-          stageName?: string;
-        };
-        if (nextData.nextQuestion && nextData.turnId) {
-          // T102: Show analyzing animation for 2 seconds for smoother transitions
-          await new Promise((resolve) => setTimeout(resolve, 2000));
-
-          // T94: Hide analyzing state
-          setIsAnalyzing(false);
-
-          // T91: Check if stage advanced
-          if (nextData.currentStage && nextData.currentStage !== currentStage) {
-            toast.success(
-              `Stage ${nextData.currentStage}: ${nextData.stageName}`,
-              {
-                description: 'Next stage',
-              }
-            );
-          } else {
-            toast.success('Next question');
+          // Check if interview is complete
+          if (result.data.done) {
+            toast.success('Interview complete', {
+              description: 'Well done.',
+            });
+            // Show upgrade dialog for free plan users (3 questions)
+            setShowUpgradeDialog(true);
+            return;
           }
 
-          // T102: Set timing.started_at immediately when question appears for countdown timer
-          const newTurn = {
-            id: nextData.turnId,
-            session_id: sessionId,
-            user_id: '', // Will be populated by server
-            question: nextData.nextQuestion,
-            tts_key: null,
-            answer_text: null,
-            answer_audio_key: null,
-            answer_digest: null,
-            bridge_text: nextData.bridgeText || null,
-            timing: {
-              started_at: new Date().toISOString(), // Start timer immediately
-              completed_at: '',
-              duration_ms: 0,
-              replay_count: 0,
-            } as Timing,
-            created_at: new Date().toISOString(),
-          } as Turn;
+          // T94: Show "Analyzing answer..." state
+          setIsAnalyzing(true);
+          toast.info('Analyzing...');
 
-          setTurns((prev) => [...prev, newTurn]);
-          setCurrentTurnId(nextData.turnId);
-          setQuestionNumber((prev) => prev + 1);
+          // If there's a next question, add it (T91)
+          const nextData = result.data as {
+            done: boolean;
+            nextQuestion: Question;
+            turnId: string;
+            bridgeText?: string | null;
+            currentStage?: number;
+            stagesPlanned?: number;
+            stageName?: string;
+          };
+          if (nextData.nextQuestion && nextData.turnId) {
+            // T102: Show analyzing animation for 2 seconds for smoother transitions
+            await new Promise((resolve) => setTimeout(resolve, 2000));
 
-          // T91: Update stage information
-          if (nextData.currentStage) setCurrentStage(nextData.currentStage);
-          if (nextData.stagesPlanned) setStagesPlanned(nextData.stagesPlanned);
-          if (nextData.stageName) setStageName(nextData.stageName);
+            // T94: Hide analyzing state
+            setIsAnalyzing(false);
+
+            // T91: Check if stage advanced
+            if (
+              nextData.currentStage &&
+              nextData.currentStage !== currentStage
+            ) {
+              toast.success(
+                `Stage ${nextData.currentStage}: ${nextData.stageName}`,
+                {
+                  description: 'Next stage',
+                }
+              );
+            } else {
+              toast.success('Next question');
+            }
+
+            // T102: Set timing.started_at immediately when question appears for countdown timer
+            const newTurn = {
+              id: nextData.turnId,
+              session_id: sessionId,
+              user_id: '', // Will be populated by server
+              question: nextData.nextQuestion,
+              tts_key: null,
+              answer_text: null,
+              answer_audio_key: null,
+              answer_digest: null,
+              bridge_text: nextData.bridgeText || null,
+              timing: {
+                started_at: new Date().toISOString(), // Start timer immediately
+                completed_at: '',
+                duration_ms: 0,
+                replay_count: 0,
+              } as Timing,
+              created_at: new Date().toISOString(),
+            } as Turn;
+
+            setTurns((prev) => [...prev, newTurn]);
+            setCurrentTurnId(nextData.turnId);
+            setQuestionNumber((prev) => prev + 1);
+
+            // T91: Update stage information
+            if (nextData.currentStage) setCurrentStage(nextData.currentStage);
+            if (nextData.stagesPlanned)
+              setStagesPlanned(nextData.stagesPlanned);
+            if (nextData.stageName) setStageName(nextData.stageName);
+          }
+
+          // Clear answer and reset state
+          setAnswer('');
+          setAudioBlob(null);
+          // Note: Reveal count is automatically reset by useQuestionReveal hook
         }
-
-        // Clear answer and reset state
-        setAnswer('');
-        setAudioBlob(null);
-        // Note: Reveal count is automatically reset by useQuestionReveal hook
+      } catch (error) {
+        console.error('Submit error:', error);
+        toast.error('Something went wrong', {
+          description: 'Please try again',
+        });
+      } finally {
+        setIsSubmitting(false);
       }
-    } catch (error) {
-      console.error('Submit error:', error);
-      toast.error('Something went wrong', {
-        description: 'Please try again',
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+    },
+    [
+      answerMode,
+      answer,
+      audioBlob,
+      currentTurnId,
+      sessionId,
+      revealCount,
+      currentStage,
+    ]
+  );
 
   // T100: Replay handler - extends reveal window
   const handleReplay = () => {
@@ -397,27 +413,27 @@ export function InterviewUI({
           </div>
         )}
 
-        {/* T102: Render only the current turn (question without answer) */}
-        {turns
-          .filter((t) => !t.answer_text)
-          .map((turn, _, filteredTurns) => {
-            // Find the index in the original turns array for progress tracking
-            const index = turns.findIndex((t) => t.id === turn.id);
+        {/* T102: Render only the FIRST unanswered turn (current question) */}
+        {currentQuestion &&
+          (() => {
+            // Calculate index in original turns array for progress tracking
+            const index = turns.findIndex((t) => t.id === currentQuestion.id);
+
             return (
-              <div key={turn.id} className="space-y-4">
+              <div key={currentQuestion.id} className="space-y-4">
                 {/* Bridge Text (T89) - appears before questions 2+ */}
-                {turn.bridge_text && index > 0 && (
+                {currentQuestion.bridge_text && index > 0 && (
                   <div className="flex justify-start">
                     <div className="max-w-[75%] rounded-lg bg-muted/50 p-4 border-l-2 border-primary/40">
                       <p className="text-sm italic text-muted-foreground leading-relaxed">
-                        {turn.bridge_text}
+                        {currentQuestion.bridge_text}
                       </p>
                     </div>
                   </div>
                 )}
 
                 {/* Question - T93: With Countdown & Reveal System */}
-                {turn.id === currentTurnId && !accessibilityMode ? (
+                {currentQuestion.id === currentTurnId && !accessibilityMode ? (
                   <div className="space-y-4">
                     {/* T93: Countdown Display */}
                     {countdown !== null && (
@@ -438,9 +454,9 @@ export function InterviewUI({
                     {/* T93: Question (conditionally visible) */}
                     {countdown === null && questionVisible && (
                       <QuestionBubble
-                        question={turn.question}
+                        question={currentQuestion.question}
                         questionNumber={index + 1}
-                        turnId={turn.id}
+                        turnId={currentQuestion.id}
                       />
                     )}
 
@@ -457,32 +473,16 @@ export function InterviewUI({
                     )}
                   </div>
                 ) : (
-                  /* Past questions or accessibility mode - always visible */
+                  /* Accessibility mode - always visible */
                   <QuestionBubble
-                    question={turn.question}
+                    question={currentQuestion.question}
                     questionNumber={index + 1}
-                    turnId={turn.id}
+                    turnId={currentQuestion.id}
                   />
-                )}
-
-                {/* Answer */}
-                {turn.answer_text && (
-                  <div className="flex justify-end">
-                    <div className="max-w-[80%] rounded-lg bg-primary/10 p-4">
-                      <div className="mb-2">
-                        <span className="text-xs font-medium text-muted-foreground uppercase">
-                          Your Answer
-                        </span>
-                      </div>
-                      <p className="text-base whitespace-pre-wrap">
-                        {turn.answer_text}
-                      </p>
-                    </div>
-                  </div>
                 )}
               </div>
             );
-          })}
+          })()}
       </div>
 
       {/* T94: Analyzing Answer Transition */}
