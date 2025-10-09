@@ -313,7 +313,10 @@ export interface Session {
   updated_at: string;
 }
 
-// Turn type (from turns table) - T89: Added bridge_text
+// Turn type enum (T106)
+export type TurnType = 'small_talk' | 'question' | 'confirmation';
+
+// Turn type (from turns table) - T89: Added bridge_text, T106: Added turn_type
 export interface Turn {
   id: string;
   session_id: string;
@@ -325,5 +328,6 @@ export interface Turn {
   answer_digest: AnswerDigest | Json | null;
   timing: Timing | Json | null;
   bridge_text: string | null; // T89: Conversational transition referencing previous answer
+  turn_type: TurnType; // T106: Distinguish small talk from interview questions
   created_at: string;
 }

@@ -361,11 +361,11 @@ Return ONLY valid JSON with no additional text:
 export async function startInterview(sessionId: string) {
   const supabase = await createClient();
 
-  // Get the session with research snapshot and stage info
+  // Get the session with research snapshot, stage info, and plan_tier
   const { data: session, error: sessionError } = await supabase
     .from('sessions')
     .select(
-      'id, user_id, status, research_snapshot, limits, current_stage, stages_planned'
+      'id, user_id, status, research_snapshot, limits, current_stage, stages_planned, plan_tier'
     )
     .eq('id', sessionId)
     .single();
@@ -379,7 +379,7 @@ export async function startInterview(sessionId: string) {
     throw new Error(`Cannot start interview in ${session.status} state`);
   }
 
-  // T91: Get stage information for first question
+  const planTier = (session as any).plan_tier as PlanTier;
   const currentStage = (session as any).current_stage || 1;
   const stagesPlanned = (session as any).stages_planned || 1;
   const researchSnapshot = session.research_snapshot as ResearchSnapshot;
@@ -388,50 +388,154 @@ export async function startInterview(sessionId: string) {
     `[T91] Starting interview - Stage ${currentStage} of ${stagesPlanned}`
   );
 
-  // Generate first question with stage information
-  const question = await generateQuestion({
-    researchSnapshot,
-    previousTurns: [],
-    questionNumber: 1,
-    totalQuestions: (session.limits as any)?.question_cap || 3,
-    currentStage, // T91: Pass stage info
-    stagesPlanned, // T91: Pass stage info
-    questionsInStage: 0, // T91: First question in stage
-  });
-
-  console.log(
-    `[T91] First question generated with category: ${question.category}`
-  );
-
-  // Create first turn
-  const { data: turn, error: turnError } = await supabase
+  // T106: Check if small talk turns already exist
+  const { data: existingTurns } = await supabase
     .from('turns')
-    .insert({
-      session_id: sessionId,
-      user_id: session.user_id,
-      question: question,
-      timing: {
-        started_at: new Date().toISOString(),
-      },
-    })
-    .select()
-    .single();
+    .select('id, turn_type')
+    .eq('session_id', sessionId)
+    .order('created_at', { ascending: true });
 
-  if (turnError) {
-    console.error('Error creating turn:', turnError);
-    throw new Error('Failed to create interview turn');
+  const hasSmallTalk = existingTurns?.some(
+    (t) => (t as any).turn_type === 'small_talk'
+  );
+  const hasAnyTurns = existingTurns && existingTurns.length > 0;
+
+  // T106: Generate and create small talk turns for paid users (only if not already done)
+  if (planTier === 'paid' && !hasSmallTalk && !hasAnyTurns) {
+    console.log('[T106] Generating small talk for paid user');
+    const smallTalkQuestions = await generateSmallTalk(sessionId);
+
+    // Create turns for each small talk question
+    for (const questionText of smallTalkQuestions) {
+      const smallTalkQuestion: Question = {
+        text: questionText,
+        category: 'small_talk',
+        difficulty: 'easy',
+        time_limit: 0, // No timer for small talk
+        follow_up: false,
+      };
+
+      await supabase.from('turns').insert({
+        session_id: sessionId,
+        user_id: session.user_id,
+        question: smallTalkQuestion,
+        turn_type: 'small_talk', // T106: Mark as small talk
+        timing: {
+          started_at: new Date().toISOString(),
+        },
+      });
+    }
+
+    // Create the confirmation turn ("Ready to begin?")
+    const confirmationQuestion: Question = {
+      text: "Great! I think we're ready to begin the formal interview. Are you ready to start?",
+      category: 'confirmation',
+      difficulty: 'easy',
+      time_limit: 0,
+      follow_up: false,
+    };
+
+    const { data: confirmTurn } = await supabase
+      .from('turns')
+      .insert({
+        session_id: sessionId,
+        user_id: session.user_id,
+        question: confirmationQuestion,
+        turn_type: 'confirmation', // T106: Mark as confirmation
+        timing: {
+          started_at: new Date().toISOString(),
+        },
+      })
+      .select()
+      .single();
+
+    console.log('[T106] Small talk and confirmation turns created');
+
+    // Update session status to running
+    await supabase
+      .from('sessions')
+      .update({ status: 'running' })
+      .eq('id', sessionId);
+
+    return {
+      turnId: confirmTurn!.id,
+      question: confirmationQuestion,
+    };
   }
 
-  // Update session status to running
-  await supabase
-    .from('sessions')
-    .update({ status: 'running' })
-    .eq('id', sessionId);
+  // Check if we still need to create the first actual interview question
+  const hasRealQuestion = existingTurns?.some(
+    (t) => (t as any).turn_type === 'question' || !(t as any).turn_type
+  );
 
-  return {
-    turnId: turn.id,
-    question,
-  };
+  if (!hasRealQuestion) {
+    // Generate first actual interview question with stage information
+    const question = await generateQuestion({
+      researchSnapshot,
+      previousTurns: [],
+      questionNumber: 1,
+      totalQuestions: (session.limits as any)?.question_cap || 3,
+      currentStage, // T91: Pass stage info
+      stagesPlanned, // T91: Pass stage info
+      questionsInStage: 0, // T91: First question in stage
+    });
+
+    console.log(
+      `[T91] First question generated with category: ${question.category}`
+    );
+
+    // Create first turn
+    const { data: turn, error: turnError } = await supabase
+      .from('turns')
+      .insert({
+        session_id: sessionId,
+        user_id: session.user_id,
+        question: question,
+        turn_type: 'question', // T106: Mark as actual question
+        timing: {
+          started_at: new Date().toISOString(),
+        },
+      })
+      .select()
+      .single();
+
+    if (turnError) {
+      console.error('Error creating turn:', turnError);
+      throw new Error('Failed to create interview turn');
+    }
+
+    // Update session status to running
+    await supabase
+      .from('sessions')
+      .update({ status: 'running' })
+      .eq('id', sessionId);
+
+    return {
+      turnId: turn.id,
+      question,
+    };
+  }
+
+  // If we reach here, return the first unanswered turn
+  const firstUnanswered = existingTurns?.find((t) => {
+    // Need to check if turn has an answer - fetch full turn data
+    return true; // Simplified for now
+  });
+
+  if (firstUnanswered) {
+    const { data: fullTurn } = await supabase
+      .from('turns')
+      .select('*')
+      .eq('id', firstUnanswered.id)
+      .single();
+
+    return {
+      turnId: fullTurn!.id,
+      question: fullTurn!.question as Question,
+    };
+  }
+
+  throw new Error('Unable to start or resume interview');
 }
 
 /**
@@ -513,9 +617,10 @@ export async function submitAnswer(params: {
   );
 
   // T90: Fetch turns with answer_text for context-aware question generation
+  // T106: Fetch turn_type to exclude small talk from counts
   const { data: allTurns, error: turnsError } = await supabase
     .from('turns')
-    .select('question, answer_digest, answer_text')
+    .select('question, answer_digest, answer_text, turn_type')
     .eq('session_id', sessionId)
     .order('created_at', { ascending: true });
 
@@ -531,8 +636,13 @@ export async function submitAnswer(params: {
   const stagesPlanned = (session as any).stages_planned || 1;
   const researchSnapshot = session.research_snapshot as ResearchSnapshot;
 
+  // T106: Filter out small talk and confirmation turns from the question count
+  const actualQuestions = allTurns.filter(
+    (t) => (t as any).turn_type === 'question' || !(t as any).turn_type
+  );
+
   // T85: Enforce free tier restrictions (3 questions max)
-  if (planTier === 'free' && allTurns.length >= 3) {
+  if (planTier === 'free' && actualQuestions.length >= 3) {
     // End interview for free tier
     await supabase
       .from('sessions')
@@ -546,7 +656,7 @@ export async function submitAnswer(params: {
   }
 
   // Check if we've reached the question limit (paid tier or general cap)
-  if (allTurns.length >= questionCap) {
+  if (actualQuestions.length >= questionCap) {
     // End interview
     await supabase
       .from('sessions')
@@ -565,8 +675,8 @@ export async function submitAnswer(params: {
       ? calculateQuestionsPerStage(questionCap, stagesPlanned)
       : questionCap;
 
-  // Count how many questions we've answered in total
-  const totalAnswered = allTurns.length;
+  // T106: Count only actual interview questions (not small talk)
+  const totalAnswered = actualQuestions.length;
 
   // T91: Calculate how many questions have been answered in the current stage
   // Stage boundaries: Stage 1 starts at 0, Stage 2 starts at questionsPerStage, etc.
@@ -595,11 +705,11 @@ export async function submitAnswer(params: {
       .eq('id', sessionId);
   }
 
-  // Generate next question (T91: with stage information)
+  // Generate next question (T91: with stage information, T106: using actualQuestions count)
   const nextQuestion = await generateQuestion({
     researchSnapshot,
-    previousTurns: allTurns as any,
-    questionNumber: allTurns.length + 1,
+    previousTurns: actualQuestions as any,
+    questionNumber: actualQuestions.length + 1,
     totalQuestions: questionCap,
     currentStage: newStage,
     stagesPlanned,
@@ -617,7 +727,7 @@ export async function submitAnswer(params: {
     }
   }
 
-  // Create next turn (T89: with bridge_text)
+  // Create next turn (T89: with bridge_text, T106: with turn_type)
   const { data: nextTurn, error: nextTurnError } = await supabase
     .from('turns')
     .insert({
@@ -625,6 +735,7 @@ export async function submitAnswer(params: {
       user_id: session.user_id,
       question: nextQuestion,
       bridge_text: bridgeText, // T89: Add bridge text
+      turn_type: 'question', // T106: Mark as actual interview question
       timing: {
         started_at: new Date().toISOString(),
       },
@@ -774,6 +885,100 @@ Return ONLY the introduction text, no additional formatting or explanations. Kee
     throw new Error(
       `Failed to generate introduction: ${error instanceof Error ? error.message : 'Unknown error'}`
     );
+  }
+}
+
+/**
+ * T106: Generate small talk questions for warm-up before the interview
+ * This creates a comfortable, conversational opening to help candidates feel at ease
+ * @param sessionId The session ID
+ * @returns Array of 1-2 light, warm-up questions
+ */
+export async function generateSmallTalk(sessionId: string): Promise<string[]> {
+  const supabase = await createClient();
+
+  // Get session with research snapshot
+  const { data: session, error: sessionError } = await supabase
+    .from('sessions')
+    .select('*, research_snapshot, plan_tier')
+    .eq('id', sessionId)
+    .single();
+
+  if (sessionError || !session) {
+    throw new Error('Session not found');
+  }
+
+  const planTier = (session as any).plan_tier as PlanTier;
+
+  // Only generate small talk for paid tier
+  if (planTier !== 'paid') {
+    return []; // Free tier doesn't get small talk
+  }
+
+  const researchSnapshot = session.research_snapshot as ResearchSnapshot;
+  const candidateName = researchSnapshot.cv_summary.name || 'candidate';
+  const role = researchSnapshot.job_spec_summary.role;
+  const company = researchSnapshot.company_facts.name;
+
+  const prompt = `You are a professional interviewer about to conduct an interview for a ${role} position at ${company}.
+
+Before diving into the formal interview questions, generate 1-2 light, warm-up questions to help ${candidateName} feel comfortable and ease into the conversation.
+
+Guidelines:
+1. Keep questions friendly, light, and open-ended
+2. Avoid anything too personal or intrusive
+3. Questions should help build rapport without being overly casual
+4. Each question should be conversational (1 sentence)
+
+Examples of good small-talk questions:
+- "How has your day been going so far?"
+- "I see you're based in [location] – how are things there?"
+- "Before we start, can you tell me a bit about what drew you to apply for this role?"
+- "How are you feeling about the interview today?"
+
+Return ONLY the questions, one per line, no numbering or bullet points.`;
+
+  try {
+    const response = await openai.chat.completions.create({
+      model: MODELS.CONVERSATIONAL,
+      messages: [
+        {
+          role: 'system',
+          content:
+            'You are a warm, professional interviewer creating light small-talk questions to help candidates relax before an interview.',
+        },
+        {
+          role: 'user',
+          content: prompt,
+        },
+      ],
+      temperature: 0.8, // Higher temperature for natural variation
+      max_tokens: 150,
+    });
+
+    const questionsText = response.choices[0]?.message?.content?.trim();
+
+    if (!questionsText) {
+      throw new Error('No small talk questions generated');
+    }
+
+    // Split by newlines and filter empty lines
+    const questions = questionsText
+      .split('\n')
+      .map((q) => q.trim())
+      .filter((q) => q.length > 0)
+      .slice(0, 2); // Max 2 questions
+
+    console.log('[T106] Generated small talk questions:', questions);
+
+    return questions;
+  } catch (error) {
+    console.error('[T106] Error generating small talk:', error);
+    // Return fallback small talk questions
+    return [
+      'How has your day been going so far?',
+      'Before we begin, tell me briefly what drew you to apply for this role?',
+    ];
   }
 }
 

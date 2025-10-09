@@ -415,10 +415,16 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
             // Calculate index in original turns array for progress tracking
             const index = turns.findIndex((t) => t.id === currentQuestion.id);
 
+            // T106: Check if this is a small talk or confirmation turn
+            const turnType = (currentQuestion as any).turn_type;
+            const isSmallTalk = turnType === 'small_talk';
+            const isConfirmation = turnType === 'confirmation';
+            const isSpecialTurn = isSmallTalk || isConfirmation;
+
             return (
               <div key={currentQuestion.id} className="space-y-4">
-                {/* Bridge Text (T89) - appears before questions 2+ */}
-                {currentQuestion.bridge_text && index > 0 && (
+                {/* Bridge Text (T89) - appears before questions 2+ (not for small talk) */}
+                {currentQuestion.bridge_text && index > 0 && !isSpecialTurn && (
                   <div className="flex justify-start">
                     <div className="max-w-[75%] rounded-lg bg-muted/50 p-4 border-l-2 border-primary/40">
                       <p className="text-sm italic text-muted-foreground leading-relaxed">
@@ -428,8 +434,34 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
                   </div>
                 )}
 
-                {/* Question - T93: With Countdown & Reveal System */}
-                {currentQuestion.id === currentTurnId && !accessibilityMode ? (
+                {/* T106: Small Talk / Confirmation - Simple display, no timer */}
+                {isSpecialTurn ? (
+                  <div className="flex justify-start">
+                    <div
+                      className={`max-w-[85%] rounded-lg p-5 border-l-4 ${
+                        isConfirmation
+                          ? 'bg-green-50 dark:bg-green-950/30 border-green-500'
+                          : 'bg-amber-50 dark:bg-amber-950/30 border-amber-500'
+                      }`}
+                    >
+                      <div className="mb-2">
+                        <span
+                          className={`text-xs font-semibold uppercase tracking-wide ${
+                            isConfirmation
+                              ? 'text-green-700 dark:text-green-300'
+                              : 'text-amber-700 dark:text-amber-300'
+                          }`}
+                        >
+                          {isConfirmation ? 'Ready Check' : 'Warm-up'}
+                        </span>
+                      </div>
+                      <p className="text-base leading-relaxed text-foreground">
+                        {currentQuestion.question.text}
+                      </p>
+                    </div>
+                  </div>
+                ) : /* Regular Interview Question - T93: With Countdown & Reveal System */
+                currentQuestion.id === currentTurnId && !accessibilityMode ? (
                   <div className="space-y-4">
                     {/* T93: Countdown Display */}
                     {countdown !== null && (
@@ -501,29 +533,41 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
       {/* Answer Input */}
       {currentQuestion && !isAnalyzing && (
         <div className="sticky bottom-0 bg-background border-t pt-4">
-          {/* Timer and Replay Controls */}
-          <div className="mb-4 flex items-center justify-between">
-            <ReplayButton
-              replayCount={revealCount}
-              replayCap={maxReveals}
-              onReplay={handleReplay}
-              disabled={isSubmitting || !canReplay}
-            />
-            {!accessibilityMode &&
-              (currentQuestion.timing as Timing | null)?.started_at && (
-                <TimerRing
-                  timeLimit={timerSec}
-                  startTime={(currentQuestion.timing as Timing).started_at}
-                  onExpire={() => {
-                    toast.warning('Time is up', {
-                      description: 'Auto-submitting...',
-                    });
-                    // Auto-submit the current answer
-                    handleSubmit();
-                  }}
-                />
-              )}
-          </div>
+          {/* T106: Timer and Replay Controls - Only for actual interview questions */}
+          {(() => {
+            const turnType = (currentQuestion as any).turn_type;
+            const isSpecialTurn =
+              turnType === 'small_talk' || turnType === 'confirmation';
+
+            return (
+              !isSpecialTurn && (
+                <div className="mb-4 flex items-center justify-between">
+                  <ReplayButton
+                    replayCount={revealCount}
+                    replayCap={maxReveals}
+                    onReplay={handleReplay}
+                    disabled={isSubmitting || !canReplay}
+                  />
+                  {!accessibilityMode &&
+                    (currentQuestion.timing as Timing | null)?.started_at && (
+                      <TimerRing
+                        timeLimit={timerSec}
+                        startTime={
+                          (currentQuestion.timing as Timing).started_at
+                        }
+                        onExpire={() => {
+                          toast.warning('Time is up', {
+                            description: 'Auto-submitting...',
+                          });
+                          // Auto-submit the current answer
+                          handleSubmit();
+                        }}
+                      />
+                    )}
+                </div>
+              )
+            );
+          })()}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Answer Mode Toggle */}
