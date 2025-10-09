@@ -128,8 +128,8 @@ export function InterviewUI({
     init();
   }, [sessionId]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (e?: React.FormEvent) => {
+    e?.preventDefault();
 
     // Validate we have an answer (text or audio)
     if (answerMode === 'text' && !answer.trim()) {
@@ -246,6 +246,9 @@ export function InterviewUI({
           stageName?: string;
         };
         if (nextData.nextQuestion && nextData.turnId) {
+          // T102: Show analyzing animation for 2 seconds for smoother transitions
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+
           // T94: Hide analyzing state
           setIsAnalyzing(false);
 
@@ -489,8 +492,10 @@ export function InterviewUI({
                 }
                 onExpire={() => {
                   toast.warning('Time is up', {
-                    description: 'Submit your answer',
+                    description: 'Auto-submitting...',
                   });
+                  // Auto-submit the current answer
+                  handleSubmit();
                 }}
               />
             )}

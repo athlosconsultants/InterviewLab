@@ -59,75 +59,53 @@ export function useQuestionReveal({
       return;
     }
 
-    // If question is currently hidden, re-show it with extension
-    if (!questionVisible) {
-      setQuestionVisible(true);
-      const duration = REPLAY_EXTENSION;
-      const endTime = Date.now() + duration;
-      revealEndTimeRef.current = endTime;
-
-      // Start tick interval
-      if (tickIntervalRef.current) {
-        clearInterval(tickIntervalRef.current);
-      }
-      tickIntervalRef.current = setInterval(() => {
-        const now = Date.now();
-        const remaining = Math.max(0, Math.ceil((endTime - now) / 1000));
-        setRemainingTime(remaining);
-
-        if (remaining === 0) {
-          if (tickIntervalRef.current) {
-            clearInterval(tickIntervalRef.current);
-            tickIntervalRef.current = null;
-          }
-        }
-      }, 100);
-
-      // Auto-hide after extension
-      const hideTimer = setTimeout(() => {
-        setQuestionVisible(false);
-        setRemainingTime(null);
-        revealEndTimeRef.current = null;
-
-        const remaining = MAX_REPLAYS - revealCount;
-        toast.info('Question hidden', {
-          description:
-            remaining > 0
-              ? `Use Replay to review (${remaining}× remaining)`
-              : 'No replays remaining',
-        });
-      }, duration);
-
-      timersRef.current.push(hideTimer);
-    } else {
-      // If question is currently visible, extend the window
-      if (revealEndTimeRef.current) {
-        const now = Date.now();
-        const currentRemaining = revealEndTimeRef.current - now;
-        const newEndTime = revealEndTimeRef.current + REPLAY_EXTENSION;
-        revealEndTimeRef.current = newEndTime;
-
-        // Clear existing hide timer
-        clearAllTimers();
-
-        // Set new hide timer
-        const hideTimer = setTimeout(() => {
-          setQuestionVisible(false);
-          setRemainingTime(null);
-          revealEndTimeRef.current = null;
-
-          const remaining = MAX_REPLAYS - revealCount;
-          toast.info('Question hidden', {
-            description:
-              remaining > 0
-                ? `Use Replay to review (${remaining}× remaining)`
-                : 'No replays remaining',
-          });
-        }, currentRemaining + REPLAY_EXTENSION);
-
-        timersRef.current.push(hideTimer);
-      }
+    // T102: Reject replay if question is already visible
+    if (questionVisible) {
+      toast.error('Question already visible', {
+        description: 'Replay only works when question is hidden',
+      });
+      return;
     }
+
+    // Re-show the hidden question with extension
+    setQuestionVisible(true);
+    const duration = REPLAY_EXTENSION;
+    const endTime = Date.now() + duration;
+    revealEndTimeRef.current = endTime;
+
+    // Start tick interval
+    if (tickIntervalRef.current) {
+      clearInterval(tickIntervalRef.current);
+    }
+    tickIntervalRef.current = setInterval(() => {
+      const now = Date.now();
+      const remaining = Math.max(0, Math.ceil((endTime - now) / 1000));
+      setRemainingTime(remaining);
+
+      if (remaining === 0) {
+        if (tickIntervalRef.current) {
+          clearInterval(tickIntervalRef.current);
+          tickIntervalRef.current = null;
+        }
+      }
+    }, 100);
+
+    // Auto-hide after extension
+    const hideTimer = setTimeout(() => {
+      setQuestionVisible(false);
+      setRemainingTime(null);
+      revealEndTimeRef.current = null;
+
+      const remaining = MAX_REPLAYS - (revealCount + 1); // Calculate remaining after this replay
+      toast.info('Question hidden', {
+        description:
+          remaining > 0
+            ? `Use Replay to review (${remaining}× remaining)`
+            : 'No replays remaining',
+      });
+    }, duration);
+
+    timersRef.current.push(hideTimer);
 
     // Use functional update to avoid stale closure issues
     setRevealCount((prev) => {
