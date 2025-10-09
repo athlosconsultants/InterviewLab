@@ -11,13 +11,13 @@ import {
 } from '@/app/interview/[id]/actions';
 import type { Question, Turn, Timing } from '@/lib/schema';
 import { toast } from 'sonner';
-import { QuestionBubble } from './QuestionBubble';
-import { TimerRing } from './TimerRing';
-import { ReplayButton } from './ReplayButton';
-import { AudioRecorder } from './AudioRecorder';
+import { QuestionBubble } from '../QuestionBubble';
+import { TimerRing } from '../TimerRing';
+import { ReplayButton } from '../ReplayButton';
+import { AudioRecorder } from '../AudioRecorder';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { UpgradeDialog } from './UpgradeDialog';
+import { UpgradeDialog } from '../UpgradeDialog';
 import { useQuestionReveal } from '@/hooks/useQuestionReveal';
 
 interface InterviewUIProps {
@@ -26,11 +26,7 @@ interface InterviewUIProps {
   company: string;
 }
 
-export function InterviewUI({
-  sessionId,
-  jobTitle,
-  company,
-}: InterviewUIProps) {
+export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [turns, setTurns] = useState<Turn[]>([]);
