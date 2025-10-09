@@ -278,19 +278,21 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
 
           // T106: Handle small talk/confirmation transitions (no new question to add)
           if (!nextData.nextQuestion) {
-            // T102: Show analyzing animation for 2 seconds for smoother transitions
-            await new Promise((resolve) => setTimeout(resolve, 2000));
-
-            // T94: Hide analyzing state
-            setIsAnalyzing(false);
-
-            // Find the next unanswered turn and set it as current
+            // Find the next unanswered turn BEFORE hiding analyzing state
             const nextUnanswered = turns.find(
               (t) => t.id !== currentTurnId && !t.answer_text
             );
+
+            // T102: Show analyzing animation for 2 seconds for smoother transitions
+            await new Promise((resolve) => setTimeout(resolve, 2000));
+
+            // Update to the next turn (if found)
             if (nextUnanswered) {
               setCurrentTurnId(nextUnanswered.id);
             }
+
+            // T94: Hide analyzing state AFTER updating turn
+            setIsAnalyzing(false);
 
             // Clear answer and reset state
             setAnswer('');
@@ -299,28 +301,7 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
           }
 
           if (nextData.nextQuestion && nextData.turnId) {
-            // T102: Show analyzing animation for 2 seconds for smoother transitions
-            await new Promise((resolve) => setTimeout(resolve, 2000));
-
-            // T94: Hide analyzing state
-            setIsAnalyzing(false);
-
-            // T91: Check if stage advanced
-            if (
-              nextData.currentStage &&
-              nextData.currentStage !== currentStage
-            ) {
-              toast.success(
-                `Stage ${nextData.currentStage}: ${nextData.stageName}`,
-                {
-                  description: 'Next stage',
-                }
-              );
-            } else if (!isSpecialTurn) {
-              toast.success('Next question');
-            }
-
-            // T102: Set timing.started_at immediately when question appears for countdown timer
+            // T102: Prepare new turn BEFORE hiding analyzing state
             const newTurn = {
               id: nextData.turnId,
               session_id: sessionId,
@@ -340,6 +321,7 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
               created_at: new Date().toISOString(),
             } as Turn;
 
+            // Add new turn to state
             setTurns((prev) => [...prev, newTurn]);
             setCurrentTurnId(nextData.turnId);
             setQuestionNumber((prev) => prev + 1);
@@ -349,6 +331,27 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
             if (nextData.stagesPlanned)
               setStagesPlanned(nextData.stagesPlanned);
             if (nextData.stageName) setStageName(nextData.stageName);
+
+            // T102: Show analyzing animation for 2 seconds for smoother transitions
+            await new Promise((resolve) => setTimeout(resolve, 2000));
+
+            // T94: Hide analyzing state AFTER updating turn
+            setIsAnalyzing(false);
+
+            // T91: Show toast after analyzing is complete
+            if (
+              nextData.currentStage &&
+              nextData.currentStage !== currentStage
+            ) {
+              toast.success(
+                `Stage ${nextData.currentStage}: ${nextData.stageName}`,
+                {
+                  description: 'Next stage',
+                }
+              );
+            } else if (!isSpecialTurn) {
+              toast.success('Next question');
+            }
           }
 
           // Clear answer and reset state
@@ -445,8 +448,9 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
           </div>
         )}
 
-        {/* T102: Render only the FIRST unanswered turn (current question) */}
+        {/* T102: Render only the FIRST unanswered turn (current question) - Hide during analyzing */}
         {currentQuestion &&
+          !isAnalyzing &&
           (() => {
             // Calculate index in original turns array for progress tracking
             const index = turns.findIndex((t) => t.id === currentQuestion.id);
