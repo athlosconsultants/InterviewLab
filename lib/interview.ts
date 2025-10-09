@@ -199,6 +199,7 @@ export async function generateQuestion(params: {
   currentStage?: number;
   stagesPlanned?: number;
   questionsInStage?: number;
+  mode?: 'text' | 'voice'; // T109: Mode-aware question generation
 }): Promise<Question> {
   const {
     researchSnapshot,
@@ -208,6 +209,7 @@ export async function generateQuestion(params: {
     currentStage = 1,
     stagesPlanned = 1,
     questionsInStage = 0,
+    mode = 'text', // T109: Default to text mode if not specified
   } = params;
 
   // T90: Calculate interview progress for progressive difficulty
@@ -292,6 +294,27 @@ Domain: ${researchSnapshot.competencies.domain.join(', ')}
 
 # Previous Conversation:
 ${conversationContext}
+
+# T109 Interview Mode:
+**Mode: ${mode.toUpperCase()}**
+${
+  mode === 'voice'
+    ? `
+**VOICE MODE REQUIREMENTS:**
+- Keep questions concise and clear for text-to-speech
+- Avoid complex sentence structures that are hard to follow in audio
+- Use natural, conversational language that sounds good when spoken
+- Question should be under 30 words when possible
+- Avoid parenthetical comments or complex formatting
+- Make the question flow naturally when heard, not just read
+`
+    : `
+**TEXT MODE:**
+- Question will be displayed visually to the candidate
+- Can use more complex sentence structures if needed
+- Formatting and visual clarity are important
+`
+}
 
 # Task:
 Generate question ${questionNumber} of ${totalQuestions} (Progress: ${Math.round(progress * 100)}%)
@@ -413,11 +436,11 @@ Return ONLY valid JSON with no additional text:
 export async function startInterview(sessionId: string) {
   const supabase = await createClient();
 
-  // Get the session with research snapshot, stage info, plan_tier, and stage_targets
+  // Get the session with research snapshot, stage info, plan_tier, stage_targets, and mode
   const { data: session, error: sessionError } = await supabase
     .from('sessions')
     .select(
-      'id, user_id, status, research_snapshot, limits, current_stage, stages_planned, plan_tier, stage_targets'
+      'id, user_id, status, research_snapshot, limits, current_stage, stages_planned, plan_tier, stage_targets, mode'
     )
     .eq('id', sessionId)
     .single();
@@ -436,6 +459,7 @@ export async function startInterview(sessionId: string) {
   const stagesPlanned = (session as any).stages_planned || 1;
   const researchSnapshot = session.research_snapshot as ResearchSnapshot;
   let stageTargets = (session as any).stage_targets as number[] | null;
+  const mode = (session as any).mode || 'text'; // T109: Get interview mode
 
   console.log(
     `[T91] Starting interview - Stage ${currentStage} of ${stagesPlanned}`
@@ -547,6 +571,7 @@ export async function startInterview(sessionId: string) {
       currentStage, // T91: Pass stage info
       stagesPlanned, // T91: Pass stage info
       questionsInStage: 0, // T91: First question in stage
+      mode, // T109: Pass interview mode for mode-aware prompts
     });
 
     console.log(
@@ -736,6 +761,7 @@ export async function submitAnswer(params: {
   const stagesPlanned = (session as any).stages_planned || 1;
   const researchSnapshot = session.research_snapshot as ResearchSnapshot;
   const stageTargets = (session as any).stage_targets as number[] | null;
+  const mode = (session as any).mode || 'text'; // T109: Get interview mode
 
   // T106: Filter out small talk and confirmation turns from the question count
   const actualQuestions = allTurns.filter(
@@ -818,6 +844,7 @@ export async function submitAnswer(params: {
     currentStage: newStage,
     stagesPlanned,
     questionsInStage: newStage !== currentStage ? 0 : questionsInCurrentStage,
+    mode, // T109: Pass interview mode for mode-aware prompts
   });
 
   // T89: Generate bridge text referencing the previous answer (paid tier only)
@@ -922,6 +949,7 @@ export async function generateIntro(sessionId: string): Promise<string> {
 
   const researchSnapshot = session.research_snapshot as ResearchSnapshot;
   const planTier = (session as any).plan_tier as PlanTier;
+  const mode = (session as any).mode || 'text'; // T109: Get interview mode
 
   // Only generate intros for paid tier
   if (planTier !== 'paid') {
@@ -951,7 +979,20 @@ Role: ${role}
 Company: ${company}
 Level: ${level}
 
-Return ONLY the introduction text, no additional formatting or explanations. Keep it concise and natural.`;
+T109 Mode Requirements:
+${
+  mode === 'voice'
+    ? `**VOICE MODE**: This introduction will be spoken via text-to-speech.
+- Use natural, conversational language that flows well when spoken
+- Avoid complex punctuation or formatting
+- Keep sentences clear and easy to understand in audio
+- Use short, natural pauses (commas) for breath points`
+    : `**TEXT MODE**: This introduction will be displayed as text.
+- Standard professional interview introduction format is fine
+- Can use standard punctuation and formatting`
+}
+
+Return ONLY the introduction text, no additional formatting or explanations. Keep it concise and natural for ${mode} delivery.`;
 
   try {
     const response = await openai.chat.completions.create({
@@ -1100,10 +1141,10 @@ export async function generateBridge(
 ): Promise<string> {
   const supabase = await createClient();
 
-  // Get session with research snapshot and plan_tier
+  // Get session with research snapshot, plan_tier, and mode
   const { data: session, error: sessionError } = await supabase
     .from('sessions')
-    .select('*, research_snapshot, plan_tier')
+    .select('*, research_snapshot, plan_tier, mode')
     .eq('id', sessionId)
     .single();
 
@@ -1112,6 +1153,7 @@ export async function generateBridge(
   }
 
   const planTier = (session as any).plan_tier as PlanTier;
+  const mode = (session as any).mode || 'text'; // T109: Get interview mode
 
   // Only generate bridges for paid tier
   if (planTier !== 'paid') {
@@ -1155,12 +1197,25 @@ Generate a brief, natural conversational bridge (1-2 sentences maximum) that:
 4. Sounds like a real interviewer would speak
 5. IMPORTANT: Do NOT include a question. This is just a contextual comment that will lead into the next question.
 
+T109 Mode Requirements:
+${
+  mode === 'voice'
+    ? `**VOICE MODE**: This bridge will be spoken via text-to-speech.
+- Use natural, conversational language that flows well when spoken
+- Avoid complex punctuation or formatting
+- Keep sentences clear and easy to understand in audio
+- Use simple, natural phrasing that sounds good when heard`
+    : `**TEXT MODE**: This bridge will be displayed as text.
+- Standard professional bridge format is fine
+- Can use standard punctuation and formatting`
+}
+
 Examples of good bridges:
 - "That's an interesting approach to stakeholder management."
 - "I appreciate your insight on technical debt and the trade-offs you mentioned."
 - "Your experience with cross-functional teams sounds valuable."
 
-Return ONLY the bridge text, no quotes, no additional formatting. Keep it concise and conversational. Do not end with a question.`;
+Return ONLY the bridge text, no quotes, no additional formatting. Keep it concise and conversational for ${mode} delivery. Do not end with a question.`;
 
   try {
     const response = await openai.chat.completions.create({

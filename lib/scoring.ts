@@ -115,7 +115,20 @@ function buildFeedbackPrompt(
   const { cv_summary, job_spec_summary, company_facts, competencies } =
     snapshot;
 
-  const conversationText = turns
+  // T109: Identify small talk turns for better context
+  const smallTalkTurns = turns.filter(
+    (turn) =>
+      turn.question.category === 'small_talk' ||
+      (turn as any).turn_type === 'small_talk'
+  );
+  const actualInterviewTurns = turns.filter(
+    (turn) =>
+      turn.question.category !== 'small_talk' &&
+      (turn as any).turn_type !== 'small_talk' &&
+      (turn as any).turn_type !== 'confirmation'
+  );
+
+  const conversationText = actualInterviewTurns
     .map((turn, index) => {
       return `
 Question ${index + 1} (${turn.question.category} - ${turn.question.difficulty}):
@@ -126,6 +139,7 @@ ${turn.answer_text || '(No answer provided)'}
 
 ${turn.timing?.duration_ms ? `Time taken: ${Math.round(turn.timing.duration_ms / 1000)}s` : ''}
 ${turn.timing?.replay_count ? `Replays: ${turn.timing.replay_count}` : ''}
+${turn.timing?.reveal_count ? `Reveals: ${turn.timing.reveal_count}` : ''}
 ---`;
     })
     .join('\n\n');
@@ -148,8 +162,19 @@ ${turn.timing?.replay_count ? `Replays: ${turn.timing.replay_count}` : ''}
 - Behavioral: ${competencies.behavioral.join(', ')}
 - Domain: ${competencies.domain.join(', ')}
 
+## Interview Context (T109)
+**Small Talk Phase**: ${smallTalkTurns.length > 0 ? `${smallTalkTurns.length} warm-up questions were asked before the formal interview` : 'No warm-up phase'}
+**Interview Format**: Text-based interview with question reveal system
+**Total Questions Evaluated**: ${actualInterviewTurns.length} (excluding warm-up)
+
 ## Interview Conversation
 ${conversationText}
+
+## T109 New Scoring Signals
+In addition to traditional evaluation criteria, consider these behavioral signals:
+- **Replay Count**: Number of times candidate requested question to be repeated (composure indicator)
+- **Reveal Count**: Number of times candidate used "Show Again" to re-display question text (comprehension indicator)  
+- **Small Talk Performance**: ${smallTalkTurns.length > 0 ? 'Candidate completed warm-up phase before formal questions' : 'Direct interview start'}
 
 ## Your Task
 Evaluate this interview performance and provide structured feedback. Consider:
@@ -160,14 +185,18 @@ Evaluate this interview performance and provide structured feedback. Consider:
    - 0-1 replays per question = confident, composed (no penalty)
    - 2 replays per question = slight hesitation (minor deduction, ~5-10 points in communication)
    - Excessive replays suggest lack of preparation or composure
+   - **T109 Reveal Signal**: Consider reveal count as a comprehension indicator
+   - 0-1 reveals per question = good comprehension (no penalty)
+   - 2+ reveals per question = difficulty retaining question information (minor deduction)
 3. **Problem Solving**: Analytical thinking, approach to challenges
 4. **Cultural Fit**: Alignment with company values and role expectations
 
-**T96 - Composure in Communication Scoring:**
-- In real interviews, composure and confidence matter
+**T109 - Enhanced Behavioral Signals in Communication Scoring:**
+- In real interviews, composure and comprehension matter
 - Replay count reflects question comprehension and preparation
-- Factor this subtly into the communication dimension score
-- Don't over-penalize - focus on answer quality first
+- Reveal count reflects ability to retain and process question information
+- Factor these subtly into the communication dimension score
+- Don't over-penalize - focus on answer quality first, behavioral signals second
 
 Provide an overall score (0-100), dimension scores, 3-5 actionable tips, and identify specific strengths and areas for improvement.
 
