@@ -505,7 +505,7 @@ export async function startInterview(sessionId: string, supabaseClient?: any) {
     .order('created_at', { ascending: true });
 
   const hasSmallTalk = existingTurns?.some(
-    (t) => (t as any).turn_type === 'small_talk'
+    (t: any) => (t as any).turn_type === 'small_talk'
   );
   const hasAnyTurns = existingTurns && existingTurns.length > 0;
 
@@ -574,7 +574,7 @@ export async function startInterview(sessionId: string, supabaseClient?: any) {
 
   // Check if we still need to create the first actual interview question
   const hasRealQuestion = existingTurns?.some(
-    (t) => (t as any).turn_type === 'question' || !(t as any).turn_type
+    (t: any) => (t as any).turn_type === 'question' || !(t as any).turn_type
   );
 
   if (!hasRealQuestion) {
@@ -641,7 +641,7 @@ export async function startInterview(sessionId: string, supabaseClient?: any) {
   }
 
   // If we reach here, return the first unanswered turn
-  const firstUnanswered = existingTurns?.find((t) => {
+  const firstUnanswered = existingTurns?.find((t: any) => {
     // Need to check if turn has an answer - fetch full turn data
     return true; // Simplified for now
   });
@@ -1070,7 +1070,7 @@ export async function getInterviewState(
     session,
     turns,
     isComplete: session.status === 'feedback' || session.status === 'complete',
-    currentTurn: turns.find((t) => !t.answer_text),
+    currentTurn: turns.find((t: any) => !t.answer_text),
   };
 }
 

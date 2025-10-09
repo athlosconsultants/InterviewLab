@@ -97,7 +97,7 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
       }
 
       if (result.data) {
-        const turnsWithTiming = (result.data.turns || []).map((turn) => {
+        const turnsWithTiming = (result.data.turns || []).map((turn: Turn) => {
           const timing = turn.timing as Timing | null;
           if (!timing?.started_at && !turn.answer_text) {
             return {
@@ -119,7 +119,9 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
         setStagesPlanned(result.data.stagesPlanned || 1);
         setStageName(result.data.stageName || '');
 
-        const firstUnanswered = turnsWithTiming.find((t) => !t.answer_text);
+        const firstUnanswered = turnsWithTiming.find(
+          (t: Turn) => !t.answer_text
+        );
         if (firstUnanswered) {
           setCurrentTurnId(firstUnanswered.id);
           // T108: Reset replay count for voice mode when setting initial turn

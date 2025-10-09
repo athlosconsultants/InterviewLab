@@ -128,22 +128,24 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
 
         if (result.data) {
           // T102: Ensure all turns have timing.started_at for countdown timer
-          const turnsWithTiming = (result.data.turns || []).map((turn) => {
-            const timing = turn.timing as Timing | null;
-            if (!timing?.started_at && !turn.answer_text) {
-              // If it's an unanswered question without timing, set it now
-              return {
-                ...turn,
-                timing: {
-                  started_at: new Date().toISOString(),
-                  completed_at: '',
-                  duration_ms: 0,
-                  replay_count: 0,
-                } as Timing,
-              };
+          const turnsWithTiming = (result.data.turns || []).map(
+            (turn: Turn) => {
+              const timing = turn.timing as Timing | null;
+              if (!timing?.started_at && !turn.answer_text) {
+                // If it's an unanswered question without timing, set it now
+                return {
+                  ...turn,
+                  timing: {
+                    started_at: new Date().toISOString(),
+                    completed_at: '',
+                    duration_ms: 0,
+                    replay_count: 0,
+                  } as Timing,
+                };
+              }
+              return turn;
             }
-            return turn;
-          });
+          );
           setTurns(turnsWithTiming);
           setCurrentTurnId(result.data.currentTurn?.id || null);
 
