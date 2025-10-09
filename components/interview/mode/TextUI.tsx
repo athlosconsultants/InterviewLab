@@ -50,7 +50,13 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
   // T94: Analyzing Answer transition state
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
-  // T100: Question Reveal System
+  // T100: Question Reveal System - only for actual interview questions
+  const currentQuestion = turns.find((t) => !t.answer_text);
+  const isCurrentQuestionSpecial =
+    currentQuestion &&
+    ((currentQuestion as any).turn_type === 'small_talk' ||
+      (currentQuestion as any).turn_type === 'confirmation');
+
   const {
     countdown,
     questionVisible,
@@ -60,7 +66,7 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
     handleReplay: handleRevealReplay,
     remainingTime,
   } = useQuestionReveal({
-    currentTurnId,
+    currentTurnId: isCurrentQuestionSpecial ? null : currentTurnId, // Disable for small talk/confirmation
     accessibilityMode,
   });
 
@@ -248,18 +254,50 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
 
           // T94: Show "Analyzing answer..." state
           setIsAnalyzing(true);
-          toast.info('Analyzing...');
+          // T106: Don't show toast for small talk/confirmation transitions
+          const currentQuestionType = turns.find((t) => t.id === currentTurnId);
+          const isSpecialTurn =
+            currentQuestionType &&
+            ((currentQuestionType as any).turn_type === 'small_talk' ||
+              (currentQuestionType as any).turn_type === 'confirmation');
+
+          if (!isSpecialTurn) {
+            toast.info('Analyzing...');
+          }
 
           // If there's a next question, add it (T91)
           const nextData = result.data as {
             done: boolean;
-            nextQuestion: Question;
+            nextQuestion: Question | null;
             turnId: string;
             bridgeText?: string | null;
             currentStage?: number;
             stagesPlanned?: number;
             stageName?: string;
           };
+
+          // T106: Handle small talk/confirmation transitions (no new question to add)
+          if (!nextData.nextQuestion) {
+            // T102: Show analyzing animation for 2 seconds for smoother transitions
+            await new Promise((resolve) => setTimeout(resolve, 2000));
+
+            // T94: Hide analyzing state
+            setIsAnalyzing(false);
+
+            // Find the next unanswered turn and set it as current
+            const nextUnanswered = turns.find(
+              (t) => t.id !== currentTurnId && !t.answer_text
+            );
+            if (nextUnanswered) {
+              setCurrentTurnId(nextUnanswered.id);
+            }
+
+            // Clear answer and reset state
+            setAnswer('');
+            setAudioBlob(null);
+            return;
+          }
+
           if (nextData.nextQuestion && nextData.turnId) {
             // T102: Show analyzing animation for 2 seconds for smoother transitions
             await new Promise((resolve) => setTimeout(resolve, 2000));
@@ -278,7 +316,7 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
                   description: 'Next stage',
                 }
               );
-            } else {
+            } else if (!isSpecialTurn) {
               toast.success('Next question');
             }
 
@@ -351,8 +389,6 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
       </div>
     );
   }
-
-  const currentQuestion = turns.find((t) => !t.answer_text);
 
   return (
     <div className="mx-auto w-full max-w-4xl p-4 space-y-6">

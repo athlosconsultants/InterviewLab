@@ -616,16 +616,47 @@ export async function submitAnswer(params: {
     (session as any).conversation_summary || null
   );
 
+  // T106: Check if the current turn is a small talk or confirmation turn
+  const currentTurnType = (turn as any).turn_type;
+
+  // T106: For small talk, just return done:false with no next question
+  // The UI will show the next unanswered turn automatically
+  if (currentTurnType === 'small_talk') {
+    return {
+      done: false,
+      nextQuestion: null,
+    };
+  }
+
   // T90: Fetch turns with answer_text for context-aware question generation
   // T106: Fetch turn_type to exclude small talk from counts
   const { data: allTurns, error: turnsError } = await supabase
     .from('turns')
-    .select('question, answer_digest, answer_text, turn_type')
+    .select('id, question, answer_digest, answer_text, turn_type')
     .eq('session_id', sessionId)
     .order('created_at', { ascending: true });
 
   if (turnsError) {
     throw new Error('Failed to fetch turns');
+  }
+
+  // T106: For confirmation turn, check if there's already an unanswered actual interview question
+  if (currentTurnType === 'confirmation') {
+    const existingQuestion = allTurns.find(
+      (t) =>
+        !t.answer_text &&
+        ((t as any).turn_type === 'question' || !(t as any).turn_type)
+    );
+
+    if (existingQuestion) {
+      // There's already an unanswered actual interview question, return it
+      return {
+        done: false,
+        nextQuestion: existingQuestion.question as Question,
+        turnId: existingQuestion.id,
+      };
+    }
+    // If no existing question, continue to generate one below
   }
 
   const questionCap = (session.limits as any)?.question_cap || 3;
@@ -706,9 +737,10 @@ export async function submitAnswer(params: {
   }
 
   // Generate next question (T91: with stage information, T106: using actualQuestions count)
+  // NOTE: Pass allTurns (including small talk) for context, but use actualQuestions for counting
   const nextQuestion = await generateQuestion({
     researchSnapshot,
-    previousTurns: actualQuestions as any,
+    previousTurns: allTurns as any, // Include small talk for context
     questionNumber: actualQuestions.length + 1,
     totalQuestions: questionCap,
     currentStage: newStage,
