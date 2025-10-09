@@ -20,6 +20,7 @@ import { Label } from '@/components/ui/label';
 import { UpgradeDialog } from '../UpgradeDialog';
 import { useQuestionReveal } from '@/hooks/useQuestionReveal';
 import { trackEvent } from '@/lib/analytics'; // T110: Analytics tracking
+import { getResumeData, autoSaveSession } from '@/lib/session'; // T111: Session resume
 
 interface InterviewUIProps {
   sessionId: string;
@@ -50,6 +51,11 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
 
   // T94: Analyzing Answer transition state
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+
+  // T111: Resume functionality state
+  const [resumeChecked, setResumeChecked] = useState(false);
+  const [resumeMessage, setResumeMessage] = useState<string | null>(null);
+  const [canResume, setCanResume] = useState(false);
 
   // T100: Question Reveal System - only for actual interview questions
   const currentQuestion = turns.find((t) => !t.answer_text);
@@ -86,6 +92,26 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
   useEffect(() => {
     const init = async () => {
       setIsLoading(true);
+
+      // T111: Check if interview can be resumed before initializing
+      if (!resumeChecked) {
+        try {
+          const resumeData = await getResumeData(sessionId);
+          setResumeChecked(true);
+          setCanResume(resumeData.canResume);
+          setResumeMessage(resumeData.message);
+
+          if (resumeData.canResume) {
+            toast.info('Interview resumed', {
+              description: resumeData.message,
+            });
+          }
+        } catch (error) {
+          console.error('[T111] Resume check failed:', error);
+          // Continue with normal initialization if resume check fails
+        }
+      }
+
       try {
         const result = await initializeInterview(sessionId);
 
@@ -428,6 +454,22 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
       }
     }
   }, [currentQuestion?.id, sessionId, questionNumber]);
+
+  // T111: Auto-save session progress every 10 seconds
+  useEffect(() => {
+    if (!isLoading && turns.length > 0) {
+      const autoSaveInterval = setInterval(async () => {
+        try {
+          await autoSaveSession(sessionId);
+          console.log('[T111] Auto-saved session progress');
+        } catch (error) {
+          console.error('[T111] Auto-save failed:', error);
+        }
+      }, 10000); // 10 seconds
+
+      return () => clearInterval(autoSaveInterval);
+    }
+  }, [sessionId, isLoading, turns.length]);
 
   if (isLoading) {
     return (

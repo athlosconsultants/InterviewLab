@@ -15,6 +15,7 @@ import { VoiceOrb } from '../VoiceOrb';
 import { AudioRecorder } from '../AudioRecorder';
 import { UpgradeDialog } from '../UpgradeDialog';
 import { trackEvent } from '@/lib/analytics'; // T110: Analytics tracking
+import { getResumeData, autoSaveSession } from '@/lib/session'; // T111: Session resume
 
 interface VoiceUIProps {
   sessionId: string;
@@ -44,6 +45,11 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
   const [stagesPlanned, setStagesPlanned] = useState(1);
   const [stageName, setStageName] = useState('');
 
+  // T111: Resume functionality state
+  const [resumeChecked, setResumeChecked] = useState(false);
+  const [resumeMessage, setResumeMessage] = useState<string | null>(null);
+  const [canResume, setCanResume] = useState(false);
+
   // Audio playback
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
@@ -56,6 +62,26 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
   useEffect(() => {
     const loadInterview = async () => {
       setIsLoading(true);
+
+      // T111: Check if interview can be resumed before initializing
+      if (!resumeChecked) {
+        try {
+          const resumeData = await getResumeData(sessionId);
+          setResumeChecked(true);
+          setCanResume(resumeData.canResume);
+          setResumeMessage(resumeData.message);
+
+          if (resumeData.canResume) {
+            toast.info('Interview resumed', {
+              description: resumeData.message,
+            });
+          }
+        } catch (error) {
+          console.error('[T111] Resume check failed:', error);
+          // Continue with normal initialization if resume check fails
+        }
+      }
+
       const result = await initializeInterview(sessionId);
 
       if (result.error) {
@@ -120,6 +146,22 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
       });
     }
   }, [turns, sessionId]);
+
+  // T111: Auto-save session progress every 10 seconds
+  useEffect(() => {
+    if (!isLoading && turns.length > 0) {
+      const autoSaveInterval = setInterval(async () => {
+        try {
+          await autoSaveSession(sessionId);
+          console.log('[T111] Auto-saved session progress');
+        } catch (error) {
+          console.error('[T111] Auto-save failed:', error);
+        }
+      }, 10000); // 10 seconds
+
+      return () => clearInterval(autoSaveInterval);
+    }
+  }, [sessionId, isLoading, turns.length]);
 
   // Auto-play TTS for intro, then play first question after completion
   useEffect(() => {

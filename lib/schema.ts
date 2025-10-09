@@ -295,6 +295,16 @@ export interface Entitlement {
   created_at: string;
 }
 
+// T111: Resume progress state
+export interface ResumeProgressState {
+  current_turn_id: string | null;
+  last_completed_turn_id: string | null;
+  answered_count: number;
+  total_expected: number;
+  interview_phase: 'small_talk' | 'confirmation' | 'interview' | 'complete';
+  last_save_timestamp: string;
+}
+
 // Session type (from sessions table)
 export interface Session {
   id: string;
@@ -313,6 +323,9 @@ export interface Session {
   entitlement_id: string | null;
   intro_text: string | null;
   conversation_summary: string | null; // T95: Rolling summary of conversation
+  turn_index: number; // T111: Current turn index for resume
+  progress_state: ResumeProgressState | Json | null; // T111: Resume state data
+  last_activity: string; // T111: Last activity timestamp
   created_at: string;
   updated_at: string;
 }

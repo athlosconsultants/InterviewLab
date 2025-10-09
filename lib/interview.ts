@@ -1,5 +1,6 @@
 import { openai, MODELS } from './openai';
 import { createClient } from './supabase-server';
+import { saveSessionProgress } from './session'; // T111: Session resume functionality
 import type {
   ResearchSnapshot,
   Question,
@@ -709,6 +710,42 @@ export async function submitAnswer(params: {
     qaSummary,
     (session as any).conversation_summary || null
   );
+
+  // T111: Save session progress after answer submission
+  try {
+    const allTurnsForProgress = await supabase
+      .from('turns')
+      .select('id, answer_text, turn_type')
+      .eq('session_id', sessionId)
+      .order('created_at', { ascending: true });
+
+    if (allTurnsForProgress.data) {
+      const turns = allTurnsForProgress.data;
+      const currentTurnIndex = turns.findIndex((t) => t.id === turnId);
+      const nextUnanswered = turns.find(
+        (t) => !t.answer_text && t.id !== turnId
+      );
+
+      // Determine current interview phase
+      let phase: 'small_talk' | 'confirmation' | 'interview' | 'complete' =
+        'interview';
+      if ((turn as any).turn_type === 'small_talk') phase = 'small_talk';
+      else if ((turn as any).turn_type === 'confirmation')
+        phase = 'confirmation';
+      else if (!nextUnanswered) phase = 'complete';
+
+      await saveSessionProgress(
+        sessionId,
+        nextUnanswered?.id || null,
+        turnId, // This turn is now completed
+        currentTurnIndex + 1, // Next turn index
+        phase
+      );
+    }
+  } catch (error) {
+    console.error('[T111] Failed to save session progress:', error);
+    // Don't throw - resume saving shouldn't break the flow
+  }
 
   // T106: Check if the current turn is a small talk or confirmation turn
   const currentTurnType = (turn as any).turn_type;
