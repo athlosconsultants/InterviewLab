@@ -517,17 +517,13 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
           <div>
             <h1 className="text-2xl font-bold">{jobTitle}</h1>
             <p className="text-muted-foreground">{company}</p>
-            <div className="mt-2 space-y-1">
-              <p className="text-sm text-muted-foreground">
-                Question {questionNumber} of {totalQuestions}
+            {/* T123: Removed question counter for greater immersion */}
+            {/* T91: Display stage information for multi-stage interviews */}
+            {stagesPlanned > 1 && stageName && (
+              <p className="text-sm font-medium text-primary mt-2">
+                Stage {currentStage} of {stagesPlanned}: {stageName}
               </p>
-              {/* T91: Display stage information for multi-stage interviews */}
-              {stagesPlanned > 1 && stageName && (
-                <p className="text-sm font-medium text-primary">
-                  Stage {currentStage} of {stagesPlanned}: {stageName}
-                </p>
-              )}
-            </div>
+            )}
           </div>
           <div className="flex items-center space-x-2">
             <AccessibilityIcon className="h-4 w-4 text-muted-foreground" />

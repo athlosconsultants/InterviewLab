@@ -682,11 +682,9 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
                 </p>
               )}
             </div>
+            {/* T123: Removed question counter for greater immersion */}
             <div className="text-right">
               <p className="text-sm text-muted-foreground">Voice Mode</p>
-              <p className="text-sm font-medium">
-                Question {questionCount + 1}
-              </p>
             </div>
           </div>
         </div>
