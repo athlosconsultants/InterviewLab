@@ -250,11 +250,11 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
       (t) => t.id === currentTurnId && !t.answer_text
     );
 
-    // Skip if this is the first question and we have an intro (it will be chained)
+    // T114 FIX: Always skip first question if intro exists - intro effect handles it
     const isFirstQuestion =
       turns.length > 0 && currentQuestion?.id === turns[0].id;
-    if (isFirstQuestion && introText && !introPlayed) {
-      return;
+    if (isFirstQuestion && introText) {
+      return; // Skip regardless of introPlayed state to prevent double playback
     }
 
     if (currentQuestion && !isLoading) {
