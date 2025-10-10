@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -45,6 +45,9 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
   const [accessibilityMode, setAccessibilityMode] = useState(false);
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   const [introText, setIntroText] = useState<string | null>(null);
+
+  // Prevent duplicate submissions
+  const submissionInProgress = useRef(false);
   // T91: Stage tracking
   const [currentStage, setCurrentStage] = useState(1);
   const [stagesPlanned, setStagesPlanned] = useState(1);
@@ -197,6 +200,12 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
     async (e?: React.FormEvent, allowEmpty: boolean = false) => {
       e?.preventDefault();
 
+      // Prevent duplicate submissions
+      if (submissionInProgress.current) {
+        console.log('[TextUI] Submission already in progress, ignoring');
+        return;
+      }
+
       // Validate we have an answer (text or audio) - unless allowEmpty is true
       if (answerMode === 'text' && !answer.trim() && !allowEmpty) {
         toast.error('Answer required');
@@ -213,6 +222,7 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
         return;
       }
 
+      submissionInProgress.current = true;
       setIsSubmitting(true);
 
       try {
@@ -235,6 +245,7 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
 
           if (!uploadData.success) {
             toast.error('Upload failed');
+            submissionInProgress.current = false;
             setIsSubmitting(false);
             return;
           }
@@ -255,6 +266,7 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
 
           if (!transcribeData.success) {
             toast.error('Transcription failed');
+            submissionInProgress.current = false;
             setIsSubmitting(false);
             return;
           }
@@ -284,6 +296,7 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
 
         if (result.error) {
           setIsAnalyzing(false);
+          submissionInProgress.current = false;
           toast.error('Unable to submit', {
             description: result.error,
           });
@@ -301,6 +314,7 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
           // Check if interview is complete
           if (result.data.done) {
             setIsAnalyzing(false);
+            submissionInProgress.current = false;
             toast.success('Interview complete', {
               description: 'Well done.',
             });
@@ -372,6 +386,7 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
             // Clear answer and reset state
             setAnswer('');
             setAudioBlob(null);
+            submissionInProgress.current = false;
             return;
           }
 
@@ -444,6 +459,7 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
           description: 'Please try again',
         });
       } finally {
+        submissionInProgress.current = false;
         setIsSubmitting(false);
       }
     },
