@@ -158,6 +158,7 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
 
   // Track if intro has been played to prevent double playback on Q1
   const [introPlayed, setIntroPlayed] = useState(false);
+  const introPlayingRef = useRef(false); // T114: Prevent concurrent intro playback
 
   // T115: Track interview phase for proper sequencing
   const [currentPhase, setCurrentPhase] = useState<
@@ -204,9 +205,19 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
 
   // T115: Auto-play TTS for intro, then play first turn after a pause
   useEffect(() => {
-    if (introText && turns.length > 0 && !introPlayed && !isLoading) {
+    // T114 FIX: Check both state and ref to prevent duplicate playback
+    if (
+      introText &&
+      turns.length > 0 &&
+      !introPlayed &&
+      !introPlayingRef.current &&
+      !isLoading
+    ) {
       const firstTurn = turns.find((t) => !t.answer_text);
       if (firstTurn) {
+        // T114 FIX: Set ref immediately (synchronously) to block concurrent runs
+        introPlayingRef.current = true;
+
         const turnType = (firstTurn as any).turn_type || 'question';
 
         // Set initial phase based on first turn type
