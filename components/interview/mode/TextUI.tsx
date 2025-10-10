@@ -192,17 +192,18 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
   }, [sessionId]);
 
   // T102: Wrap handleSubmit in useCallback to stabilize timer onExpire callback
+  // T121: Add flag to allow empty answer submission when timer expires
   const handleSubmit = useCallback(
-    async (e?: React.FormEvent) => {
+    async (e?: React.FormEvent, allowEmpty: boolean = false) => {
       e?.preventDefault();
 
-      // Validate we have an answer (text or audio)
-      if (answerMode === 'text' && !answer.trim()) {
+      // Validate we have an answer (text or audio) - unless allowEmpty is true
+      if (answerMode === 'text' && !answer.trim() && !allowEmpty) {
         toast.error('Answer required');
         return;
       }
 
-      if (answerMode === 'audio' && !audioBlob) {
+      if (answerMode === 'audio' && !audioBlob && !allowEmpty) {
         toast.error('Recording required');
         return;
       }
@@ -725,11 +726,10 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
                           (currentQuestion.timing as Timing).started_at
                         }
                         onExpire={() => {
-                          toast.warning('Time is up', {
-                            description: 'Auto-submitting...',
-                          });
-                          // Auto-submit the current answer
-                          handleSubmit();
+                          // T121: Auto-submit with allowEmpty flag
+                          toast.warning("Time's up – moving on");
+                          // Auto-submit even if answer is empty
+                          handleSubmit(undefined, true);
                         }}
                       />
                     )}
