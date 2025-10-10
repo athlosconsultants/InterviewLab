@@ -28,11 +28,12 @@ export function VoiceOrb({ state, size = 'lg' }: VoiceOrbProps) {
     lg: 'w-48 h-48',
   };
 
+  // T116: Updated processing state to muted grey
   const stateColors = {
     idle: 'bg-gradient-to-br from-primary/20 to-primary/40',
     speaking: 'bg-gradient-to-br from-primary to-primary/60',
     listening: 'bg-gradient-to-br from-blue-500 to-blue-600',
-    processing: 'bg-gradient-to-br from-purple-500 to-purple-600',
+    processing: 'bg-gradient-to-br from-gray-400 to-gray-500', // T116: Muted grey
   };
 
   return (
@@ -79,7 +80,7 @@ export function VoiceOrb({ state, size = 'lg' }: VoiceOrbProps) {
               'scale-100': state === 'idle',
               'scale-105': state === 'speaking',
               'scale-110': state === 'listening',
-              'animate-pulse': state === 'processing',
+              'animate-pulse-slow': state === 'processing', // T116: Slow pulse for processing
             }
           )}
         >
