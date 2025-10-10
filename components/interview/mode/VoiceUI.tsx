@@ -75,6 +75,11 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
     setIsPlayingAudio(false);
   }, []);
 
+  // T115: Helper to add a pause/delay in the audio flow
+  const pauseBetweenSections = (ms: number = 1500): Promise<void> => {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  };
+
   // Initialize interview
   useEffect(() => {
     const loadInterview = async () => {
@@ -154,6 +159,11 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
   // Track if intro has been played to prevent double playback on Q1
   const [introPlayed, setIntroPlayed] = useState(false);
 
+  // T115: Track interview phase for proper sequencing
+  const [currentPhase, setCurrentPhase] = useState<
+    'welcome' | 'smalltalk' | 'confirmation' | 'interview' | 'complete'
+  >('welcome');
+
   // T110: Track when small talk is shown in voice mode
   useEffect(() => {
     const currentQuestion = turns.find((t) => !t.answer_text);
@@ -192,26 +202,48 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
     };
   }, [stopAllAudio]);
 
-  // Auto-play TTS for intro, then play first question after completion
+  // T115: Auto-play TTS for intro, then play first turn after a pause
   useEffect(() => {
     if (introText && turns.length > 0 && !introPlayed && !isLoading) {
-      const firstQuestion = turns.find((t) => !t.answer_text);
-      if (firstQuestion) {
-        // Play intro first, then chain to first question
-        playTextToSpeech(introText, 'intro', () => {
+      const firstTurn = turns.find((t) => !t.answer_text);
+      if (firstTurn) {
+        const turnType = (firstTurn as any).turn_type || 'question';
+
+        // Set initial phase based on first turn type
+        if (turnType === 'small_talk') {
+          setCurrentPhase('smalltalk');
+        } else if (turnType === 'confirmation') {
+          setCurrentPhase('confirmation');
+        } else {
+          setCurrentPhase('interview');
+        }
+
+        // Play intro with pause before first turn
+        playTextToSpeech(introText, 'intro', async () => {
           setIntroPlayed(true);
-          const questionText = firstQuestion.question.text;
-          const bridgeText = firstQuestion.bridge_text;
-          const fullText = bridgeText
-            ? `${bridgeText} ${questionText}`
-            : questionText;
-          playQuestionTTS(firstQuestion.id, fullText);
+
+          // T115: Add pause after welcome message
+          await pauseBetweenSections(2000); // 2 second pause after intro
+
+          // Play the first turn
+          const questionText = firstTurn.question.text;
+          const bridgeText = firstTurn.bridge_text;
+
+          // T115: Play bridge separately if it exists
+          if (bridgeText) {
+            await playTextToSpeech(bridgeText, 'bridge', async () => {
+              await pauseBetweenSections(800); // Brief pause after bridge
+              playQuestionTTS(firstTurn.id, questionText);
+            });
+          } else {
+            playQuestionTTS(firstTurn.id, questionText);
+          }
         });
       }
     }
   }, [introText, turns, introPlayed, isLoading]);
 
-  // Auto-play TTS for new questions (merge bridge into spoken question)
+  // T115: Auto-play TTS for new questions with proper sequencing
   // Skip first question if intro exists (it's chained after intro)
   useEffect(() => {
     const currentQuestion = turns.find(
@@ -226,15 +258,29 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
     }
 
     if (currentQuestion && !isLoading) {
+      const turnType = (currentQuestion as any).turn_type || 'question';
+
+      // T115: Update phase based on turn type
+      if (turnType === 'small_talk') {
+        setCurrentPhase('smalltalk');
+      } else if (turnType === 'confirmation') {
+        setCurrentPhase('confirmation');
+      } else {
+        setCurrentPhase('interview');
+      }
+
       const questionText = currentQuestion.question.text;
       const bridgeText = currentQuestion.bridge_text;
 
-      // Merge bridge + question for seamless TTS playback
-      const fullText = bridgeText
-        ? `${bridgeText} ${questionText}`
-        : questionText;
-
-      playQuestionTTS(currentQuestion.id, fullText);
+      // T115: Play bridge separately with pauses for better flow
+      if (bridgeText) {
+        playTextToSpeech(bridgeText, 'bridge', async () => {
+          await pauseBetweenSections(800); // Brief pause after bridge
+          playQuestionTTS(currentQuestion.id, questionText);
+        });
+      } else {
+        playQuestionTTS(currentQuestion.id, questionText);
+      }
     }
   }, [currentTurnId, turns, isLoading, introText, introPlayed]);
 
@@ -493,6 +539,7 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
 
           if (result.data.done) {
             setOrbState('idle');
+            setCurrentPhase('complete'); // T115: Mark as complete
             toast.success('Interview complete', {
               description: 'Well done.',
             });
@@ -546,6 +593,31 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
               created_at: new Date().toISOString(),
             } as Turn;
 
+            // T115: Add pause between sections based on phase transitions
+            const currentTurn = turns.find((t) => t.id === currentTurnId);
+            const currentTurnType =
+              (currentTurn as any)?.turn_type || 'question';
+            const nextTurnType = (newTurn as any).turn_type || 'question';
+
+            // Add longer pause when transitioning from small talk → confirmation or confirmation → interview
+            let pauseDuration = 1000; // Default pause
+            if (
+              currentTurnType === 'small_talk' &&
+              nextTurnType === 'small_talk'
+            ) {
+              pauseDuration = 1200; // Between small talk questions
+            } else if (
+              currentTurnType === 'small_talk' &&
+              nextTurnType === 'confirmation'
+            ) {
+              pauseDuration = 1500; // Before confirmation
+            } else if (
+              currentTurnType === 'confirmation' &&
+              nextTurnType === 'question'
+            ) {
+              pauseDuration = 2000; // Before main interview
+            }
+
             setTurns((prev) => [...prev, newTurn]);
             setCurrentTurnId(nextData.turnId);
             // T108: Reset replay count for voice mode when setting new turn
@@ -555,6 +627,9 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
             if (nextData.stagesPlanned)
               setStagesPlanned(nextData.stagesPlanned);
             if (nextData.stageName) setStageName(nextData.stageName);
+
+            // T115: Add the calculated pause before transitioning
+            await pauseBetweenSections(pauseDuration);
           }
 
           // T113: Ensure smooth transition with dynamic timing
