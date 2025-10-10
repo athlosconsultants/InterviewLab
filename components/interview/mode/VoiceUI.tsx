@@ -305,7 +305,8 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
       // T114: Cancel any existing audio before starting new playback
       stopAllAudio();
 
-      setOrbState('speaking');
+      console.log(`[OrbState] Generating TTS for ${type}...`);
+      setOrbState('processing'); // Show processing while generating audio
 
       // T114: Use OpenAI TTS API for consistent voice
       const response = await fetch('/api/tts', {
@@ -328,23 +329,33 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
       const audio = new Audio(data.audioUrl);
       audioRef.current = audio;
 
+      // Event-driven state management
+      audio.onplay = () => {
+        console.log(
+          `[OrbState] processing → speaking (${type} playback started)`
+        );
+        setOrbState('speaking');
+        setIsPlayingAudio(true);
+      };
+
       audio.onended = () => {
-        setOrbState('idle');
+        console.log(`[OrbState] speaking → ready (${type} playback ended)`);
+        setOrbState('ready');
         setIsPlayingAudio(false);
         if (onComplete) onComplete();
       };
 
       audio.onerror = () => {
-        setOrbState('idle');
+        console.error(`[OrbState] Audio error for ${type}`);
+        setOrbState('ready');
         setIsPlayingAudio(false);
         toast.error('Audio playback failed');
       };
 
       await audio.play();
-      setIsPlayingAudio(true);
     } catch (error) {
       console.error('TTS error:', error);
-      setOrbState('idle');
+      setOrbState('ready');
       toast.error('Unable to play audio');
     }
   };
@@ -354,7 +365,8 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
       // T114: Cancel any existing audio before starting new playback
       stopAllAudio();
 
-      setOrbState('speaking');
+      console.log(`[OrbState] Generating TTS for question...`);
+      setOrbState('processing'); // Show processing while generating audio
 
       const response = await fetch('/api/tts', {
         method: 'POST',
@@ -378,8 +390,20 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
       const audio = new Audio(data.audioUrl);
       audioRef.current = audio;
 
+      // Event-driven state management
+      audio.onplay = () => {
+        console.log(
+          `[OrbState] processing → speaking (question playback started)`
+        );
+        setOrbState('speaking');
+        setIsPlayingAudio(true);
+      };
+
       audio.onended = () => {
-        setOrbState('idle');
+        console.log(
+          `[OrbState] speaking → ready (question playback ended, awaiting user input)`
+        );
+        setOrbState('ready');
         setIsPlayingAudio(false);
 
         // T110: Track successful orb autoplay completion
@@ -391,16 +415,16 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
       };
 
       audio.onerror = () => {
-        setOrbState('idle');
+        console.error(`[OrbState] Audio error for question`);
+        setOrbState('ready');
         setIsPlayingAudio(false);
         toast.error('Audio playback failed');
       };
 
       await audio.play();
-      setIsPlayingAudio(true);
     } catch (error) {
       console.error('TTS error:', error);
-      setOrbState('idle');
+      setOrbState('ready');
       toast.error('Unable to play question audio');
     }
   };
@@ -425,10 +449,12 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
       return newCount;
     });
 
+    console.log(`[OrbState] ready → speaking (replaying question)`);
     setOrbState('speaking');
     audioRef.current.currentTime = 0;
     audioRef.current.play().catch(() => {
-      setOrbState('idle');
+      console.error(`[OrbState] Replay failed`);
+      setOrbState('ready');
       toast.error('Replay failed');
     });
   }, [currentAudioUrl]);
@@ -453,6 +479,7 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
       }
 
       setIsSubmitting(true);
+      console.log(`[OrbState] ready → processing (user submitted answer)`);
       setOrbState('processing');
 
       try {
@@ -474,7 +501,8 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
 
           if (!uploadData.success) {
             toast.error('Upload failed');
-            setOrbState('idle');
+            console.error(`[OrbState] Upload failed, returning to ready`);
+            setOrbState('ready');
             setIsSubmitting(false);
             return;
           }
@@ -495,7 +523,10 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
 
           if (!transcribeData.success) {
             toast.error('Transcription failed');
-            setOrbState('idle');
+            console.error(
+              `[OrbState] Transcription failed, returning to ready`
+            );
+            setOrbState('ready');
             setIsSubmitting(false);
             return;
           }
@@ -537,7 +568,8 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
           toast.error('Unable to submit', {
             description: result.error,
           });
-          setOrbState('idle');
+          console.error(`[OrbState] Submit failed, returning to ready`);
+          setOrbState('ready');
           return;
         }
 
@@ -549,7 +581,8 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
           );
 
           if (result.data.done) {
-            setOrbState('idle');
+            console.log(`[OrbState] processing → ready (interview complete)`);
+            setOrbState('ready');
             setCurrentPhase('complete'); // T115: Mark as complete
             toast.success('Interview complete', {
               description: 'Well done.',
@@ -690,14 +723,16 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
 
           setAnswer('');
           setAudioBlob(null);
-          setOrbState('idle');
+          // Don't set orb state here - let audio playback handle state transitions
+          // The orb will remain in 'processing' until audio starts playing
         }
       } catch (error) {
         console.error('Submit error:', error);
         toast.error('Something went wrong', {
           description: 'Please try again',
         });
-        setOrbState('idle');
+        console.error(`[OrbState] Submit error, returning to ready`);
+        setOrbState('ready');
       } finally {
         setIsSubmitting(false);
       }
