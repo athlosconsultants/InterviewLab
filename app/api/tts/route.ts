@@ -13,48 +13,52 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { text, turnId } = await request.json();
+    const { text, turnId, type = 'question' } = await request.json();
 
     if (!text || typeof text !== 'string') {
       return NextResponse.json({ error: 'Text is required' }, { status: 400 });
     }
 
-    if (!turnId) {
-      return NextResponse.json(
-        { error: 'Turn ID is required' },
-        { status: 400 }
-      );
-    }
+    // T114: turnId is optional for intro/bridge audio
+    // For intro/bridge, we generate audio without caching in turns table
+    let ttsKey: string | null = null;
 
-    // Verify turn belongs to user
-    const { data: turn, error: turnError } = await supabase
-      .from('turns')
-      .select('id, user_id, tts_key')
-      .eq('id', turnId)
-      .eq('user_id', user.id)
-      .single();
+    if (turnId) {
+      // Verify turn belongs to user
+      const { data: turn, error: turnError } = await supabase
+        .from('turns')
+        .select('id, user_id, tts_key')
+        .eq('id', turnId)
+        .eq('user_id', user.id)
+        .single();
 
-    if (turnError || !turn) {
-      return NextResponse.json({ error: 'Turn not found' }, { status: 404 });
-    }
-
-    // Check if TTS already exists for this turn
-    if (turn.tts_key) {
-      // Get a signed URL for the cached audio (valid for 1 hour)
-      const { data: audioData, error: signError } = await supabase.storage
-        .from('audio')
-        .createSignedUrl(turn.tts_key, 3600);
-
-      if (signError || !audioData) {
-        console.error('Failed to get signed URL for cached audio:', signError);
-        // Fall through to regenerate
-      } else {
-        return NextResponse.json({
-          success: true,
-          audioUrl: audioData.signedUrl,
-          cached: true,
-        });
+      if (turnError || !turn) {
+        return NextResponse.json({ error: 'Turn not found' }, { status: 404 });
       }
+
+      // Check if TTS already exists for this turn
+      if (turn.tts_key) {
+        // Get a signed URL for the cached audio (valid for 1 hour)
+        const { data: audioData, error: signError } = await supabase.storage
+          .from('audio')
+          .createSignedUrl(turn.tts_key, 3600);
+
+        if (signError || !audioData) {
+          console.error(
+            'Failed to get signed URL for cached audio:',
+            signError
+          );
+          // Fall through to regenerate
+        } else {
+          return NextResponse.json({
+            success: true,
+            audioUrl: audioData.signedUrl,
+            cached: true,
+          });
+        }
+      }
+
+      ttsKey = turn.tts_key;
     }
 
     // Generate TTS audio using OpenAI
@@ -68,8 +72,11 @@ export async function POST(request: NextRequest) {
     // Convert response to buffer
     const buffer = Buffer.from(await mp3.arrayBuffer());
 
-    // Upload to Supabase Storage
-    const storageKey = `${user.id}/tts_${turnId}_${Date.now()}.mp3`;
+    // T114: Generate storage key based on type
+    const storageKey = turnId
+      ? `${user.id}/tts_${turnId}_${Date.now()}.mp3`
+      : `${user.id}/tts_${type}_${Date.now()}.mp3`;
+
     const { data: uploadData, error: uploadError } = await supabase.storage
       .from('audio')
       .upload(storageKey, buffer, {
@@ -86,14 +93,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Update turn with TTS key
-    const { error: updateError } = await supabase
-      .from('turns')
-      .update({ tts_key: uploadData.path })
-      .eq('id', turnId);
+    // T114: Only update turn if turnId is provided
+    if (turnId) {
+      const { error: updateError } = await supabase
+        .from('turns')
+        .update({ tts_key: uploadData.path })
+        .eq('id', turnId);
 
-    if (updateError) {
-      console.error('Failed to update turn with TTS key:', updateError);
+      if (updateError) {
+        console.error('Failed to update turn with TTS key:', updateError);
+      }
     }
 
     // Get signed URL (valid for 1 hour)

@@ -59,6 +59,22 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
   // T108: Replay count tracking for voice mode scoring
   const [replayCount, setReplayCount] = useState(0);
 
+  // T114: Unified audio cancellation to prevent overlaps
+  const stopAllAudio = useCallback(() => {
+    // Stop any browser TTS
+    if (window.speechSynthesis.speaking) {
+      window.speechSynthesis.cancel();
+    }
+
+    // Stop any Audio element playback
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+
+    setIsPlayingAudio(false);
+  }, []);
+
   // Initialize interview
   useEffect(() => {
     const loadInterview = async () => {
@@ -169,6 +185,13 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
     }
   }, [sessionId, isLoading, turns.length]);
 
+  // T114: Cleanup audio on unmount
+  useEffect(() => {
+    return () => {
+      stopAllAudio();
+    };
+  }, [stopAllAudio]);
+
   // Auto-play TTS for intro, then play first question after completion
   useEffect(() => {
     if (introText && turns.length > 0 && !introPlayed && !isLoading) {
@@ -215,39 +238,65 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
     }
   }, [currentTurnId, turns, isLoading, introText, introPlayed]);
 
+  // T114: Updated to use OpenAI TTS consistently for intro/bridge
   const playTextToSpeech = async (
     text: string,
     type: 'intro' | 'bridge',
     onComplete?: () => void
   ) => {
     try {
+      // T114: Cancel any existing audio before starting new playback
+      stopAllAudio();
+
       setOrbState('speaking');
 
-      // For intro/bridge, we just use browser TTS for now
-      // In production, you'd want to call the TTS API
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = 1.0;
-      utterance.pitch = 1.0;
+      // T114: Use OpenAI TTS API for consistent voice
+      const response = await fetch('/api/tts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text: text,
+          type: type,
+          // No turnId for intro/bridge audio
+        }),
+      });
 
-      utterance.onend = () => {
+      const data = await response.json();
+
+      if (!data.success || !data.audioUrl) {
+        throw new Error('Failed to generate audio');
+      }
+
+      // Create and play audio
+      const audio = new Audio(data.audioUrl);
+      audioRef.current = audio;
+
+      audio.onended = () => {
         setOrbState('idle');
+        setIsPlayingAudio(false);
         if (onComplete) onComplete();
       };
 
-      utterance.onerror = () => {
+      audio.onerror = () => {
         setOrbState('idle');
-        toast.error('Speech playback failed');
+        setIsPlayingAudio(false);
+        toast.error('Audio playback failed');
       };
 
-      window.speechSynthesis.speak(utterance);
+      await audio.play();
+      setIsPlayingAudio(true);
     } catch (error) {
       console.error('TTS error:', error);
       setOrbState('idle');
+      toast.error('Unable to play audio');
     }
   };
 
   const playQuestionTTS = async (turnId: string, questionText: string) => {
     try {
+      // T114: Cancel any existing audio before starting new playback
+      stopAllAudio();
+
       setOrbState('speaking');
 
       const response = await fetch('/api/tts', {
@@ -256,6 +305,7 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
         body: JSON.stringify({
           text: questionText,
           turnId: turnId,
+          type: 'question',
         }),
       });
 
@@ -302,6 +352,11 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
     if (!currentAudioUrl || !audioRef.current) {
       toast.error('No audio to replay');
       return;
+    }
+
+    // T114: Stop any other audio first (e.g., browser TTS)
+    if (window.speechSynthesis.speaking) {
+      window.speechSynthesis.cancel();
     }
 
     // T108: Increment replay count for voice mode

@@ -1043,7 +1043,55 @@ ALTER TABLE sessions ADD COLUMN IF NOT EXISTS difficulty_curve JSON;
 - Console logs show actual generation time for optimization
 - Warnings logged if latency exceeds 1500ms target
 
-## Phase 11 — Payments (Optional for MVP)
+## Phase 11 — Immersion & Polish
+
+### T114 — Unified TTS Voice and Playback Control
+
+Use one consistent TTS voice across welcome, bridge, and questions.  
+Prevent overlapping audio by cancelling previous `AudioContext` sources before new playback.
+
+### T115 — Voice Interview Flow Sequencing
+
+Implement the complete scripted flow:  
+Welcome (no input) → warm-up 1 → bridge → warm-up 2 → ready-check → bridge → main intro → pause → Q1.  
+Handle transitions via queued async events; confirm identical logic for text mode.
+
+### T116 — Voice Orb Visual Polish
+
+Replace flashing purple animation with muted-grey slow-pulse “analysis” state.  
+Keep “speaking”/“listening” colours distinct but subtle.
+
+### T117 — Flow Validation Audit (Voice)
+
+End-to-end QA: verify single-voice playback, correct ordering, pause timing, and state recovery if user interacts mid-audio.
+
+### T118 — Text Mode Warm-Up Integration
+
+Apply the same welcome + small-talk + ready-check flow to text mode, sharing backend logic.
+
+### T119 — Bridge Visibility Sync
+
+Hide bridge text whenever its associated question hides; unhide together on replay.
+
+### T120 — Analyzing UI Redesign
+
+Minimalist fade-in/out animation with subtle spinner or three-dot pulse.  
+Ensure total transition ≈ 0.5–1 s for smoothness.
+
+### T121 — Countdown Auto-Advance
+
+On timer expiry, auto-submit current answer (blank if none) and move to next question.  
+Show toast “Time’s up – moving on”.
+
+### T122 — Checklist Centering
+
+Center the dynamic checklist animation on the “Setting Up Interview” screen (flexbox + justify/align center).
+
+### T123 — Hide Question Counter
+
+Remove “Question X of Y” from both UIs; retain internal progress tracking only.
+
+## Phase 12 — Payments (Optional for MVP)
 
 ### T114 — Pricing UI + Upgrade Dialog
 
@@ -1075,7 +1123,7 @@ ALTER TABLE sessions ADD COLUMN IF NOT EXISTS difficulty_curve JSON;
 
 ---
 
-## Phase 12 — Production Hardening
+## Phase 13 — Production Hardening
 
 ### T118 — Security Headers
 
