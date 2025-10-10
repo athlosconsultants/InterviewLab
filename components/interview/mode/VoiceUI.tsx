@@ -59,6 +59,10 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
   // T108: Replay count tracking for voice mode scoring
   const [replayCount, setReplayCount] = useState(0);
 
+  // Autoplay blocker handling for browser restrictions
+  const [needsUserInteraction, setNeedsUserInteraction] = useState(false);
+  const [hasUserInteracted, setHasUserInteracted] = useState(false);
+
   // T114: Unified audio cancellation to prevent overlaps
   const stopAllAudio = useCallback(() => {
     // Stop any browser TTS
@@ -352,7 +356,20 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
         toast.error('Audio playback failed');
       };
 
-      await audio.play();
+      try {
+        await audio.play();
+      } catch (playError: any) {
+        // Handle autoplay blocking
+        if (playError.name === 'NotAllowedError') {
+          console.warn(
+            '[OrbState] Autoplay blocked - requiring user interaction'
+          );
+          setNeedsUserInteraction(true);
+          setOrbState('ready');
+        } else {
+          throw playError;
+        }
+      }
     } catch (error) {
       console.error('TTS error:', error);
       setOrbState('ready');
@@ -421,13 +438,76 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
         toast.error('Audio playback failed');
       };
 
-      await audio.play();
+      try {
+        await audio.play();
+      } catch (playError: any) {
+        // Handle autoplay blocking
+        if (playError.name === 'NotAllowedError') {
+          console.warn(
+            '[OrbState] Autoplay blocked - requiring user interaction'
+          );
+          setNeedsUserInteraction(true);
+          setOrbState('ready');
+        } else {
+          throw playError;
+        }
+      }
     } catch (error) {
       console.error('TTS error:', error);
       setOrbState('ready');
       toast.error('Unable to play question audio');
     }
   };
+
+  // Handle user interaction to resume audio after autoplay block
+  const handleResumeWithInteraction = useCallback(() => {
+    console.log('[OrbState] User clicked to resume - enabling audio playback');
+    setHasUserInteracted(true);
+    setNeedsUserInteraction(false);
+
+    // Retry playing the current question or intro
+    const currentQuestion = turns.find((t) => t.id === currentTurnId);
+    if (currentQuestion && !currentQuestion.answer_text) {
+      const questionText = currentQuestion.question.text;
+      const bridgeText = currentQuestion.bridge_text;
+
+      if (bridgeText) {
+        playTextToSpeech(bridgeText, 'bridge', async () => {
+          await pauseBetweenSections(800);
+          playQuestionTTS(currentQuestion.id, questionText);
+        });
+      } else {
+        playQuestionTTS(currentQuestion.id, questionText);
+      }
+    } else if (introText && !introPlayed && turns.length > 0) {
+      // Replay intro if we haven't done so yet
+      const firstTurn = turns.find((t) => !t.answer_text);
+      if (firstTurn) {
+        playTextToSpeech(introText, 'intro', async () => {
+          setIntroPlayed(true);
+          await pauseBetweenSections(2000);
+          const questionText = firstTurn.question.text;
+          const bridgeText = firstTurn.bridge_text;
+          if (bridgeText) {
+            await playTextToSpeech(bridgeText, 'bridge', async () => {
+              await pauseBetweenSections(800);
+              playQuestionTTS(firstTurn.id, questionText);
+            });
+          } else {
+            playQuestionTTS(firstTurn.id, questionText);
+          }
+        });
+      }
+    }
+  }, [
+    turns,
+    currentTurnId,
+    introText,
+    introPlayed,
+    playTextToSpeech,
+    playQuestionTTS,
+    pauseBetweenSections,
+  ]);
 
   const handleReplay = useCallback(() => {
     if (!currentAudioUrl || !audioRef.current) {
@@ -779,7 +859,24 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
         <div className="flex flex-col items-center justify-center py-12">
           <VoiceOrb state={orbState} size="lg" />
 
-          {currentQuestion && (
+          {/* Resume button for autoplay block */}
+          {needsUserInteraction && (
+            <div className="mt-8 text-center space-y-4">
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground">
+                  Browser blocked automatic audio playback
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Click below to continue your interview
+                </p>
+              </div>
+              <Button onClick={handleResumeWithInteraction} size="lg">
+                Click to Continue Interview
+              </Button>
+            </div>
+          )}
+
+          {currentQuestion && !needsUserInteraction && (
             <div className="mt-8 flex items-center gap-3">
               <Button
                 variant="outline"
@@ -801,7 +898,7 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
         </div>
 
         {/* Answer Input */}
-        {currentQuestion && !isSubmitting && (
+        {currentQuestion && !isSubmitting && !needsUserInteraction && (
           <div className="border rounded-lg p-6 space-y-4 bg-card">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold">Your Answer</h3>
