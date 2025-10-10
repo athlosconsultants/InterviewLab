@@ -641,6 +641,46 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
 
             // T115: Add the calculated pause before transitioning
             await pauseBetweenSections(pauseDuration);
+          } else if (!nextData.nextQuestion && !nextData.done) {
+            // T106 FIX: No nextQuestion returned (e.g., after small_talk)
+            // Find the next unanswered turn in existing turns
+            const nextUnansweredTurn = turns.find(
+              (t) => t.id !== currentTurnId && !t.answer_text
+            );
+
+            if (nextUnansweredTurn) {
+              // T115: Calculate pause based on transition
+              const currentTurn = turns.find((t) => t.id === currentTurnId);
+              const currentTurnType =
+                (currentTurn as any)?.turn_type || 'question';
+              const nextTurnType =
+                (nextUnansweredTurn as any)?.turn_type || 'question';
+
+              let pauseDuration = 1000;
+              if (
+                currentTurnType === 'small_talk' &&
+                nextTurnType === 'small_talk'
+              ) {
+                pauseDuration = 1200;
+              } else if (
+                currentTurnType === 'small_talk' &&
+                nextTurnType === 'confirmation'
+              ) {
+                pauseDuration = 1500;
+              } else if (
+                currentTurnType === 'confirmation' &&
+                nextTurnType === 'question'
+              ) {
+                pauseDuration = 2000;
+              }
+
+              // Update to next unanswered turn
+              setCurrentTurnId(nextUnansweredTurn.id);
+              setReplayCount(0);
+
+              // T115: Add pause before playing next turn
+              await pauseBetweenSections(pauseDuration);
+            }
           }
 
           // T113: Ensure smooth transition with dynamic timing
