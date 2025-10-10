@@ -674,19 +674,27 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
           })()}
       </div>
 
-      {/* T94: Analyzing Answer Transition */}
+      {/* T120: Analyzing Answer Transition - Apple-style minimalist animation */}
       {isAnalyzing && (
-        <div className="flex justify-center py-8">
-          <div className="flex items-center space-x-3 rounded-lg bg-primary/10 px-6 py-4 border border-primary/20">
-            <Loader2 className="h-5 w-5 animate-spin text-primary" />
-            <div className="flex flex-col">
-              <span className="text-sm font-medium text-primary">
-                Analyzing
-              </span>
-              <span className="text-xs text-muted-foreground">
-                Generating next question
-              </span>
+        <div className="flex justify-center py-12 animate-in fade-in duration-500">
+          <div className="flex flex-col items-center space-y-3">
+            {/* Animated dots */}
+            <div className="flex items-center space-x-1.5">
+              <div
+                className="h-2 w-2 rounded-full bg-gray-400 animate-pulse-slow"
+                style={{ animationDelay: '0ms' }}
+              />
+              <div
+                className="h-2 w-2 rounded-full bg-gray-400 animate-pulse-slow"
+                style={{ animationDelay: '150ms' }}
+              />
+              <div
+                className="h-2 w-2 rounded-full bg-gray-400 animate-pulse-slow"
+                style={{ animationDelay: '300ms' }}
+              />
             </div>
+            {/* Subtle text */}
+            <span className="text-sm font-light text-gray-500">Analyzing</span>
           </div>
         </div>
       )}
