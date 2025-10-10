@@ -547,21 +547,25 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
 
       {/* T102: Current Question Only Display */}
       <div className="space-y-6">
-        {/* Interview Introduction (T88) - shown only at start */}
-        {introText && turns.length === 0 && (
-          <div className="flex justify-start">
-            <div className="max-w-[85%] rounded-lg bg-blue-50 dark:bg-blue-950/30 p-5 border-l-4 border-blue-500">
-              <div className="mb-2">
-                <span className="text-xs font-semibold text-blue-700 dark:text-blue-300 uppercase tracking-wide">
-                  Welcome
-                </span>
+        {/* T118: Interview Introduction - shown at start (even if small talk exists) */}
+        {introText &&
+          (turns.length === 0 ||
+            (currentQuestion &&
+              (currentQuestion as any).turn_type === 'small_talk' &&
+              turns.findIndex((t) => t.id === currentQuestion.id) === 0)) && (
+            <div className="flex justify-start">
+              <div className="max-w-[85%] rounded-lg bg-blue-50 dark:bg-blue-950/30 p-5 border-l-4 border-blue-500">
+                <div className="mb-2">
+                  <span className="text-xs font-semibold text-blue-700 dark:text-blue-300 uppercase tracking-wide">
+                    Welcome
+                  </span>
+                </div>
+                <p className="text-base leading-relaxed text-foreground whitespace-pre-wrap">
+                  {introText}
+                </p>
               </div>
-              <p className="text-base leading-relaxed text-foreground whitespace-pre-wrap">
-                {introText}
-              </p>
             </div>
-          </div>
-        )}
+          )}
 
         {/* T102: Render only the FIRST unanswered turn (current question) - Hide during analyzing */}
         {currentQuestion &&
@@ -578,8 +582,8 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
 
             return (
               <div key={currentQuestion.id} className="space-y-4">
-                {/* Bridge Text (T89) - appears before questions 2+ (not for small talk) */}
-                {currentQuestion.bridge_text && index > 0 && !isSpecialTurn && (
+                {/* T118: Bridge Text - appears before questions (including small talk) */}
+                {currentQuestion.bridge_text && index > 0 && (
                   <div className="flex justify-start">
                     <div className="max-w-[75%] rounded-lg bg-muted/50 p-4 border-l-2 border-primary/40">
                       <p className="text-sm italic text-muted-foreground leading-relaxed">
