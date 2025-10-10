@@ -582,16 +582,18 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
 
             return (
               <div key={currentQuestion.id} className="space-y-4">
-                {/* T118: Bridge Text - appears before questions (including small talk) */}
-                {currentQuestion.bridge_text && index > 0 && (
-                  <div className="flex justify-start">
-                    <div className="max-w-[75%] rounded-lg bg-muted/50 p-4 border-l-2 border-primary/40">
-                      <p className="text-sm italic text-muted-foreground leading-relaxed">
-                        {currentQuestion.bridge_text}
-                      </p>
+                {/* T119: Bridge Text - synced with question visibility */}
+                {currentQuestion.bridge_text &&
+                  index > 0 &&
+                  (isSpecialTurn || accessibilityMode || questionVisible) && (
+                    <div className="flex justify-start">
+                      <div className="max-w-[75%] rounded-lg bg-muted/50 p-4 border-l-2 border-primary/40">
+                        <p className="text-sm italic text-muted-foreground leading-relaxed">
+                          {currentQuestion.bridge_text}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
                 {/* T106: Small Talk / Confirmation - Simple display, no timer */}
                 {isSpecialTurn ? (
