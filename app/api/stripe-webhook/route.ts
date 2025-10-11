@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { createClient } from '@/lib/supabase-server';
+import { createServiceRoleClient } from '@/lib/supabase-server';
 import { TIER_CONFIGS, type EntitlementTier } from '@/lib/schema';
 
 // Initialize Stripe
@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
       const tierConfig = TIER_CONFIGS[tier];
 
       // Create Supabase client with service role (bypasses RLS)
-      const supabase = await createClient();
+      const supabase = createServiceRoleClient();
 
       // Check if user already has an active entitlement for this purchase
       const { data: existingEntitlements } = await supabase
