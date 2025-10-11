@@ -168,18 +168,24 @@ export async function createSession(params: CreateSessionParams) {
       };
     }
 
-    // T86: Consume the entitlement after successful session creation
+    // T86/T135: Consume one interview credit after successful session creation
     if (entitlementId) {
-      const consumeResult = await consumeEntitlement(entitlementId, user.id);
+      const consumeResult = await consumeEntitlement(
+        entitlementId,
+        user.id,
+        session.id // T135: Pass session ID for tracking
+      );
       if (!consumeResult.success) {
         // Log the error but don't fail the session creation
         // The session is already created, we don't want to rollback
-        console.error('Failed to consume entitlement:', consumeResult.error);
+        console.error('[T135] Failed to consume credit:', consumeResult.error);
         console.warn(
-          'Session created but entitlement not consumed. Manual intervention may be required.'
+          '[T135] Session created but credit not consumed. Manual intervention may be required.'
         );
       } else {
-        console.log('Entitlement consumed:', entitlementId);
+        console.log(
+          `[T135] Credit consumed for session ${session.id}. Remaining: ${consumeResult.remainingCredits}`
+        );
       }
     }
 
