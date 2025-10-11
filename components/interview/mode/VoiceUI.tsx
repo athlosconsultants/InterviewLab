@@ -16,7 +16,9 @@ import { toast } from 'sonner';
 import { VoiceOrb } from '../VoiceOrb';
 import { AudioRecorder } from '../AudioRecorder';
 import { UpgradeDialog } from '../UpgradeDialog';
+import { TimerRing } from '../TimerRing'; // T126: Countdown timer for voice mode
 import { trackEvent } from '@/lib/analytics'; // T110: Analytics tracking
+import { audioController } from '@/lib/audioController'; // T127: Global audio controller
 
 interface VoiceUIProps {
   sessionId: string;
@@ -24,7 +26,7 @@ interface VoiceUIProps {
   company: string;
 }
 
-type OrbState = 'idle' | 'speaking' | 'listening' | 'processing';
+type OrbState = 'idle' | 'speaking' | 'listening' | 'thinking';
 
 export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
   const router = useRouter();
@@ -51,31 +53,24 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
   const [resumeMessage, setResumeMessage] = useState<string | null>(null);
   const [canResume, setCanResume] = useState(false);
 
-  // Audio playback
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  // T127: Audio playback managed by AudioController
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [currentAudioUrl, setCurrentAudioUrl] = useState<string | null>(null);
 
   // T108: Replay count tracking for voice mode scoring
   const [replayCount, setReplayCount] = useState(0);
 
+  // T126: Timer state for voice mode (mirrors text mode)
+  const [timerStartTime, setTimerStartTime] = useState<string | null>(null);
+  const [isTimerActive, setIsTimerActive] = useState(false);
+
   // Autoplay blocker handling for browser restrictions
   const [needsUserInteraction, setNeedsUserInteraction] = useState(false);
   const [hasUserInteracted, setHasUserInteracted] = useState(false);
 
-  // T114: Unified audio cancellation to prevent overlaps
+  // T127: Use AudioController to stop all audio
   const stopAllAudio = useCallback(() => {
-    // Stop any browser TTS
-    if (window.speechSynthesis.speaking) {
-      window.speechSynthesis.cancel();
-    }
-
-    // Stop any Audio element playback
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-    }
-
+    audioController.stop();
     setIsPlayingAudio(false);
   }, []);
 
@@ -299,20 +294,17 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
     }
   }, [currentTurnId, turns, isLoading, introText, introPlayed]);
 
-  // T114: Updated to use OpenAI TTS consistently for intro/bridge
+  // T127: Updated to use AudioController for robust audio management
   const playTextToSpeech = async (
     text: string,
     type: 'intro' | 'bridge',
     onComplete?: () => void
   ) => {
     try {
-      // T114: Cancel any existing audio before starting new playback
-      stopAllAudio();
-
       console.log(`[OrbState] Generating TTS for ${type}...`);
-      setOrbState('processing'); // Show processing while generating audio
+      setOrbState('thinking'); // Show thinking while generating audio
 
-      // T114: Use OpenAI TTS API for consistent voice
+      // Use OpenAI TTS API for consistent voice
       const response = await fetch('/api/tts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -329,61 +321,48 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
         throw new Error('Failed to generate audio');
       }
 
-      // Create and play audio
-      const audio = new Audio(data.audioUrl);
-      audioRef.current = audio;
-
-      // Event-driven state management
-      audio.onplay = () => {
-        console.log(
-          `[OrbState] processing → speaking (${type} playback started)`
-        );
-        setOrbState('speaking');
-        setIsPlayingAudio(true);
-      };
-
-      audio.onended = () => {
-        console.log(`[OrbState] speaking → idle (${type} playback ended)`);
-        setOrbState('idle');
-        setIsPlayingAudio(false);
-        if (onComplete) onComplete();
-      };
-
-      audio.onerror = () => {
-        console.error(`[OrbState] Audio error for ${type}`);
-        setOrbState('idle');
-        setIsPlayingAudio(false);
-        toast.error('Audio playback failed');
-      };
-
-      try {
-        await audio.play();
-      } catch (playError: any) {
-        // Handle autoplay blocking
-        if (playError.name === 'NotAllowedError') {
-          console.warn(
-            '[OrbState] Autoplay blocked - requiring user interaction'
+      // T127: Use AudioController for playback with debouncing
+      await audioController.play(data.audioUrl, {
+        onPlay: () => {
+          console.log(
+            `[OrbState] thinking → speaking (${type} playback started)`
           );
-          setNeedsUserInteraction(true);
+          setOrbState('speaking');
+          setIsPlayingAudio(true);
+        },
+        onEnd: () => {
+          console.log(`[OrbState] speaking → idle (${type} playback ended)`);
           setOrbState('idle');
-        } else {
-          throw playError;
-        }
+          setIsPlayingAudio(false);
+          if (onComplete) onComplete();
+        },
+        onError: (error) => {
+          console.error(`[OrbState] Audio error for ${type}:`, error);
+          setOrbState('idle');
+          setIsPlayingAudio(false);
+          toast.error('Audio playback failed');
+        },
+      });
+    } catch (playError: any) {
+      // Handle autoplay blocking
+      if (playError?.name === 'NotAllowedError') {
+        console.warn(
+          '[OrbState] Autoplay blocked - requiring user interaction'
+        );
+        setNeedsUserInteraction(true);
+        setOrbState('idle');
+      } else {
+        console.error('TTS error:', playError);
+        setOrbState('idle');
+        toast.error('Unable to play audio');
       }
-    } catch (error) {
-      console.error('TTS error:', error);
-      setOrbState('idle');
-      toast.error('Unable to play audio');
     }
   };
 
   const playQuestionTTS = async (turnId: string, questionText: string) => {
     try {
-      // T114: Cancel any existing audio before starting new playback
-      stopAllAudio();
-
       console.log(`[OrbState] Generating TTS for question...`);
-      setOrbState('processing'); // Show processing while generating audio
+      setOrbState('thinking'); // Show thinking while generating audio
 
       const response = await fetch('/api/tts', {
         method: 'POST',
@@ -403,59 +382,58 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
 
       setCurrentAudioUrl(data.audioUrl);
 
-      // Create and play audio
-      const audio = new Audio(data.audioUrl);
-      audioRef.current = audio;
-
-      // Event-driven state management
-      audio.onplay = () => {
-        console.log(
-          `[OrbState] processing → speaking (question playback started)`
-        );
-        setOrbState('speaking');
-        setIsPlayingAudio(true);
-      };
-
-      audio.onended = () => {
-        console.log(
-          `[OrbState] speaking → idle (question playback ended, awaiting user input)`
-        );
-        setOrbState('idle');
-        setIsPlayingAudio(false);
-
-        // T110: Track successful orb autoplay completion
-        trackEvent('orb_autoplay_ok', sessionId, {
-          mode: 'voice',
-          turn_id: turnId,
-          question_number: turns.filter((t) => !t.answer_text).length + 1,
-        });
-      };
-
-      audio.onerror = () => {
-        console.error(`[OrbState] Audio error for question`);
-        setOrbState('idle');
-        setIsPlayingAudio(false);
-        toast.error('Audio playback failed');
-      };
-
-      try {
-        await audio.play();
-      } catch (playError: any) {
-        // Handle autoplay blocking
-        if (playError.name === 'NotAllowedError') {
-          console.warn(
-            '[OrbState] Autoplay blocked - requiring user interaction'
+      // T127: Use AudioController for playback with debouncing
+      await audioController.play(data.audioUrl, {
+        onPlay: () => {
+          console.log(
+            `[OrbState] thinking → speaking (question playback started)`
           );
-          setNeedsUserInteraction(true);
+          setOrbState('speaking');
+          setIsPlayingAudio(true);
+        },
+        onEnd: () => {
+          console.log(
+            `[OrbState] speaking → idle (question playback ended, awaiting user input)`
+          );
           setOrbState('idle');
-        } else {
-          throw playError;
-        }
+          setIsPlayingAudio(false);
+
+          // T126: Start timer after TTS playback ends (only for main interview questions)
+          const currentTurn = turns.find((t) => t.id === turnId);
+          const turnType = (currentTurn as any)?.turn_type || 'question';
+          if (turnType === 'question') {
+            console.log('[T126] Starting countdown timer after TTS playback');
+            setTimerStartTime(new Date().toISOString());
+            setIsTimerActive(true);
+          }
+
+          // T110: Track successful orb autoplay completion
+          trackEvent('orb_autoplay_ok', sessionId, {
+            mode: 'voice',
+            turn_id: turnId,
+            question_number: turns.filter((t) => !t.answer_text).length + 1,
+          });
+        },
+        onError: (error) => {
+          console.error(`[OrbState] Audio error for question:`, error);
+          setOrbState('idle');
+          setIsPlayingAudio(false);
+          toast.error('Audio playback failed');
+        },
+      });
+    } catch (playError: any) {
+      // Handle autoplay blocking
+      if (playError?.name === 'NotAllowedError') {
+        console.warn(
+          '[OrbState] Autoplay blocked - requiring user interaction'
+        );
+        setNeedsUserInteraction(true);
+        setOrbState('idle');
+      } else {
+        console.error('TTS error:', playError);
+        setOrbState('idle');
+        toast.error('Unable to play question audio');
       }
-    } catch (error) {
-      console.error('TTS error:', error);
-      setOrbState('idle');
-      toast.error('Unable to play question audio');
     }
   };
 
@@ -509,15 +487,10 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
     pauseBetweenSections,
   ]);
 
-  const handleReplay = useCallback(() => {
-    if (!currentAudioUrl || !audioRef.current) {
+  const handleReplay = useCallback(async () => {
+    if (!audioController.getCurrentUrl()) {
       toast.error('No audio to replay');
       return;
-    }
-
-    // T114: Stop any other audio first (e.g., browser TTS)
-    if (window.speechSynthesis.speaking) {
-      window.speechSynthesis.cancel();
     }
 
     // T108: Increment replay count for voice mode
@@ -531,26 +504,41 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
 
     console.log(`[OrbState] idle → speaking (replaying question)`);
     setOrbState('speaking');
-    audioRef.current.currentTime = 0;
-    audioRef.current.play().catch(() => {
-      console.error(`[OrbState] Replay failed`);
+
+    // T127: Use AudioController for replay
+    try {
+      await audioController.replay();
+    } catch (error) {
+      console.error(`[OrbState] Replay failed:`, error);
       setOrbState('idle');
       toast.error('Replay failed');
-    });
-  }, [currentAudioUrl]);
+    }
+  }, []);
+
+  // T126: Timer expiration ref to avoid circular dependency
+  const timerExpireRef = useRef<(() => void) | null>(null);
 
   const handleSubmit = useCallback(
-    async (e?: React.FormEvent) => {
+    async (e?: React.FormEvent, autoAdvance = false) => {
       e?.preventDefault();
 
-      if (answerMode === 'text' && !answer.trim()) {
-        toast.error('Answer required');
-        return;
+      // T126: Stop timer on manual submit
+      if (!autoAdvance) {
+        setIsTimerActive(false);
+        setTimerStartTime(null);
       }
 
-      if (answerMode === 'audio' && !audioBlob) {
-        toast.error('Recording required');
-        return;
+      // T126: Allow empty answers if auto-advance from timer
+      if (!autoAdvance) {
+        if (answerMode === 'text' && !answer.trim()) {
+          toast.error('Answer required');
+          return;
+        }
+
+        if (answerMode === 'audio' && !audioBlob) {
+          toast.error('Recording required');
+          return;
+        }
       }
 
       if (!currentTurnId) {
@@ -559,15 +547,15 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
       }
 
       setIsSubmitting(true);
-      console.log(`[OrbState] idle → processing (user submitted answer)`);
-      setOrbState('processing');
+      console.log(`[OrbState] idle → thinking (user submitted answer)`);
+      setOrbState('thinking');
 
       try {
-        let finalAnswer = answer.trim();
+        let finalAnswer = autoAdvance ? '' : answer.trim();
         let audioKey: string | undefined = undefined;
 
-        // Handle audio mode
-        if (answerMode === 'audio' && audioBlob) {
+        // Handle audio mode (skip if auto-advance)
+        if (answerMode === 'audio' && audioBlob && !autoAdvance) {
           const audioFormData = new FormData();
           audioFormData.append('audio', audioBlob, 'answer.webm');
           audioFormData.append('turnId', currentTurnId);
@@ -625,7 +613,7 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
 
         // T113: Track submission time for latency monitoring
         const submitStartTime = Date.now();
-        setOrbState('processing'); // T113: Show processing immediately
+        setOrbState('thinking'); // T113: Show thinking immediately
 
         // Submit the answer (T108: include replay count in voice mode)
         const result = await submitInterviewAnswer({
@@ -659,7 +647,7 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
           );
 
           if (result.data.done) {
-            console.log(`[OrbState] processing → idle (interview complete)`);
+            console.log(`[OrbState] thinking → idle (interview complete)`);
             setOrbState('idle');
             setCurrentPhase('complete'); // T115: Mark as complete
             toast.success('Interview complete', {
@@ -744,6 +732,8 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
             setCurrentTurnId(nextData.turnId);
             // T108: Reset replay count for voice mode when setting new turn
             setReplayCount(0);
+            // T126: Reset timer for new question
+            setIsTimerActive(false);
 
             if (nextData.currentStage) setCurrentStage(nextData.currentStage);
             if (nextData.stagesPlanned)
@@ -788,6 +778,8 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
               // Update to next unanswered turn
               setCurrentTurnId(nextUnansweredTurn.id);
               setReplayCount(0);
+              // T126: Reset timer
+              setIsTimerActive(false);
 
               // T115: Add pause before playing next turn
               await pauseBetweenSections(pauseDuration);
@@ -802,7 +794,7 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
           setAnswer('');
           setAudioBlob(null);
           // Don't set orb state here - let audio playback handle state transitions
-          // The orb will remain in 'processing' until audio starts playing
+          // The orb will remain in 'thinking' until audio starts playing
         }
       } catch (error) {
         console.error('Submit error:', error);
@@ -815,8 +807,32 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
         setIsSubmitting(false);
       }
     },
-    [answerMode, answer, audioBlob, currentTurnId, sessionId, currentStage]
+    [
+      answerMode,
+      answer,
+      audioBlob,
+      currentTurnId,
+      sessionId,
+      currentStage,
+      isSubmitting,
+      replayCount,
+      turns,
+    ]
   );
+
+  // T126: Setup timer expiration callback
+  useEffect(() => {
+    timerExpireRef.current = () => {
+      console.log('[T126] Timer expired - auto-advancing with blank answer');
+      setIsTimerActive(false);
+      setTimerStartTime(null);
+
+      // Auto-submit with empty answer
+      if (!isSubmitting) {
+        handleSubmit(undefined, true);
+      }
+    };
+  }, [isSubmitting, handleSubmit]);
 
   if (isLoading) {
     return (
@@ -855,7 +871,18 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
 
         {/* Voice Orb */}
         <div className="flex flex-col items-center justify-center py-12">
-          <VoiceOrb state={orbState} size="lg" />
+          <div className="flex items-center gap-6">
+            <VoiceOrb state={orbState} size="lg" />
+
+            {/* T126: Countdown Timer (only during main interview questions) */}
+            {isTimerActive && timerStartTime && currentQuestion && (
+              <TimerRing
+                timeLimit={90} // 90 seconds like text mode
+                startTime={timerStartTime}
+                onExpire={() => timerExpireRef.current?.()}
+              />
+            )}
+          </div>
 
           {/* Resume button for autoplay block */}
           {needsUserInteraction && (

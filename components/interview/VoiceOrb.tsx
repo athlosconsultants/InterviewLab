@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 
-type OrbState = 'idle' | 'ready' | 'speaking' | 'listening' | 'processing';
+type OrbState = 'idle' | 'ready' | 'speaking' | 'listening' | 'thinking';
 
 interface VoiceOrbProps {
   state: OrbState;
@@ -28,13 +28,13 @@ export function VoiceOrb({ state, size = 'lg' }: VoiceOrbProps) {
     lg: 'w-48 h-48',
   };
 
-  // T116: Updated processing state to muted grey
+  // T125: Updated thinking state to muted grey
   const stateColors = {
     idle: 'bg-gradient-to-br from-primary/20 to-primary/40',
     ready: 'bg-gradient-to-br from-primary/20 to-primary/40', // Same as idle, awaiting input
     speaking: 'bg-gradient-to-br from-primary to-primary/60',
     listening: 'bg-gradient-to-br from-blue-500 to-blue-600',
-    processing: 'bg-gradient-to-br from-gray-400 to-gray-500', // T116: Muted grey
+    thinking: 'bg-gradient-to-br from-gray-400 to-gray-500', // T125: Muted grey for thinking
   };
 
   return (
@@ -81,7 +81,7 @@ export function VoiceOrb({ state, size = 'lg' }: VoiceOrbProps) {
               'scale-100': state === 'idle' || state === 'ready',
               'scale-105': state === 'speaking',
               'scale-110': state === 'listening',
-              'animate-pulse-slow': state === 'processing', // T116: Slow pulse for processing
+              'animate-pulse-slow': state === 'thinking', // T125: Slow pulse for thinking
             }
           )}
         >
@@ -107,7 +107,7 @@ export function VoiceOrb({ state, size = 'lg' }: VoiceOrbProps) {
         {state === 'ready' && 'Ready'}
         {state === 'speaking' && 'Speaking...'}
         {state === 'listening' && 'Listening...'}
-        {state === 'processing' && 'Processing...'}
+        {state === 'thinking' && 'Thinking...'}
       </p>
     </div>
   );
