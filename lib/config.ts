@@ -65,14 +65,14 @@ function validateEnvironment(): EnvironmentConfig {
   });
 
   return {
-    supabaseUrl: requiredVars.NEXT_PUBLIC_SUPABASE_URL,
-    supabaseAnonKey: requiredVars.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    supabaseUrl: requiredVars.NEXT_PUBLIC_SUPABASE_URL!,
+    supabaseAnonKey: requiredVars.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     supabaseServiceRoleKey: requiredVars.SUPABASE_SERVICE_ROLE_KEY!,
-    openaiApiKey: requiredVars.OPENAI_API_KEY,
+    openaiApiKey: requiredVars.OPENAI_API_KEY!,
     stripeSecretKey: requiredVars.STRIPE_SECRET_KEY!,
     stripePublishableKey: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '',
     stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET || '',
-    siteUrl: requiredVars.NEXT_PUBLIC_SITE_URL,
+    siteUrl: requiredVars.NEXT_PUBLIC_SITE_URL!,
     nodeEnv: process.env.NODE_ENV || 'development',
   };
 }
