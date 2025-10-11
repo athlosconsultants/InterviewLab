@@ -1,9 +1,25 @@
 import OpenAI from 'openai';
 
-// Initialize OpenAI client
+// Lazy-initialized OpenAI client
+// This prevents build-time errors when env vars aren't available
+let _openai: OpenAI | null = null;
+
+export function getOpenAIClient(): OpenAI {
+  if (!_openai) {
+    _openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
+  }
+  return _openai;
+}
+
+// Legacy export for backward compatibility
 // This should only be used on the server side
-export const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+export const openai = new Proxy({} as OpenAI, {
+  get: (target, prop) => {
+    const client = getOpenAIClient();
+    return (client as any)[prop];
+  },
 });
 
 // Default model for general tasks
