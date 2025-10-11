@@ -1043,7 +1043,7 @@ ALTER TABLE sessions ADD COLUMN IF NOT EXISTS difficulty_curve JSON;
 - Console logs show actual generation time for optimization
 - Warnings logged if latency exceeds 1500ms target
 
-## Phase 11 — Immersion & Polish
+## Phase 11 — Immersion & Polish ### PHASE COMPLETE
 
 ### T114 — Unified TTS Voice and Playback Control
 
@@ -1091,7 +1091,56 @@ Center the dynamic checklist animation on the “Setting Up Interview” screen 
 
 Remove “Question X of Y” from both UIs; retain internal progress tracking only.
 
-## Phase 12 — Payments (Optional for MVP)
+## Phase 12 — Experience & Marketing Enhancements
+
+### T124 — Greeting Separation (Fix Warm-Up Flow)
+
+Split the **greeting** and **first warm-up** turns in both text and voice interviews.  
+Greeting = solo message (no answer box); after fade or “Continue,” render first warm-up question.  
+Ensure voice mode automatically reads greeting then transitions to warm-up 1.
+
+### T125 — “Thinking” State Label
+
+Replace all UI text and orb labels showing “Processing” → “Thinking.”  
+Rename state internally to `thinking` for consistency.
+
+### T126 — Countdown Timer for Voice Mode
+
+Add countdown timer identical to text mode, triggered **after TTS playback ends**.  
+Only active during main interview (not warm-ups).  
+When timer = 0 → auto-advance to next question (submit blank if needed).
+
+### T127 — Orb Playback Guards
+
+Introduce global `AudioController` to cancel previous TTS before starting new audio.  
+Block double play calls within 500 ms; log state changes for QA.
+
+### T128 — Question Limit Per Section (User-Configurable)
+
+Add “Max Questions Per Stage” field (1–10) to setup form.  
+Backend: `upper = userLimit`; `lower = upper > 3 ? upper - 2 : upper`;  
+randomize count between lower and upper.  
+Persist in `stage_targets`; end interview once limit reached.
+
+### T129 — Landing Page Redesign (Apple-Style Hero)
+
+Rebuild `/app/(marketing)/page.tsx` with modern Apple-like aesthetic:
+
+- Hero: “Prepare for real interviews with AI trained on S&P 500 companies.”
+- CTAs: **Start Free Interview** and **Upgrade to Full Simulation**.
+- Three-step “Upload → Research → Interview” section.
+- Feature blocks for Voice/Text modes and adaptive difficulty.
+- Testimonials & final CTA.  
+  Use Framer Motion for smooth section transitions.
+
+### T130 — Landing Page Copy & CTAs
+
+Add clear descriptive copy and SEO meta:
+
+- Headline, sub-text, meta description.
+- “Start your free interview today” button linking to `/setup`.
+
+## Phase 13 — Payments (Optional for MVP)
 
 ### T114 — Pricing UI + Upgrade Dialog
 
@@ -1123,7 +1172,7 @@ Remove “Question X of Y” from both UIs; retain internal progress tracking on
 
 ---
 
-## Phase 13 — Production Hardening
+## Phase 14 — Production Hardening
 
 ### T118 — Security Headers
 

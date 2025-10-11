@@ -15,6 +15,7 @@ interface CreateSessionParams {
   location: string;
   mode: InterviewMode; // T84
   stagesPlanned: number; // T84
+  questionsPerStage: number; // T128: User-defined question limit (1-10)
   planTier: PlanTier; // T84
 }
 
@@ -115,7 +116,23 @@ export async function createSession(params: CreateSessionParams) {
 
     console.log('Research snapshot generated:', researchSnapshot);
 
-    // Create session record (T84 - with tier configuration, T86 - with entitlement_id)
+    // T128: Generate stage_targets based on user-defined question limit
+    // upper = userLimit; lower = upper > 3 ? upper - 2 : upper
+    const stageTargets: Array<{ target_questions: number }> = [];
+    for (let i = 0; i < params.stagesPlanned; i++) {
+      const upper = params.questionsPerStage;
+      const lower = upper > 3 ? upper - 2 : upper;
+      const targetQuestions =
+        Math.floor(Math.random() * (upper - lower + 1)) + lower;
+      stageTargets.push({ target_questions: targetQuestions });
+    }
+
+    console.log(
+      '[T128] Stage targets generated:',
+      stageTargets.map((s) => s.target_questions)
+    );
+
+    // Create session record (T84 - with tier configuration, T86 - with entitlement_id, T128 - with stage_targets)
     const { data: session, error: sessionError } = await supabase
       .from('sessions')
       .insert({
@@ -129,9 +146,13 @@ export async function createSession(params: CreateSessionParams) {
         mode: params.mode,
         stages_planned: params.stagesPlanned,
         current_stage: 1,
+        stage_targets: stageTargets, // T128: Per-stage question targets
         entitlement_id: entitlementId, // T86: Link entitlement to session
         limits: {
-          question_cap: params.planTier === 'free' ? 3 : 30, // Free: 3 questions, Paid: 30 questions (10 per stage max)
+          question_cap:
+            params.planTier === 'free'
+              ? 3
+              : params.questionsPerStage * params.stagesPlanned, // T128: Dynamic cap based on user selection
           replay_cap: 2,
           timer_sec: 90,
         },

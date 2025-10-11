@@ -21,6 +21,7 @@ interface IntakeFormData {
   jobDescription: string;
   mode: InterviewMode;
   stagesPlanned: number;
+  questionsPerStage: number; // T128: Max questions per stage (1-10)
   planTier: PlanTier;
 }
 
@@ -50,6 +51,7 @@ export function IntakeForm({ onSuccess }: IntakeFormProps = {}) {
     jobDescription: '',
     mode: 'text', // Default to text mode (T84)
     stagesPlanned: 1, // Default to 1 stage for free tier (T84)
+    questionsPerStage: 3, // T128: Default to 3 questions for free tier
     planTier: 'free', // Default to free tier (T84)
   });
 
@@ -70,6 +72,7 @@ export function IntakeForm({ onSuccess }: IntakeFormProps = {}) {
             planTier: 'paid',
             mode: 'voice', // Default to voice mode for paid users
             stagesPlanned: 2, // Default to 2 stages for paid users
+            questionsPerStage: 7, // T128: Default to 7 questions for paid users
           }));
         }
       } catch (error) {
@@ -220,6 +223,7 @@ export function IntakeForm({ onSuccess }: IntakeFormProps = {}) {
         location: formData.location,
         mode: formData.mode,
         stagesPlanned: formData.stagesPlanned,
+        questionsPerStage: formData.questionsPerStage, // T128: Pass question limit
         planTier: formData.planTier,
       });
 
@@ -482,9 +486,38 @@ export function IntakeForm({ onSuccess }: IntakeFormProps = {}) {
           <p className="text-xs text-muted-foreground">
             {formData.planTier === 'free'
               ? 'Free tier includes 1 stage with 3 questions'
-              : `${formData.stagesPlanned} stage${formData.stagesPlanned > 1 ? 's' : ''} with 5-10 questions each`}
+              : `${formData.stagesPlanned} stage${formData.stagesPlanned > 1 ? 's' : ''} selected`}
           </p>
         </div>
+
+        {/* T128: Questions Per Stage Selector (Paid Only) */}
+        {formData.planTier === 'paid' && (
+          <div className="space-y-3">
+            <Label>Questions Per Stage</Label>
+            <div className="flex items-center gap-4">
+              <input
+                type="range"
+                min="1"
+                max="10"
+                value={formData.questionsPerStage}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    questionsPerStage: parseInt(e.target.value),
+                  })
+                }
+                className="flex-1 h-2 bg-muted rounded-lg appearance-none cursor-pointer accent-primary"
+              />
+              <span className="text-sm font-semibold text-primary min-w-[3ch] text-center">
+                {formData.questionsPerStage}
+              </span>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Total interview length: ~
+              {formData.questionsPerStage * formData.stagesPlanned} questions
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Submit Button */}
