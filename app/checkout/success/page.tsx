@@ -1,16 +1,16 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { CheckCircle, Loader2, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 /**
- * T134 - Phase 13: Checkout Success Page
- * Displays confirmation after successful payment
+ * T134 - Phase 13: Checkout Success Page Content
+ * Inner component that uses useSearchParams
  */
-export default function CheckoutSuccessPage() {
+function CheckoutSuccessContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const sessionId = searchParams?.get('session_id');
@@ -159,6 +159,25 @@ export default function CheckoutSuccessPage() {
         </div>
       </motion.div>
     </div>
+  );
+}
+
+/**
+ * T134 - Phase 13: Checkout Success Page
+ * Wrapper component with Suspense boundary
+ */
+export default function CheckoutSuccessPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen flex-col items-center justify-center p-4">
+          <Loader2 className="h-12 w-12 animate-spin text-primary" />
+          <p className="mt-4 text-muted-foreground">Loading...</p>
+        </div>
+      }
+    >
+      <CheckoutSuccessContent />
+    </Suspense>
   );
 }
 
