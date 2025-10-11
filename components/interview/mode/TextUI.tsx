@@ -864,6 +864,8 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
           </form>
         </div>
       )}
+        </div>
+      )}
 
       {/* Upgrade Dialog */}
       <UpgradeDialog
