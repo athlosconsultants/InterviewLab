@@ -9,8 +9,18 @@ import { TIER_CONFIGS, type EntitlementTier } from '@/lib/schema';
  */
 export async function POST(request: NextRequest) {
   try {
+    // Check for required environment variables
+    const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+    if (!stripeSecretKey) {
+      console.error('[T134] Missing STRIPE_SECRET_KEY environment variable');
+      return NextResponse.json(
+        { error: 'Stripe configuration missing' },
+        { status: 500 }
+      );
+    }
+
     // Lazy-initialize Stripe to avoid build-time errors
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+    const stripe = new Stripe(stripeSecretKey, {
       apiVersion: '2025-09-30.clover',
     });
 

@@ -9,11 +9,30 @@ import { TIER_CONFIGS, type EntitlementTier } from '@/lib/schema';
  */
 export async function POST(request: NextRequest) {
   try {
+    // Check for required environment variables
+    const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+    
+    if (!stripeSecretKey) {
+      console.error('[T134 Webhook] Missing STRIPE_SECRET_KEY environment variable');
+      return NextResponse.json(
+        { error: 'Stripe configuration missing' },
+        { status: 500 }
+      );
+    }
+    
+    if (!webhookSecret) {
+      console.error('[T134 Webhook] Missing STRIPE_WEBHOOK_SECRET environment variable');
+      return NextResponse.json(
+        { error: 'Webhook configuration missing' },
+        { status: 500 }
+      );
+    }
+
     // Lazy-initialize Stripe to avoid build-time errors
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+    const stripe = new Stripe(stripeSecretKey, {
       apiVersion: '2025-09-30.clover',
     });
-    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
     const body = await request.text();
     const signature = request.headers.get('stripe-signature');
 
