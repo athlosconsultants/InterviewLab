@@ -82,7 +82,7 @@ export async function middleware(request: NextRequest) {
       "frame-ancestors 'none'",
       "upgrade-insecure-requests",
       `connect-src 'self' ${supabaseUrl} https://api.openai.com https://api.stripe.com`,
-      "media-src 'self' blob:",
+      `media-src 'self' blob: ${supabaseUrl}`,
     ].join('; ');
 
     response.headers.set('Content-Security-Policy', cspHeader);
