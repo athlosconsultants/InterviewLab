@@ -1091,54 +1091,191 @@ Center the dynamic checklist animation on the “Setting Up Interview” screen 
 
 Remove “Question X of Y” from both UIs; retain internal progress tracking only.
 
-## Phase 12 — Experience & Marketing Enhancements
+## Phase 12 — Experience & Marketing Enhancements ✅ COMPLETED
 
-### T124 — Greeting Separation (Fix Warm-Up Flow)
+### T124 — Greeting Separation (Fix Warm-Up Flow) ✅
+
+**Status:** COMPLETED  
+**Commits:** `fix(T124): Implement greeting separation for text/voice interviews`
 
 Split the **greeting** and **first warm-up** turns in both text and voice interviews.  
-Greeting = solo message (no answer box); after fade or “Continue,” render first warm-up question.  
-Ensure voice mode automatically reads greeting then transitions to warm-up 1.
+Greeting = solo message (no answer box); after "Start Interview" button, render first warm-up question.  
+Voice mode automatically reads greeting then transitions to warm-up 1.
 
-### T125 — “Thinking” State Label
+**Implementation:**
+- Added `showWelcomeScreen` state to both `TextUI.tsx` and `VoiceUI.tsx`
+- Welcome screen displays intro text with dedicated UI (blue gradient card)
+- "Start Interview" button dismisses welcome and shows first question
+- Voice mode auto-plays intro TTS, then hides welcome and plays first question
+- Fixed JSX structure issues with conditional rendering
 
-Replace all UI text and orb labels showing “Processing” → “Thinking.”  
-Rename state internally to `thinking` for consistency.
+**Files Modified:**
+- `components/interview/mode/TextUI.tsx`
+- `components/interview/mode/VoiceUI.tsx`
 
-### T126 — Countdown Timer for Voice Mode
+---
+
+### T125 — "Thinking" State Label ✅
+
+**Status:** COMPLETED  
+**Commits:** `fix(T125): Replace Processing with Thinking state`
+
+Replace all UI text and orb labels showing "Processing" → "Thinking."  
+Renamed state internally to `thinking` for consistency.
+
+**Implementation:**
+- Changed `OrbState` type from `'processing'` to `'thinking'`
+- Updated all `setOrbState('processing')` → `setOrbState('thinking')`
+- Changed orb visual label from "Processing..." to "Thinking..."
+- Updated color scheme for thinking state (muted purple with slow pulse)
+
+**Files Modified:**
+- `components/interview/VoiceOrb.tsx`
+- `components/interview/mode/VoiceUI.tsx`
+
+---
+
+### T126 — Countdown Timer for Voice Mode ✅
+
+**Status:** COMPLETED  
+**Commits:** `feat(T126): Add countdown timer for voice mode`
 
 Add countdown timer identical to text mode, triggered **after TTS playback ends**.  
 Only active during main interview (not warm-ups).  
 When timer = 0 → auto-advance to next question (submit blank if needed).
 
-### T127 — Orb Playback Guards
+**Implementation:**
+- Added `timerStartTime` and `isTimerActive` state to `VoiceUI`
+- Timer starts in `playQuestionTTS` onEnd callback for main questions only
+- `TimerRing` component displays next to orb during active timer
+- Auto-submit with blank answer on expiration via `handleTimerExpire`
+- Manual submission stops the timer
+
+**Files Modified:**
+- `components/interview/mode/VoiceUI.tsx`
+
+---
+
+### T127 — Orb Playback Guards ✅
+
+**Status:** COMPLETED  
+**Commits:** `feat(T127): Implement AudioController for playback management`
 
 Introduce global `AudioController` to cancel previous TTS before starting new audio.  
 Block double play calls within 500 ms; log state changes for QA.
 
-### T128 — Question Limit Per Section (User-Configurable)
+**Implementation:**
+- Created `lib/audioController.ts` with singleton pattern
+- `AudioController.stop()` cancels all previous audio before new playback
+- Debounce delay of 500ms prevents rapid double-play calls
+- Console logs for all state changes: `[AudioController] All audio stopped.`
+- Used in `playTextToSpeech`, `playQuestionTTS`, and `handleReplay`
 
-Add “Max Questions Per Stage” field (1–10) to setup form.  
+**Files Created:**
+- `lib/audioController.ts`
+
+**Files Modified:**
+- `components/interview/mode/VoiceUI.tsx`
+
+---
+
+### T128 — Question Limit Per Section (User-Configurable) ✅
+
+**Status:** COMPLETED  
+**Commits:** `feat(T128): Add configurable questions per stage`
+
+Add "Max Questions Per Stage" field (1–10) to setup form.  
 Backend: `upper = userLimit`; `lower = upper > 3 ? upper - 2 : upper`;  
 randomize count between lower and upper.  
 Persist in `stage_targets`; end interview once limit reached.
 
-### T129 — Landing Page Redesign (Apple-Style Hero)
+**Implementation:**
+- Added "Questions Per Stage" range input (1-10) to setup form (Pro users only)
+- Default: 3 for free, 7 for paid
+- Backend generates `stageTargets` array with randomized values
+- Each stage gets random questions between `lower` and `upper` bounds
+- Saved in `sessions.stage_targets` column
+- Dynamic `question_cap` based on `questionsPerStage * stagesPlanned`
+
+**Files Modified:**
+- `components/forms/IntakeForm.tsx`
+- `app/setup/actions.ts`
+
+---
+
+### T129 — Landing Page Redesign (Apple-Style Hero) ✅
+
+**Status:** COMPLETED  
+**Commits:** `feat(T129): Redesign landing page with Apple-style hero`
 
 Rebuild `/app/(marketing)/page.tsx` with modern Apple-like aesthetic:
 
-- Hero: “Prepare for real interviews with AI trained on S&P 500 companies.”
+- Hero: "Prepare for real interviews with AI trained on S&P 500 companies."
 - CTAs: **Start Free Interview** and **Upgrade to Full Simulation**.
-- Three-step “Upload → Research → Interview” section.
+- Three-step "Upload → Research → Interview" section.
 - Feature blocks for Voice/Text modes and adaptive difficulty.
 - Testimonials & final CTA.  
   Use Framer Motion for smooth section transitions.
 
-### T130 — Landing Page Copy & CTAs
+**Implementation:**
+- Complete rebuild of landing page with modern design
+- Hero section with gradient background and dual CTAs
+- 3-step visual process (Upload → Research → Interview)
+- Feature blocks with icons (Voice/Text modes, Adaptive Difficulty, Multi-Stage, Smart Research, Detailed Reports)
+- Testimonials section with 3 sample entries
+- Fixed ESLint errors (unescaped quotes → HTML entities)
+
+**Files Modified:**
+- `app/page.tsx`
+
+---
+
+### T130 — Landing Page Copy & CTAs ✅
+
+**Status:** COMPLETED  
+**Commits:** `feat(T130): Add landing page SEO and CTAs`
 
 Add clear descriptive copy and SEO meta:
 
 - Headline, sub-text, meta description.
-- “Start your free interview today” button linking to `/setup`.
+- "Start your free interview today" button linking to `/setup`.
+
+**Implementation:**
+- Updated page metadata for SEO
+- Headline: "Ace Your Next Interview"
+- Sub-text: "Practice with AI-powered mock interviews..."
+- Meta description optimized for search
+- CTA buttons link to `/setup` with clear messaging
+- Added descriptive copy for all feature sections
+
+**Files Modified:**
+- `app/page.tsx`
+
+---
+
+### Phase 12 Additional Fixes
+
+#### Stage Header Updates + Pro Interview End Flow ✅
+
+**Commits:** `fix: update stage header + correct pro interview end flow (Phase 12)`
+
+**Issues Fixed:**
+1. **Stage Header Not Updating:** Added console logging for stage transitions and ensured reactive updates
+2. **Pro Users See Free Plan Modal:** Fixed conditional logic to skip upgrade dialog for pro users
+
+**Implementation:**
+- Backend returns `planTier` in all `submitAnswer` responses
+- Console logs stage changes: `[Interview] Stage advanced to: 2 of 3 (Technical Deep Dive)`
+- Pro users redirect directly to report with toast notification
+- Free users still see upgrade dialog at 3-question limit
+- Stage header updates reactively in both Text and Voice UIs
+
+**Files Modified:**
+- `lib/interview.ts`
+- `components/interview/mode/TextUI.tsx`
+- `components/interview/mode/VoiceUI.tsx`
+
+---
 
 ## Phase 13 — Payments (Optional for MVP)
 
