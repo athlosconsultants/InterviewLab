@@ -3,20 +3,17 @@ import Stripe from 'stripe';
 import { createServiceRoleClient } from '@/lib/supabase-server';
 import { TIER_CONFIGS, type EntitlementTier } from '@/lib/schema';
 
-// Initialize Stripe
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-09-30.clover',
-});
-
-// Webhook secret for signature verification
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
-
 /**
  * T134 - Phase 13: Stripe Webhook Handler
  * Processes successful payments and grants entitlements
  */
 export async function POST(request: NextRequest) {
   try {
+    // Lazy-initialize Stripe to avoid build-time errors
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+      apiVersion: '2025-09-30.clover',
+    });
+    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
     const body = await request.text();
     const signature = request.headers.get('stripe-signature');
 

@@ -3,17 +3,17 @@ import Stripe from 'stripe';
 import { createClient } from '@/lib/supabase-server';
 import { TIER_CONFIGS, type EntitlementTier } from '@/lib/schema';
 
-// Initialize Stripe
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-09-30.clover',
-});
-
 /**
  * T134 - Phase 13: Create Stripe Checkout Session
  * Creates a checkout session for purchasing interview packs
  */
 export async function POST(request: NextRequest) {
   try {
+    // Lazy-initialize Stripe to avoid build-time errors
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+      apiVersion: '2025-09-30.clover',
+    });
+
     const supabase = await createClient();
     const {
       data: { user },
