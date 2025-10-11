@@ -482,7 +482,7 @@ export const TIER_CONFIGS: Record<EntitlementTier, TierConfig> = {
     name: 'Career Builder',
     interview_count: 5,
     price: 39.99,
-    currency: 'AUD',
+    currency: 'USD',
     purchase_type: 'pack_pro_5',
     perks: {
       voice_mode: true,
@@ -505,7 +505,7 @@ export const TIER_CONFIGS: Record<EntitlementTier, TierConfig> = {
     name: 'Dream Job Pack',
     interview_count: 10,
     price: 49.99,
-    currency: 'AUD',
+    currency: 'USD',
     purchase_type: 'pack_elite_10',
     perks: {
       voice_mode: true,
