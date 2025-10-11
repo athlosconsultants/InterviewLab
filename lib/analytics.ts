@@ -1,18 +1,42 @@
 import { createClient } from './supabase-client';
 
 /**
- * T110: Analytics event types for tracking user interactions
+ * T144: Comprehensive Analytics event types
  */
 export type AnalyticsEvent =
+  // User Journey
+  | 'signup_completed'
+  | 'cv_uploaded'
+  | 'job_description_uploaded'
+  | 'setup_completed'
+  | 'interview_started'
+  | 'question_answered'
+  | 'interview_completed'
+  | 'report_viewed'
+  | 'report_downloaded'
+  // Interview Experience
   | 'small_talk_shown'
   | 'proceed_confirmed'
   | 'reveal_elapsed'
   | 'show_again_used'
   | 'orb_autoplay_ok'
-  | 'interview_started'
-  | 'question_answered'
-  | 'interview_completed'
-  | 'mode_selected';
+  | 'mode_selected'
+  | 'voice_mode_toggled'
+  | 'replay_used'
+  | 'stage_advanced'
+  | 'timer_expired'
+  // Monetization
+  | 'pricing_page_viewed'
+  | 'checkout_initiated'
+  | 'purchase_completed'
+  | 'purchase_failed'
+  | 'upgrade_prompt_shown'
+  | 'upgrade_prompt_clicked'
+  | 'upgrade_prompt_dismissed'
+  // Engagement
+  | 'page_viewed'
+  | 'feature_used'
+  | 'error_occurred';
 
 export interface AnalyticsEventData {
   event: AnalyticsEvent;

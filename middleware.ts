@@ -1,7 +1,11 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
+import { nanoid } from 'nanoid';
 
 export async function middleware(request: NextRequest) {
+  // T143: Generate unique request ID for logging
+  const requestId = nanoid();
+
   let supabaseResponse = NextResponse.next({
     request,
   });
@@ -52,7 +56,39 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(redirectUrl);
   }
 
-  return supabaseResponse;
+  // T141: Add security headers (CSP, HSTS)
+  const response = supabaseResponse;
+  
+  // Add request ID for logging
+  response.headers.set('X-Request-ID', requestId);
+
+  // Content Security Policy (CSP)
+  const cspHeader = [
+    "default-src 'self'",
+    "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://va.vercel-scripts.com",
+    "style-src 'self' 'unsafe-inline'",
+    "img-src 'self' blob: data: https:",
+    "font-src 'self' data:",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+    "frame-ancestors 'none'",
+    "upgrade-insecure-requests",
+    `connect-src 'self' ${process.env.NEXT_PUBLIC_SUPABASE_URL} https://api.openai.com https://api.stripe.com`,
+    "media-src 'self' blob:",
+  ].join('; ');
+
+  response.headers.set('Content-Security-Policy', cspHeader);
+
+  // HSTS (only in production)
+  if (process.env.NODE_ENV === 'production') {
+    response.headers.set(
+      'Strict-Transport-Security',
+      'max-age=31536000; includeSubDomains; preload'
+    );
+  }
+
+  return response;
 }
 
 export const config = {
