@@ -843,6 +843,7 @@ export async function submitAnswer(params: {
     return {
       done: true,
       nextQuestion: null,
+      planTier, // Return plan tier for conditional UI
     };
   }
 
@@ -857,6 +858,7 @@ export async function submitAnswer(params: {
     return {
       done: true,
       nextQuestion: null,
+      planTier, // Return plan tier for conditional UI
     };
   }
 
@@ -1034,6 +1036,7 @@ export async function submitAnswer(params: {
     currentStage: newStage, // T91: Return current stage for UI
     stagesPlanned, // T91: Return total stages for UI
     stageName: getStageName(researchSnapshot, newStage), // T91: Return stage name
+    planTier, // Return plan tier to frontend for conditional UI
   };
 }
 

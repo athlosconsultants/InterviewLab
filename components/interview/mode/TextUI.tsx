@@ -330,8 +330,19 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
             toast.success('Interview complete', {
               description: 'Well done.',
             });
-            // Show upgrade dialog for free plan users (3 questions)
-            setShowUpgradeDialog(true);
+            // Show upgrade dialog ONLY for free plan users
+            const planTier = (result.data as any).planTier || 'free';
+            if (planTier === 'free') {
+              setShowUpgradeDialog(true);
+            } else {
+              // Pro users: redirect directly to report
+              toast.info('View your detailed report', {
+                description: 'Click below to see your results',
+              });
+              setTimeout(() => {
+                router.push(`/report/${sessionId}`);
+              }, 1500);
+            }
             return;
           }
 
@@ -429,7 +440,12 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
             setQuestionNumber((prev) => prev + 1);
 
             // T91: Update stage information
-            if (nextData.currentStage) setCurrentStage(nextData.currentStage);
+            if (nextData.currentStage) {
+              console.log(
+                `[Interview] Stage advanced to: ${nextData.currentStage} of ${nextData.stagesPlanned} (${nextData.stageName})`
+              );
+              setCurrentStage(nextData.currentStage);
+            }
             if (nextData.stagesPlanned)
               setStagesPlanned(nextData.stagesPlanned);
             if (nextData.stageName) setStageName(nextData.stageName);

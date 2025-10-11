@@ -663,7 +663,19 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
             toast.success('Interview complete', {
               description: 'Well done.',
             });
-            setShowUpgradeDialog(true);
+            // Show upgrade dialog ONLY for free plan users
+            const planTier = (result.data as any).planTier || 'free';
+            if (planTier === 'free') {
+              setShowUpgradeDialog(true);
+            } else {
+              // Pro users: redirect directly to report
+              toast.info('View your detailed report', {
+                description: 'Click below to see your results',
+              });
+              setTimeout(() => {
+                router.push(`/report/${sessionId}`);
+              }, 1500);
+            }
             return;
           }
 
@@ -745,7 +757,12 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
             // T126: Reset timer for new question
             setIsTimerActive(false);
 
-            if (nextData.currentStage) setCurrentStage(nextData.currentStage);
+            if (nextData.currentStage) {
+              console.log(
+                `[Interview] Stage advanced to: ${nextData.currentStage} of ${nextData.stagesPlanned} (${nextData.stageName})`
+              );
+              setCurrentStage(nextData.currentStage);
+            }
             if (nextData.stagesPlanned)
               setStagesPlanned(nextData.stagesPlanned);
             if (nextData.stageName) setStageName(nextData.stageName);
