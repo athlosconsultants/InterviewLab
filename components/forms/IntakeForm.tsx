@@ -58,15 +58,15 @@ export function IntakeForm({ onSuccess }: IntakeFormProps = {}) {
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Check for active entitlements on component mount
+  // T139: Check for active entitlements on component mount
   useEffect(() => {
     const checkEntitlements = async () => {
       try {
-        const response = await fetch('/api/entitlements');
+        const response = await fetch('/api/user/entitlements');
         const data = await response.json();
 
-        if (data.hasActive && data.activeCount > 0) {
-          // User has active entitlements, enable paid features
+        if (data.remaining_interviews > 0) {
+          // User has remaining interviews, enable paid features
           setFormData((prev) => ({
             ...prev,
             planTier: 'paid',
@@ -76,7 +76,7 @@ export function IntakeForm({ onSuccess }: IntakeFormProps = {}) {
           }));
         }
       } catch (error) {
-        console.error('Failed to check entitlements:', error);
+        console.error('[T139] Failed to check entitlements:', error);
         // Keep default free tier if check fails
       }
     };

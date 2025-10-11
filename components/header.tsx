@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase-server';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { signOut } from '@/app/actions/auth';
+import { EntitlementBadge } from './EntitlementBadge';
 
 export async function Header() {
   const supabase = await createClient();
@@ -19,7 +20,9 @@ export async function Header() {
         <div className="flex items-center gap-4">
           {user ? (
             <>
-              <span className="text-sm text-muted-foreground">
+              {/* T139: Show entitlement counter for logged-in users */}
+              <EntitlementBadge />
+              <span className="text-sm text-muted-foreground hidden sm:inline">
                 {user.email}
               </span>
               <form action={signOut}>
