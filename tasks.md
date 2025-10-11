@@ -1277,37 +1277,136 @@ Add clear descriptive copy and SEO meta:
 
 ---
 
-## Phase 13 — Payments (Optional for MVP)
 
-### T114 — Pricing UI + Upgrade Dialog
 
-**Goal:** Trigger upgrade.  
-**Edits:** `components/UpgradeDialog.tsx`, `app/(marketing)/page.tsx`  
-**DoD:** Button opens dialog with plan details.  
-**Test:** Dialog appears.
+## Phase 13 — Hormozi Offer System: Tiered Payments & Value Stacking
 
-### T115 — Stripe Checkout Session
-
-**Goal:** Create session.  
-**Edits:** `app/api/stripe/session/route.ts`  
-**DoD:** Returns Stripe URL for user.  
-**Test:** Clicking “Upgrade” redirects to Stripe.
-
-### T116 — Webhook & Plan Update
-
-**Goal:** Persist plan.  
-**Edits:** `app/api/stripe-webhook/route.ts`  
-**DoD:** On successful payment, update `profiles.plan`.  
-**Test:** Webhook test event updates DB.
-
-### T117 — Gate by Plan
-
-**Goal:** Enforce limits.  
-**Edits:** `lib/interview.ts`  
-**DoD:** Free/Pro/Premium limits respected server-side.  
-**Test:** Plan changes take effect immediately.
+### 🎯 Overview
+We’re upgrading InterviewLab’s monetization into a **tiered offer system** inspired by **Alex Hormozi’s “$100M Offers”** principles.  
+The goal is to maximize perceived value, drive conversions, and clearly communicate the benefits of upgrading versus staying on the free plan.
 
 ---
+
+### 🪜 Value Framework
+**Value = (Dream Outcome × Perceived Likelihood of Achievement) / (Time Delay × Effort & Sacrifice)**
+
+| Lever | InterviewLab Application |
+|--------|--------------------------|
+| **Dream Outcome** | Land your dream job faster by practicing realistic interviews trained on S&P 500 companies. |
+| **Perceived Likelihood of Achievement** | Proven AI trained on real interview data + adaptive feedback engine. |
+| **Time Delay** | Instant start — upload CV → start in 60 seconds. |
+| **Effort & Sacrifice** | Minimal input: everything is automated. |
+
+---
+
+### 💎 Tiers and Pricing
+
+| Tier | Name | Price | Currency | What It Delivers |
+|------|------|--------|-----------|------------------|
+| **Free Plan** | “Practice Mode” | $0 | — | 1 stage, 3 questions, text-only interview, basic feedback. |
+| **Starter Pack** | “Kickstart Plan (3 Interviews)” | $26.99 | USD | 3 full premium interviews + voice mode + detailed feedback reports. |
+| **Professional Pack** | “Career Builder (5 Interviews)” | $39.99 | AUD | Adds multi-stage mode, adaptive difficulty, and advanced feedback analytics. |
+| **Elite Pack** | “Dream Job Pack (10 Interviews)” | $49.99 | AUD | Adds priority AI engine, deeper industry simulation, and confidence score report. |
+
+---
+
+### ⚖️ Comparison Table — Free vs Paid
+
+| Feature | Free Plan | Starter | Professional | Elite |
+|----------|-----------|----------|---------------|--------|
+| Interview Count | 1 × (3 Q) | 3 | 5 | 10 |
+| Voice Mode | ✗ | ✓ | ✓ | ✓ |
+| Full Feedback Report | Basic | ✓ | ✓ | ✓ |
+| Multi-Stage Interviews | ✗ | ✗ | ✓ | ✓ |
+| Adaptive Difficulty | ✗ | ✓ | ✓ | ✓ |
+| Priority AI Engine | ✗ | ✗ | ✗ | ✓ |
+| Confidence Score Report | ✗ | ✗ | ✗ | ✓ |
+| Price | Free | $26.99 USD | $39.99 AUD | $49.99 AUD |
+
+**Key Copy Angle:**  
+“Free is for testing — Premium is for transforming.”
+
+---
+
+## 🧩 Backend Implementation
+
+### **T132 — Stripe Products & Price Setup**
+Create Stripe products & price IDs for each pack:  
+- `pack_starter_3` ($26.99 USD)  
+- `pack_pro_5` ($39.99 AUD)  
+- `pack_elite_10` ($49.99 AUD)  
+Store in `.env` and map to `purchase_type`.
+
+### **T133 — Entitlement Schema Upgrade**
+Extend `entitlements` table:
+```sql
+ALTER TABLE entitlements
+ADD COLUMN remaining_interviews INT DEFAULT 0,
+ADD COLUMN tier TEXT CHECK (tier IN ('starter','professional','elite')),
+ADD COLUMN purchase_type TEXT,
+ADD COLUMN perks JSONB DEFAULT '{}'::jsonb;
+```
+- When a purchase completes, increment or create entitlement for that user.  
+- Example: buying 5-pack with 2 left → 7 remaining.
+
+### **T134 — Stripe Checkout Flow + Webhook**
+- Implement `/api/checkout/session` → Stripe Checkout Session based on selected tier.  
+- On `checkout.session.completed` (webhook):  
+  - Verify signature.  
+  - Grant entitlement (remaining_interviews += tier_count).  
+  - Store `purchase_type`, `stripe_session_id`, and `currency`.
+
+### **T135 — Credit Tracking + Consumption**
+- Guard `createSession()` → reject if `remaining_interviews <= 0`.  
+- On interview completion: `remaining_interviews –= 1`.  
+- Log consumption in `entitlement_history` table.  
+- If balance = 0 → trigger “Buy More” prompt.
+
+### **T136 — Entitlement Summary Endpoint**
+Expose `/api/user/entitlements` to return:
+```json
+{
+  "tier": "professional",
+  "remaining_interviews": 3,
+  "perks": { "multi_stage": true, "priority_ai": false }
+}
+```
+
+---
+
+## 💻 Frontend Implementation
+
+### **T137 — Pricing Page + Offer Stack UI**
+Rebuild `/app/(marketing)/pricing/page.tsx`:
+- Three animated tier cards with Framer Motion.  
+- Feature comparison table (Free vs Paid).  
+- Highlight “Most Popular” Professional tier.  
+- CTAs → `/api/checkout/session?packType=…`.
+
+### **T138 — Upgrade Modal Rework**
+Replace existing UpgradeDialog with value-stacked copy:
+> “Unlock 10 interviews, priority AI feedback, and multi-stage simulations.”  
+Add pricing cards inline.
+
+### **T139 — Entitlement Counter + Zero Balance UX**
+- Show remaining interviews on dashboard & navbar.  
+- If balance = 0 → disable “Start Interview” button + display:  
+  > “You’ve used all your interviews — purchase another pack to continue.”  
+- CTA → Pricing page.
+
+### **T140 — Thank You & Upsell Flows**
+- After purchase → show confirmation:  
+  > “Welcome to the Elite Pack — 10 interviews unlocked.”  
+- After interview completion → upsell modal if balance < 2.  
+- Add bonus copy: “Upgrade to Elite for Priority Feedback & Confidence Report.”
+
+---
+
+## 🧠 Technical Notes
+- Implement per-tier perks via `perks` JSONB object.  
+- Use `currency` field for multi-currency logic.  
+- Add QA logs: `[Entitlement] Remaining: x (Tier: pro)`.
+
 
 ## Phase 14 — Production Hardening
 

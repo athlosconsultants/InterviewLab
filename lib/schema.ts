@@ -127,6 +127,13 @@ export interface Database {
           expires_at: string | null;
           consumed_at: string | null;
           created_at: string;
+          // Phase 13: Tiered payment system
+          remaining_interviews: number;
+          tier: 'starter' | 'professional' | 'elite' | null;
+          purchase_type: string | null;
+          perks: Json;
+          stripe_session_id: string | null;
+          currency: 'USD' | 'AUD';
         };
         Insert: {
           id?: string;
@@ -138,6 +145,13 @@ export interface Database {
           expires_at?: string | null;
           consumed_at?: string | null;
           created_at?: string;
+          // Phase 13: Tiered payment system
+          remaining_interviews?: number;
+          tier?: 'starter' | 'professional' | 'elite' | null;
+          purchase_type?: string | null;
+          perks?: Json;
+          stripe_session_id?: string | null;
+          currency?: 'USD' | 'AUD';
         };
         Update: {
           id?: string;
@@ -148,6 +162,48 @@ export interface Database {
           metadata?: Json;
           expires_at?: string | null;
           consumed_at?: string | null;
+          created_at?: string;
+          // Phase 13: Tiered payment system
+          remaining_interviews?: number;
+          tier?: 'starter' | 'professional' | 'elite' | null;
+          purchase_type?: string | null;
+          perks?: Json;
+          stripe_session_id?: string | null;
+          currency?: 'USD' | 'AUD';
+        };
+      };
+      entitlement_history: {
+        Row: {
+          id: string;
+          user_id: string;
+          entitlement_id: string;
+          action: 'purchase' | 'consume' | 'grant' | 'expire';
+          interview_session_id: string | null;
+          previous_balance: number | null;
+          new_balance: number | null;
+          metadata: Json;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          entitlement_id: string;
+          action: 'purchase' | 'consume' | 'grant' | 'expire';
+          interview_session_id?: string | null;
+          previous_balance?: number | null;
+          new_balance?: number | null;
+          metadata?: Json;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          entitlement_id?: string;
+          action?: 'purchase' | 'consume' | 'grant' | 'expire';
+          interview_session_id?: string | null;
+          previous_balance?: number | null;
+          new_balance?: number | null;
+          metadata?: Json;
           created_at?: string;
         };
       };
@@ -362,5 +418,142 @@ export interface Turn {
   timing: Timing | Json | null;
   bridge_text: string | null; // T89: Conversational transition referencing previous answer
   turn_type: TurnType; // T106: Distinguish small talk from interview questions
+  created_at: string;
+}
+
+// ========================================
+// Phase 13: Hormozi Tiered Payment System
+// ========================================
+
+// Entitlement tier enum
+export type EntitlementTier = 'starter' | 'professional' | 'elite';
+
+// Currency enum
+export type Currency = 'USD' | 'AUD';
+
+// Entitlement perks structure
+export interface EntitlementPerks {
+  voice_mode: boolean;
+  multi_stage: boolean;
+  priority_ai: boolean;
+  advanced_analytics: boolean;
+  confidence_report: boolean;
+}
+
+// Tier configuration (defines what each pack includes)
+export interface TierConfig {
+  tier: EntitlementTier;
+  name: string;
+  interview_count: number;
+  price: number;
+  currency: Currency;
+  purchase_type: string; // Stripe product identifier
+  perks: EntitlementPerks;
+  description: string;
+  highlights: string[];
+}
+
+// Tier configurations for each pack
+export const TIER_CONFIGS: Record<EntitlementTier, TierConfig> = {
+  starter: {
+    tier: 'starter',
+    name: 'Kickstart Plan',
+    interview_count: 3,
+    price: 26.99,
+    currency: 'USD',
+    purchase_type: 'pack_starter_3',
+    perks: {
+      voice_mode: true,
+      multi_stage: false,
+      priority_ai: false,
+      advanced_analytics: false,
+      confidence_report: false,
+    },
+    description: '3 full premium interviews + voice mode + detailed feedback reports',
+    highlights: [
+      '3 full-length interviews',
+      'Voice mode enabled',
+      'Detailed feedback reports',
+      'Adaptive difficulty',
+    ],
+  },
+  professional: {
+    tier: 'professional',
+    name: 'Career Builder',
+    interview_count: 5,
+    price: 39.99,
+    currency: 'AUD',
+    purchase_type: 'pack_pro_5',
+    perks: {
+      voice_mode: true,
+      multi_stage: true,
+      priority_ai: false,
+      advanced_analytics: true,
+      confidence_report: false,
+    },
+    description: 'Adds multi-stage mode, adaptive difficulty, and advanced feedback analytics',
+    highlights: [
+      '5 full-length interviews',
+      'Multi-stage interviews',
+      'Advanced analytics',
+      'Voice mode enabled',
+      'Adaptive difficulty',
+    ],
+  },
+  elite: {
+    tier: 'elite',
+    name: 'Dream Job Pack',
+    interview_count: 10,
+    price: 49.99,
+    currency: 'AUD',
+    purchase_type: 'pack_elite_10',
+    perks: {
+      voice_mode: true,
+      multi_stage: true,
+      priority_ai: true,
+      advanced_analytics: true,
+      confidence_report: true,
+    },
+    description: 'Adds priority AI engine, deeper industry simulation, and confidence score report',
+    highlights: [
+      '10 full-length interviews',
+      'Priority AI engine',
+      'Confidence score report',
+      'Multi-stage interviews',
+      'Advanced analytics',
+      'Voice mode enabled',
+    ],
+  },
+};
+
+// Enhanced Entitlement interface with Phase 13 fields
+export interface EntitlementWithPerks extends Entitlement {
+  remaining_interviews: number;
+  tier: EntitlementTier | null;
+  purchase_type: string | null;
+  perks: EntitlementPerks;
+  stripe_session_id: string | null;
+  currency: Currency;
+}
+
+// Entitlement summary response (from /api/user/entitlements)
+export interface EntitlementSummary {
+  tier: EntitlementTier | null;
+  remaining_interviews: number;
+  perks: EntitlementPerks;
+  active_entitlements: EntitlementWithPerks[];
+  total_consumed: number;
+}
+
+// Entitlement history entry
+export interface EntitlementHistoryEntry {
+  id: string;
+  user_id: string;
+  entitlement_id: string;
+  action: 'purchase' | 'consume' | 'grant' | 'expire';
+  interview_session_id: string | null;
+  previous_balance: number | null;
+  new_balance: number | null;
+  metadata: Json;
   created_at: string;
 }
