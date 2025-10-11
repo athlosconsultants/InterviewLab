@@ -19,8 +19,8 @@ export function ProgressSteps({ currentStep }: ProgressStepsProps) {
   const currentStepIndex = steps.findIndex((s) => s.id === currentStep);
 
   return (
-    // T122: Center the checklist with mx-auto
-    <div className="w-full max-w-2xl mx-auto space-y-4">
+    // T122: Center the checklist
+    <div className="flex flex-col items-center space-y-4 w-full">
       {steps.map((step, index) => {
         const isComplete = index < currentStepIndex;
         const isCurrent = index === currentStepIndex;

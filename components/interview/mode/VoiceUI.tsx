@@ -343,15 +343,15 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
       };
 
       audio.onended = () => {
-        console.log(`[OrbState] speaking → ready (${type} playback ended)`);
-        setOrbState('ready');
+        console.log(`[OrbState] speaking → idle (${type} playback ended)`);
+        setOrbState('idle');
         setIsPlayingAudio(false);
         if (onComplete) onComplete();
       };
 
       audio.onerror = () => {
         console.error(`[OrbState] Audio error for ${type}`);
-        setOrbState('ready');
+        setOrbState('idle');
         setIsPlayingAudio(false);
         toast.error('Audio playback failed');
       };
@@ -365,14 +365,14 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
             '[OrbState] Autoplay blocked - requiring user interaction'
           );
           setNeedsUserInteraction(true);
-          setOrbState('ready');
+          setOrbState('idle');
         } else {
           throw playError;
         }
       }
     } catch (error) {
       console.error('TTS error:', error);
-      setOrbState('ready');
+      setOrbState('idle');
       toast.error('Unable to play audio');
     }
   };
@@ -418,9 +418,9 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
 
       audio.onended = () => {
         console.log(
-          `[OrbState] speaking → ready (question playback ended, awaiting user input)`
+          `[OrbState] speaking → idle (question playback ended, awaiting user input)`
         );
-        setOrbState('ready');
+        setOrbState('idle');
         setIsPlayingAudio(false);
 
         // T110: Track successful orb autoplay completion
@@ -433,7 +433,7 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
 
       audio.onerror = () => {
         console.error(`[OrbState] Audio error for question`);
-        setOrbState('ready');
+        setOrbState('idle');
         setIsPlayingAudio(false);
         toast.error('Audio playback failed');
       };
@@ -447,14 +447,14 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
             '[OrbState] Autoplay blocked - requiring user interaction'
           );
           setNeedsUserInteraction(true);
-          setOrbState('ready');
+          setOrbState('idle');
         } else {
           throw playError;
         }
       }
     } catch (error) {
       console.error('TTS error:', error);
-      setOrbState('ready');
+      setOrbState('idle');
       toast.error('Unable to play question audio');
     }
   };
@@ -529,12 +529,12 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
       return newCount;
     });
 
-    console.log(`[OrbState] ready → speaking (replaying question)`);
+    console.log(`[OrbState] idle → speaking (replaying question)`);
     setOrbState('speaking');
     audioRef.current.currentTime = 0;
     audioRef.current.play().catch(() => {
       console.error(`[OrbState] Replay failed`);
-      setOrbState('ready');
+      setOrbState('idle');
       toast.error('Replay failed');
     });
   }, [currentAudioUrl]);
@@ -559,7 +559,7 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
       }
 
       setIsSubmitting(true);
-      console.log(`[OrbState] ready → processing (user submitted answer)`);
+      console.log(`[OrbState] idle → processing (user submitted answer)`);
       setOrbState('processing');
 
       try {
@@ -581,8 +581,8 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
 
           if (!uploadData.success) {
             toast.error('Upload failed');
-            console.error(`[OrbState] Upload failed, returning to ready`);
-            setOrbState('ready');
+            console.error(`[OrbState] Upload failed, returning to idle`);
+            setOrbState('idle');
             setIsSubmitting(false);
             return;
           }
@@ -603,10 +603,8 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
 
           if (!transcribeData.success) {
             toast.error('Transcription failed');
-            console.error(
-              `[OrbState] Transcription failed, returning to ready`
-            );
-            setOrbState('ready');
+            console.error(`[OrbState] Transcription failed, returning to idle`);
+            setOrbState('idle');
             setIsSubmitting(false);
             return;
           }
@@ -648,8 +646,8 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
           toast.error('Unable to submit', {
             description: result.error,
           });
-          console.error(`[OrbState] Submit failed, returning to ready`);
-          setOrbState('ready');
+          console.error(`[OrbState] Submit failed, returning to idle`);
+          setOrbState('idle');
           return;
         }
 
@@ -661,8 +659,8 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
           );
 
           if (result.data.done) {
-            console.log(`[OrbState] processing → ready (interview complete)`);
-            setOrbState('ready');
+            console.log(`[OrbState] processing → idle (interview complete)`);
+            setOrbState('idle');
             setCurrentPhase('complete'); // T115: Mark as complete
             toast.success('Interview complete', {
               description: 'Well done.',
@@ -811,8 +809,8 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
         toast.error('Something went wrong', {
           description: 'Please try again',
         });
-        console.error(`[OrbState] Submit error, returning to ready`);
-        setOrbState('ready');
+        console.error(`[OrbState] Submit error, returning to idle`);
+        setOrbState('idle');
       } finally {
         setIsSubmitting(false);
       }
