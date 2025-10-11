@@ -15,6 +15,7 @@ import {
   BarChart3,
 } from 'lucide-react';
 import { Metadata } from 'next';
+import { createClient } from '@/lib/supabase-server';
 
 export const metadata: Metadata = {
   title:
@@ -37,7 +38,33 @@ export const metadata: Metadata = {
   },
 };
 
-export default function Home() {
+export default async function Home() {
+  // Check if user is logged in and has credits
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  let hasCredits = false;
+  let remainingInterviews = 0;
+
+  if (user) {
+    // Fetch user's entitlements
+    const { data: entitlements } = await supabase
+      .from('entitlements')
+      .select('remaining_interviews')
+      .eq('user_id', user.id)
+      .eq('status', 'active')
+      .gt('remaining_interviews', 0);
+
+    if (entitlements && entitlements.length > 0) {
+      hasCredits = true;
+      remainingInterviews = entitlements.reduce(
+        (sum, e: any) => sum + (e.remaining_interviews || 0),
+        0
+      );
+    }
+  }
   return (
     <main className="min-h-screen bg-gradient-to-b from-background via-background to-muted/20">
       {/* Hero Section */}
@@ -73,21 +100,46 @@ export default function Home() {
 
             {/* CTAs */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-              <Link href="/setup">
-                <Button size="lg" className="text-lg px-8 py-6 shadow-lg">
-                  Start Free Interview
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-              </Link>
-              <Link href="/setup">
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="text-lg px-8 py-6"
-                >
-                  Upgrade to Full Simulation
-                </Button>
-              </Link>
+              {user && hasCredits ? (
+                // User has credits - show "Start Interview" button
+                <>
+                  <Link href="/setup">
+                    <Button size="lg" className="text-lg px-8 py-6 shadow-lg">
+                      Start Interview ({remainingInterviews}{' '}
+                      {remainingInterviews === 1 ? 'credit' : 'credits'})
+                      <ArrowRight className="ml-2 h-5 w-5" />
+                    </Button>
+                  </Link>
+                  <Link href="/pricing">
+                    <Button
+                      size="lg"
+                      variant="outline"
+                      className="text-lg px-8 py-6"
+                    >
+                      Buy More Interviews
+                    </Button>
+                  </Link>
+                </>
+              ) : (
+                // No credits or not logged in - show default CTAs
+                <>
+                  <Link href="/setup">
+                    <Button size="lg" className="text-lg px-8 py-6 shadow-lg">
+                      Start Free Interview
+                      <ArrowRight className="ml-2 h-5 w-5" />
+                    </Button>
+                  </Link>
+                  <Link href="/pricing">
+                    <Button
+                      size="lg"
+                      variant="outline"
+                      className="text-lg px-8 py-6"
+                    >
+                      View Premium Packages
+                    </Button>
+                  </Link>
+                </>
+              )}
             </div>
 
             {/* Social proof */}

@@ -731,6 +731,15 @@ export async function submitAnswer(params: {
     throw new Error('Session not found');
   }
 
+  // Guard: If session is already complete (feedback status), prevent reprocessing
+  if ((session as any).status === 'feedback') {
+    return {
+      done: true,
+      nextQuestion: null,
+      planTier: (session as any).plan_tier || 'free',
+    };
+  }
+
   // T95: Update rolling conversation summary
   await updateConversationSummary(
     sessionId,

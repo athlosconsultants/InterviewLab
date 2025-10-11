@@ -29,6 +29,11 @@ export function ReportView({
   const jobTitle = session.job_spec?.role || 'Position';
   const company = session.company || 'Company';
 
+  const handleDownloadPDF = () => {
+    // Generate PDF-friendly view and trigger print dialog
+    window.print();
+  };
+
   return (
     <main className="min-h-screen bg-gradient-to-b from-background to-muted/20">
       <div className="mx-auto max-w-5xl p-4 py-8 space-y-8">
@@ -131,7 +136,7 @@ export function ReportView({
             </Link>
           </Button>
           {reportId && (
-            <Button variant="default">
+            <Button variant="default" onClick={handleDownloadPDF}>
               <Download className="mr-2 h-4 w-4" />
               Download PDF
             </Button>
