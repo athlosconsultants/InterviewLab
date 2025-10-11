@@ -4,7 +4,14 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2, Send, Mic, Type, AccessibilityIcon } from 'lucide-react';
+import {
+  Loader2,
+  Send,
+  Mic,
+  Type,
+  AccessibilityIcon,
+  ArrowRight,
+} from 'lucide-react';
 import {
   initializeInterview,
   submitInterviewAnswer,
@@ -45,6 +52,7 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
   const [accessibilityMode, setAccessibilityMode] = useState(false);
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   const [introText, setIntroText] = useState<string | null>(null);
+  const [showWelcomeScreen, setShowWelcomeScreen] = useState(false); // T124: Welcome screen state
 
   // Prevent duplicate submissions
   const submissionInProgress = useRef(false);
@@ -152,9 +160,13 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
           setTurns(turnsWithTiming);
           setCurrentTurnId(result.data.currentTurn?.id || null);
 
-          // Extract intro text if available (T88)
+          // Extract intro text if available (T88/T124)
           if (result.data.intro) {
             setIntroText(result.data.intro);
+            // T124: Show welcome screen if intro exists and no answers yet
+            if (turnsWithTiming.every((t: Turn) => !t.answer_text)) {
+              setShowWelcomeScreen(true);
+            }
           }
 
           // T91: Extract stage information
@@ -558,27 +570,35 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
         </div>
       </div>
 
-      {/* T102: Current Question Only Display */}
-      <div className="space-y-6">
-        {/* T118: Interview Introduction - shown at start (even if small talk exists) */}
-        {introText &&
-          (turns.length === 0 ||
-            (currentQuestion &&
-              (currentQuestion as any).turn_type === 'small_talk' &&
-              turns.findIndex((t) => t.id === currentQuestion.id) === 0)) && (
-            <div className="flex justify-start">
-              <div className="max-w-[85%] rounded-lg bg-blue-50 dark:bg-blue-950/30 p-5 border-l-4 border-blue-500">
-                <div className="mb-2">
-                  <span className="text-xs font-semibold text-blue-700 dark:text-blue-300 uppercase tracking-wide">
-                    Welcome
-                  </span>
-                </div>
-                <p className="text-base leading-relaxed text-foreground whitespace-pre-wrap">
-                  {introText}
-                </p>
+      {/* T124: Welcome Screen - shown separately before questions */}
+      {showWelcomeScreen && introText && (
+        <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-8">
+          <div className="max-w-2xl w-full">
+            <div className="rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-950/30 dark:to-blue-900/20 p-8 border-2 border-blue-200 dark:border-blue-800 shadow-lg">
+              <div className="mb-4">
+                <span className="text-sm font-semibold text-blue-700 dark:text-blue-300 uppercase tracking-wide">
+                  Welcome
+                </span>
               </div>
+              <p className="text-lg leading-relaxed text-foreground whitespace-pre-wrap mb-6">
+                {introText}
+              </p>
+              <Button
+                size="lg"
+                onClick={() => setShowWelcomeScreen(false)}
+                className="w-full sm:w-auto"
+              >
+                Start Interview
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
             </div>
-          )}
+          </div>
+        </div>
+      )}
+
+      {/* T102: Current Question Only Display */}
+      {!showWelcomeScreen && (
+        <div className="space-y-6">
 
         {/* T102: Render only the FIRST unanswered turn (current question) - Hide during analyzing */}
         {currentQuestion &&
@@ -685,7 +705,6 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
               </div>
             );
           })()}
-      </div>
 
       {/* T120: Analyzing Answer Transition - Apple-style minimalist animation */}
       {isAnalyzing && (

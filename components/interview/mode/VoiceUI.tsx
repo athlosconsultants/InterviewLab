@@ -56,6 +56,7 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
   // T127: Audio playback managed by AudioController
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [currentAudioUrl, setCurrentAudioUrl] = useState<string | null>(null);
+  const [showWelcomeScreen, setShowWelcomeScreen] = useState(false); // T124: Welcome screen state
 
   // T108: Replay count tracking for voice mode scoring
   const [replayCount, setReplayCount] = useState(0);
@@ -134,7 +135,12 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
         });
 
         setTurns(turnsWithTiming);
-        setIntroText(result.data.intro || null);
+        const intro = result.data.intro || null;
+        setIntroText(intro);
+        // T124: Show welcome screen if intro exists and no answers yet
+        if (intro && turnsWithTiming.every((t: Turn) => !t.answer_text)) {
+          setShowWelcomeScreen(true);
+        }
         setCurrentStage(result.data.currentStage || 1);
         setStagesPlanned(result.data.stagesPlanned || 1);
         setStageName(result.data.stageName || '');
@@ -202,10 +208,11 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
     };
   }, [stopAllAudio]);
 
-  // T115: Auto-play TTS for intro, then play first turn after a pause
+  // T124: Auto-play TTS for intro in voice mode, then hide welcome screen and play first turn
   useEffect(() => {
-    // T114 FIX: Check both state and ref to prevent duplicate playback
+    // T124: Auto-play intro in voice mode when welcome screen is shown
     if (
+      showWelcomeScreen &&
       introText &&
       turns.length > 0 &&
       !introPlayed &&
@@ -228,9 +235,12 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
           setCurrentPhase('interview');
         }
 
-        // Play intro with pause before first turn
+        // T124: Play intro with auto-transition to first question
         playTextToSpeech(introText, 'intro', async () => {
           setIntroPlayed(true);
+
+          // T124: Hide welcome screen after intro playback
+          setShowWelcomeScreen(false);
 
           // T115: Add pause after welcome message
           await pauseBetweenSections(2000); // 2 second pause after intro
@@ -251,7 +261,7 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
         });
       }
     }
-  }, [introText, turns, introPlayed, isLoading]);
+  }, [showWelcomeScreen, introText, turns, introPlayed, isLoading]);
 
   // T115: Auto-play TTS for new questions with proper sequencing
   // Skip first question if intro exists (it's chained after intro)
@@ -850,24 +860,53 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
   return (
     <>
       <div className="mx-auto w-full max-w-4xl p-4 space-y-8">
-        {/* Header */}
-        <div className="border-b pb-4">
-          <div className="flex items-start justify-between">
-            <div>
-              <h1 className="text-2xl font-bold">{jobTitle}</h1>
-              <p className="text-muted-foreground">{company}</p>
-              {stagesPlanned > 1 && (
-                <p className="text-sm text-primary mt-2">
-                  Stage {currentStage} of {stagesPlanned}: {stageName}
+        {/* T124: Welcome Screen for Voice Mode */}
+        {showWelcomeScreen && introText && (
+          <div className="flex flex-col items-center justify-center min-h-[70vh] space-y-8">
+            <div className="max-w-2xl w-full">
+              <div className="rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-950/30 dark:to-blue-900/20 p-8 border-2 border-blue-200 dark:border-blue-800 shadow-lg">
+                <div className="mb-4">
+                  <span className="text-sm font-semibold text-blue-700 dark:text-blue-300 uppercase tracking-wide">
+                    Welcome
+                  </span>
+                </div>
+                <p className="text-lg leading-relaxed text-foreground whitespace-pre-wrap mb-6">
+                  {introText}
                 </p>
-              )}
-            </div>
-            {/* T123: Removed question counter for greater immersion */}
-            <div className="text-right">
-              <p className="text-sm text-muted-foreground">Voice Mode</p>
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-primary/10 rounded-full animate-pulse flex items-center justify-center">
+                    <Mic className="w-6 h-6 text-primary" />
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Audio playing automatically...
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
+        )}
+
+        {/* Interview Content - hidden during welcome screen */}
+        {!showWelcomeScreen && (
+          <>
+            {/* Header */}
+            <div className="border-b pb-4">
+              <div className="flex items-start justify-between">
+                <div>
+                  <h1 className="text-2xl font-bold">{jobTitle}</h1>
+                  <p className="text-muted-foreground">{company}</p>
+                  {stagesPlanned > 1 && (
+                    <p className="text-sm text-primary mt-2">
+                      Stage {currentStage} of {stagesPlanned}: {stageName}
+                    </p>
+                  )}
+                </div>
+                {/* T123: Removed question counter for greater immersion */}
+                <div className="text-right">
+                  <p className="text-sm text-muted-foreground">Voice Mode</p>
+                </div>
+              </div>
+            </div>
 
         {/* Voice Orb */}
         <div className="flex flex-col items-center justify-center py-12">
@@ -995,6 +1034,8 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
               Recording ready. Submit to transcribe and continue.
             </p>
           </div>
+        )}
+          </>
         )}
       </div>
 
