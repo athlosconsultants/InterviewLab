@@ -360,8 +360,8 @@ export default function PricingPage() {
         >
           <h3 className="text-2xl font-bold mb-8">Why InterviewLab?</h3>
           <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-            <div>
-              <div className="w-14 h-14 bg-gradient-to-br from-primary to-blue-600 rounded-2xl flex items-center justify-center mb-4">
+            <div className="text-center">
+              <div className="w-14 h-14 bg-gradient-to-br from-primary to-blue-600 rounded-2xl flex items-center justify-center mb-4 mx-auto">
                 <Zap className="w-7 h-7 text-white" />
               </div>
               <h4 className="font-semibold mb-2">Instant Start</h4>
@@ -369,8 +369,8 @@ export default function PricingPage() {
                 Upload CV → Start in 60 seconds
               </p>
             </div>
-            <div>
-              <div className="w-14 h-14 bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl flex items-center justify-center mb-4">
+            <div className="text-center">
+              <div className="w-14 h-14 bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl flex items-center justify-center mb-4 mx-auto">
                 <Target className="w-7 h-7 text-white" />
               </div>
               <h4 className="font-semibold mb-2">Proven AI</h4>
@@ -378,8 +378,8 @@ export default function PricingPage() {
                 Trained on S&P 500 company data
               </p>
             </div>
-            <div>
-              <div className="w-14 h-14 bg-gradient-to-br from-teal-500 to-cyan-600 rounded-2xl flex items-center justify-center mb-4">
+            <div className="text-center">
+              <div className="w-14 h-14 bg-gradient-to-br from-teal-500 to-cyan-600 rounded-2xl flex items-center justify-center mb-4 mx-auto">
                 <BarChart3 className="w-7 h-7 text-white" />
               </div>
               <h4 className="font-semibold mb-2">Real Feedback</h4>
