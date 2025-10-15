@@ -247,7 +247,7 @@ export default async function Home() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {/* Feature 1 - Voice Mode */}
             <div className="bg-card rounded-2xl p-8 shadow-lg border border-border space-y-4">
-              <div className="w-14 h-14 bg-gradient-to-br from-primary to-blue-600 rounded-2xl flex items-center justify-center">
+              <div className="w-14 h-14 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-2xl flex items-center justify-center">
                 <Mic className="w-7 h-7 text-white" />
               </div>
               <h3 className="text-xl font-semibold">Voice Mode</h3>
@@ -260,7 +260,7 @@ export default async function Home() {
 
             {/* Feature 2 - Text Mode */}
             <div className="bg-card rounded-2xl p-8 shadow-lg border border-border space-y-4">
-              <div className="w-14 h-14 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center">
+              <div className="w-14 h-14 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-2xl flex items-center justify-center">
                 <Type className="w-7 h-7 text-white" />
               </div>
               <h3 className="text-xl font-semibold">Text Mode</h3>
@@ -272,7 +272,7 @@ export default async function Home() {
 
             {/* Feature 3 - Adaptive Difficulty */}
             <div className="bg-card rounded-2xl p-8 shadow-lg border border-border space-y-4">
-              <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl flex items-center justify-center">
+              <div className="w-14 h-14 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-2xl flex items-center justify-center">
                 <Zap className="w-7 h-7 text-white" />
               </div>
               <h3 className="text-xl font-semibold">Adaptive Difficulty</h3>
@@ -284,7 +284,7 @@ export default async function Home() {
 
             {/* Feature 4 - Multi-Stage */}
             <div className="bg-card rounded-2xl p-8 shadow-lg border border-border space-y-4">
-              <div className="w-14 h-14 bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl flex items-center justify-center">
+              <div className="w-14 h-14 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-2xl flex items-center justify-center">
                 <Target className="w-7 h-7 text-white" />
               </div>
               <h3 className="text-xl font-semibold">Multi-Stage Interviews</h3>
@@ -296,7 +296,7 @@ export default async function Home() {
 
             {/* Feature 5 - Smart Research */}
             <div className="bg-card rounded-2xl p-8 shadow-lg border border-border space-y-4">
-              <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center">
+              <div className="w-14 h-14 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-2xl flex items-center justify-center">
                 <Brain className="w-7 h-7 text-white" />
               </div>
               <h3 className="text-xl font-semibold">Smart Research</h3>
@@ -308,7 +308,7 @@ export default async function Home() {
 
             {/* Feature 6 - Detailed Reports */}
             <div className="bg-card rounded-2xl p-8 shadow-lg border border-border space-y-4">
-              <div className="w-14 h-14 bg-gradient-to-br from-teal-500 to-cyan-600 rounded-2xl flex items-center justify-center">
+              <div className="w-14 h-14 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-2xl flex items-center justify-center">
                 <BarChart3 className="w-7 h-7 text-white" />
               </div>
               <h3 className="text-xl font-semibold">Detailed Reports</h3>
