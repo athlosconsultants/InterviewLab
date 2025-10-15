@@ -38,7 +38,8 @@ export default function PricingPage() {
     } catch (error) {
       console.error('Checkout error:', error);
       toast.error('Failed to start checkout', {
-        description: error instanceof Error ? error.message : 'Please try again',
+        description:
+          error instanceof Error ? error.message : 'Please try again',
       });
       setIsLoading(null);
     }
@@ -72,7 +73,10 @@ export default function PricingPage() {
             Transform Your Interview Game
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-2">
-            Free is for testing — <span className="font-semibold text-foreground">Premium is for transforming.</span>
+            Free is for testing —{' '}
+            <span className="font-semibold text-foreground">
+              Premium is for transforming.
+            </span>
           </p>
           <p className="text-muted-foreground">
             Unlock AI-powered interview simulation with detailed feedback
@@ -100,7 +104,7 @@ export default function PricingPage() {
         </motion.div>
 
         {/* Pricing Tiers */}
-        <div className="grid md:grid-3xl gap-8 mb-16">
+        <div className="grid md:grid-cols-3 gap-8 mb-16">
           {tiers.map((tier, index) => {
             const isPopular = tier.tier === 'professional';
             const isElite = tier.tier === 'elite';
@@ -132,7 +136,9 @@ export default function PricingPage() {
                   <div className="mb-6">
                     <div className="flex items-center gap-2 mb-2">
                       <h2 className="text-2xl font-bold">{tier.name}</h2>
-                      {isElite && <Sparkles className="h-5 w-5 text-purple-500" />}
+                      {isElite && (
+                        <Sparkles className="h-5 w-5 text-purple-500" />
+                      )}
                     </div>
                     <p className="text-sm text-muted-foreground mb-4">
                       {tier.description}
@@ -196,7 +202,9 @@ export default function PricingPage() {
                   <th className="text-left p-4 font-semibold">Feature</th>
                   <th className="text-center p-4 font-semibold">Free</th>
                   <th className="text-center p-4 font-semibold">Starter</th>
-                  <th className="text-center p-4 font-semibold bg-primary/10">Professional</th>
+                  <th className="text-center p-4 font-semibold bg-primary/10">
+                    Professional
+                  </th>
                   <th className="text-center p-4 font-semibold">Elite</th>
                 </tr>
               </thead>
@@ -348,4 +356,3 @@ export default function PricingPage() {
     </div>
   );
 }
-

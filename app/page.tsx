@@ -93,9 +93,11 @@ export default async function Home() {
 
             {/* Subheadline */}
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Upload your CV and job description. Our AI researches the role,
-              generates personalized questions, and provides detailed
-              feedback—just like a real interview.
+              Upload your CV and job description — then experience an adaptive,
+              conversational AI interview that mirrors real hiring panels. Each
+              question evolves based on your responses, following proven
+              industry interview frameworks and delivering personalized feedback
+              at the end.
             </p>
 
             {/* CTAs */}
@@ -125,7 +127,7 @@ export default async function Home() {
                 <>
                   <Link href="/setup">
                     <Button size="lg" className="text-lg px-8 py-6 shadow-lg">
-                      Start Free Interview
+                      Start Interview Now
                       <ArrowRight className="ml-2 h-5 w-5" />
                     </Button>
                   </Link>
@@ -135,7 +137,7 @@ export default async function Home() {
                       variant="outline"
                       className="text-lg px-8 py-6"
                     >
-                      View Premium Packages
+                      Explore Deep Immersion Interviews
                     </Button>
                   </Link>
                 </>
@@ -326,7 +328,7 @@ export default async function Home() {
             <h2 className="text-3xl sm:text-4xl font-bold mb-4">
               Loved by job seekers everywhere
             </h2>
-        <p className="text-lg text-muted-foreground">
+            <p className="text-lg text-muted-foreground">
               Real feedback from candidates who landed their dream jobs
             </p>
           </div>
@@ -434,13 +436,13 @@ export default async function Home() {
               skills and landed offers at top companies.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-        <Link href="/setup">
+              <Link href="/setup">
                 <Button size="lg" className="text-lg px-8 py-6 shadow-lg">
                   Start your free interview today
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
-        </Link>
-      </div>
+              </Link>
+            </div>
             <p className="text-sm text-muted-foreground mt-6">
               No credit card required • Get started in 2 minutes
             </p>
