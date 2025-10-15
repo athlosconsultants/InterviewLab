@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Check, X, Loader2, Sparkles } from 'lucide-react';
@@ -29,6 +29,15 @@ export default function PricingPage() {
 
       const data = await response.json();
 
+      // If unauthorized (not logged in), redirect to sign-in page
+      if (response.status === 401) {
+        // Store the selected tier in session storage to resume after login
+        sessionStorage.setItem('pendingPurchaseTier', tier);
+        // Redirect to sign-in with return URL to pricing page
+        router.push('/sign-in?redirect=/pricing');
+        return;
+      }
+
       if (!response.ok || !data.url) {
         throw new Error(data.error || 'Failed to create checkout session');
       }
@@ -44,6 +53,20 @@ export default function PricingPage() {
       setIsLoading(null);
     }
   };
+
+  // Check for pending purchase after sign-in
+  useEffect(() => {
+    const pendingTier = sessionStorage.getItem('pendingPurchaseTier');
+    if (
+      pendingTier &&
+      ['starter', 'professional', 'elite'].includes(pendingTier)
+    ) {
+      // Clear the pending tier
+      sessionStorage.removeItem('pendingPurchaseTier');
+      // Automatically trigger the purchase
+      handlePurchase(pendingTier as EntitlementTier);
+    }
+  }, []);
 
   const tiers = [
     TIER_CONFIGS.starter,
