@@ -375,6 +375,19 @@ export default function PricingPage() {
             </div>
           </div>
         </motion.div>
+
+        {/* Footer */}
+        <div className="mt-16 text-center text-sm text-muted-foreground border-t pt-8">
+          <p>
+            Need help?{' '}
+            <a
+              href="mailto:support@theinterviewlab.io"
+              className="text-primary hover:underline"
+            >
+              support@theinterviewlab.io
+            </a>
+          </p>
+        </div>
       </div>
     </div>
   );

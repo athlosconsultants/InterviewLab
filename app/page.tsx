@@ -458,6 +458,15 @@ export default async function Home() {
             <p className="mt-2">
               Practice makes perfect. Interview prep made intelligent.
             </p>
+            <p className="mt-4">
+              Need help?{' '}
+              <a
+                href="mailto:support@theinterviewlab.io"
+                className="text-primary hover:underline"
+              >
+                support@theinterviewlab.io
+              </a>
+            </p>
           </div>
         </div>
       </footer>

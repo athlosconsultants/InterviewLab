@@ -36,7 +36,9 @@ function CheckoutSuccessContent() {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center p-4">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
-        <p className="mt-4 text-muted-foreground">Processing your purchase...</p>
+        <p className="mt-4 text-muted-foreground">
+          Processing your purchase...
+        </p>
       </div>
     );
   }
@@ -84,9 +86,7 @@ function CheckoutSuccessContent() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
           >
-            <h1 className="text-3xl font-bold mb-4">
-              🎉 Purchase Successful!
-            </h1>
+            <h1 className="text-3xl font-bold mb-4">🎉 Purchase Successful!</h1>
             <p className="text-lg text-muted-foreground mb-2">
               Your interview pack has been activated.
             </p>
@@ -156,6 +156,17 @@ function CheckoutSuccessContent() {
               Order ID: {sessionId.slice(-12)}
             </p>
           )}
+
+          {/* Support Email */}
+          <p className="mt-6 text-sm text-muted-foreground">
+            Questions?{' '}
+            <a
+              href="mailto:support@theinterviewlab.io"
+              className="text-primary hover:underline"
+            >
+              support@theinterviewlab.io
+            </a>
+          </p>
         </div>
       </motion.div>
     </div>
@@ -180,4 +191,3 @@ export default function CheckoutSuccessPage() {
     </Suspense>
   );
 }
-
