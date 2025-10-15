@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase-server';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import Image from 'next/image';
 import { signOut } from '@/app/actions/auth';
 import { EntitlementBadge } from './EntitlementBadge';
 
@@ -13,8 +14,15 @@ export async function Header() {
   return (
     <header className="border-b">
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-        <Link href="/" className="text-xl font-bold">
-          InterviewLab
+        <Link href="/" className="flex items-center gap-2">
+          <Image
+            src="/logo.png"
+            alt="InterviewLab Logo"
+            width={32}
+            height={32}
+            className="h-8 w-8"
+          />
+          <span className="text-xl font-bold">InterviewLab</span>
         </Link>
 
         <div className="flex items-center gap-4">
