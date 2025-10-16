@@ -27,6 +27,10 @@ export async function GET(request: Request) {
     'twitter',
   ].some((pattern) => userAgent.includes(pattern));
 
+  console.log('[Auth Callback] User-Agent:', userAgent);
+  console.log('[Auth Callback] Is in-app browser:', isInAppBrowser);
+  console.log('[Auth Callback] Has code:', !!code);
+
   // If in-app browser detected and they clicked a magic link, redirect to sign-in with instructions
   if (isInAppBrowser && code) {
     console.log(
@@ -34,7 +38,7 @@ export async function GET(request: Request) {
     );
     return NextResponse.redirect(
       new URL(
-        '/sign-in?error=use_code&message=Please use the 6-digit code from your email instead of clicking the link',
+        "/sign-in?error=use_code&message=Magic links don't work in this browser. Please check your email and enter the 6-digit code instead.",
         request.url
       )
     );
@@ -53,8 +57,26 @@ export async function GET(request: Request) {
       }
 
       console.error('[Auth Callback] Code exchange failed:', error.message);
+
+      // If code exchange fails, redirect to OTP flow as fallback
+      console.log(
+        '[Auth Callback] Redirecting to OTP flow due to code exchange failure'
+      );
+      return NextResponse.redirect(
+        new URL(
+          '/sign-in?error=use_code&message=There was an issue with the magic link. Please check your email and enter the 6-digit code instead.',
+          request.url
+        )
+      );
     } catch (err) {
       console.error('[Auth Callback] Code exchange exception:', err);
+      // Redirect to OTP flow on exception as well
+      return NextResponse.redirect(
+        new URL(
+          '/sign-in?error=use_code&message=There was an issue with the magic link. Please check your email and enter the 6-digit code instead.',
+          request.url
+        )
+      );
     }
   }
 

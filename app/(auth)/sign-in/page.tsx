@@ -29,8 +29,20 @@ function SignInForm() {
     // Check for error messages from URL params (e.g., from callback redirect)
     const error = searchParams?.get('error');
     const urlMessage = searchParams?.get('message');
-    if (error === 'use_code' && urlMessage) {
-      setMessage(decodeURIComponent(urlMessage));
+    const urlEmail = searchParams?.get('email');
+
+    if (error === 'use_code') {
+      // User clicked magic link in problematic browser - show OTP input
+      setOtpSent(true);
+      setIsInApp(true); // Force in-app mode
+      if (urlEmail) {
+        setEmail(decodeURIComponent(urlEmail));
+      }
+      if (urlMessage) {
+        setMessage(decodeURIComponent(urlMessage));
+      } else {
+        setMessage('Please enter the 6-digit code from your email');
+      }
     }
   }, [searchParams]);
 
@@ -126,6 +138,18 @@ function SignInForm() {
           </div>
         )}
 
+        {message && (
+          <div
+            className={`p-4 rounded-lg border ${
+              message.includes('Check') || message.includes('Success')
+                ? 'bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-900 text-green-800 dark:text-green-200'
+                : 'bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900 text-amber-800 dark:text-amber-200'
+            }`}
+          >
+            <p className="text-sm">{message}</p>
+          </div>
+        )}
+
         {!otpSent ? (
           <form onSubmit={handleSignIn} className="space-y-4">
             <div>
@@ -146,21 +170,25 @@ function SignInForm() {
                   ? 'Send Verification Code'
                   : 'Send Magic Link'}
             </Button>
-
-            {message && (
-              <p
-                className={`text-sm text-center ${
-                  message.includes('Check')
-                    ? 'text-green-600'
-                    : 'text-destructive'
-                }`}
-              >
-                {message}
-              </p>
-            )}
           </form>
         ) : (
           <form onSubmit={handleVerifyOtp} className="space-y-4">
+            {!email && (
+              <div>
+                <Input
+                  type="email"
+                  placeholder="Enter your email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  disabled={loading}
+                />
+                <p className="text-xs text-muted-foreground mt-2">
+                  Enter the email address you used to sign in
+                </p>
+              </div>
+            )}
+
             <div>
               <Input
                 type="text"
@@ -175,16 +203,19 @@ function SignInForm() {
                 pattern="\d{6}"
                 inputMode="numeric"
                 autoComplete="one-time-code"
+                className="text-2xl text-center tracking-widest font-mono"
               />
-              <p className="text-xs text-muted-foreground mt-2">
-                Code sent to {email}
-              </p>
+              {email && (
+                <p className="text-xs text-muted-foreground mt-2">
+                  Code sent to {email}
+                </p>
+              )}
             </div>
 
             <Button
               type="submit"
               className="w-full"
-              disabled={loading || otp.length !== 6}
+              disabled={loading || otp.length !== 6 || !email}
             >
               {loading ? 'Verifying...' : 'Verify Code'}
             </Button>
@@ -196,23 +227,12 @@ function SignInForm() {
               onClick={() => {
                 setOtpSent(false);
                 setOtp('');
+                setEmail('');
                 setMessage('');
               }}
             >
-              Use a different email
+              Start over
             </Button>
-
-            {message && (
-              <p
-                className={`text-sm text-center ${
-                  message.includes('Success')
-                    ? 'text-green-600'
-                    : 'text-destructive'
-                }`}
-              >
-                {message}
-              </p>
-            )}
           </form>
         )}
       </div>
