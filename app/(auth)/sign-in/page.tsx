@@ -8,6 +8,9 @@ import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { AlertCircle } from 'lucide-react';
 
+// Force dynamic rendering to prevent prerendering issues with browser detection
+export const dynamic = 'force-dynamic';
+
 export default function SignInPage() {
   const [email, setEmail] = useState('');
   const [otp, setOtp] = useState('');

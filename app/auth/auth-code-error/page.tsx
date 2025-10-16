@@ -6,6 +6,9 @@ import { AlertCircle, ExternalLink, Mail } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { isInAppBrowser, getInAppBrowserName } from '@/lib/browser-detection';
 
+// Force dynamic rendering to prevent prerendering issues with browser detection
+export const dynamic = 'force-dynamic';
+
 export default function AuthCodeErrorPage() {
   const [isInApp, setIsInApp] = useState(false);
   const [browserName, setBrowserName] = useState<string | null>(null);
