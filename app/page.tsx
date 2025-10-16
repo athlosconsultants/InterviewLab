@@ -5,6 +5,7 @@
 
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   ArrowRight,
   Mic,
@@ -353,7 +354,13 @@ export default async function Home() {
                 improve.&rdquo;
               </p>
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-primary to-blue-600 rounded-full" />
+                <Image
+                  src="/Sarah_Chen Headshot.png"
+                  alt="Sarah Chen"
+                  width={40}
+                  height={40}
+                  className="w-10 h-10 rounded-full object-cover"
+                />
                 <div>
                   <p className="font-semibold">Sarah Chen</p>
                   <p className="text-sm text-muted-foreground">
@@ -382,7 +389,13 @@ export default async function Home() {
                 out of 4 companies!&rdquo;
               </p>
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full" />
+                <Image
+                  src="/Marcus_Johnson Headshot.png"
+                  alt="Marcus Johnson"
+                  width={40}
+                  height={40}
+                  className="w-10 h-10 rounded-full object-cover"
+                />
                 <div>
                   <p className="font-semibold">Marcus Johnson</p>
                   <p className="text-sm text-muted-foreground">
@@ -411,7 +424,13 @@ export default async function Home() {
                 interview.&rdquo;
               </p>
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full" />
+                <Image
+                  src="/Priya_Patel Headshot.png"
+                  alt="Priya Patel"
+                  width={40}
+                  height={40}
+                  className="w-10 h-10 rounded-full object-cover"
+                />
                 <div>
                   <p className="font-semibold">Priya Patel</p>
                   <p className="text-sm text-muted-foreground">
