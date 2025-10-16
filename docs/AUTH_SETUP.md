@@ -23,25 +23,25 @@ You must configure your Supabase email templates to support both magic links and
 
 Go to: **Supabase Dashboard → Authentication → Email Templates → Magic Link**
 
-Update the template to include BOTH:
+**We have created a professional, branded email template for you!**
 
-```html
-<h2>Sign in to InterviewLab</h2>
+📧 **Full template location**: `docs/SUPABASE_EMAIL_TEMPLATE.html`
 
-<!-- For standard browsers (magic link) -->
-<p>Click the link below to sign in:</p>
-<p><a href="{{ .ConfirmationURL }}">Sign In</a></p>
+The template includes:
 
-<!-- For in-app browsers (OTP code) -->
-<p>Or use this 6-digit code:</p>
-<h1
-  style="font-size: 32px; font-weight: bold; text-align: center; letter-spacing: 8px; margin: 20px 0;"
->
-  {{ .Token }}
-</h1>
+- ✨ Beautiful gradient design matching the landing page
+- 🎨 Professional branding with logo and colors
+- 📱 Mobile-responsive layout
+- 🔐 Clear separation between magic link and OTP code
+- 💡 User instructions for which method to use
+- 🎯 Optimized for both standard and in-app browsers
 
-<p><small>This code expires in 5 minutes.</small></p>
-```
+**To use it:**
+
+1. Open `docs/SUPABASE_EMAIL_TEMPLATE.html`
+2. Copy the entire HTML content
+3. Paste it into your Supabase Magic Link email template
+4. Save and test!
 
 #### 2. Email Template Variables
 
