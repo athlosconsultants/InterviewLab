@@ -4,14 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { createClient } from '@/lib/supabase-client';
 import { isInAppBrowser, getInAppBrowserName } from '@/lib/browser-detection';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { AlertCircle } from 'lucide-react';
 
-// Force dynamic rendering to prevent prerendering issues with browser detection
-export const dynamic = 'force-dynamic';
-
-export default function SignInPage() {
+function SignInForm() {
   const [email, setEmail] = useState('');
   const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
@@ -213,5 +210,24 @@ export default function SignInPage() {
         )}
       </div>
     </main>
+  );
+}
+
+export default function SignInPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="min-h-screen flex items-center justify-center p-4">
+          <div className="w-full max-w-md space-y-8 p-8">
+            <div className="text-center">
+              <h1 className="text-3xl font-bold">Sign In</h1>
+              <p className="text-muted-foreground mt-2">Loading...</p>
+            </div>
+          </div>
+        </main>
+      }
+    >
+      <SignInForm />
+    </Suspense>
   );
 }
