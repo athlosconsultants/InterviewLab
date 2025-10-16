@@ -107,7 +107,10 @@ export default async function Home() {
                 // User has credits - show "Start Interview" button
                 <>
                   <Link href="/setup">
-                    <Button size="lg" className="text-lg px-8 py-6 shadow-lg">
+                    <Button
+                      size="lg"
+                      className="text-lg px-8 py-6 shadow-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700"
+                    >
                       Start Interview ({remainingInterviews}{' '}
                       {remainingInterviews === 1 ? 'credit' : 'credits'})
                       <ArrowRight className="ml-2 h-5 w-5" />
@@ -117,7 +120,7 @@ export default async function Home() {
                     <Button
                       size="lg"
                       variant="outline"
-                      className="text-lg px-8 py-6"
+                      className="text-lg px-8 py-6 border-2"
                     >
                       Buy More Interviews
                     </Button>
@@ -127,7 +130,10 @@ export default async function Home() {
                 // No credits or not logged in - show default CTAs
                 <>
                   <Link href="/setup">
-                    <Button size="lg" className="text-lg px-8 py-6 shadow-lg">
+                    <Button
+                      size="lg"
+                      className="text-lg px-8 py-6 shadow-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700"
+                    >
                       Start Interview Now
                       <ArrowRight className="ml-2 h-5 w-5" />
                     </Button>
@@ -136,7 +142,7 @@ export default async function Home() {
                     <Button
                       size="lg"
                       variant="outline"
-                      className="text-lg px-8 py-6"
+                      className="text-lg px-8 py-6 border-2"
                     >
                       Explore Deep Immersion Interviews
                     </Button>
@@ -462,7 +468,10 @@ export default async function Home() {
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link href="/setup">
-                <Button size="lg" className="text-lg px-8 py-6 shadow-lg">
+                <Button
+                  size="lg"
+                  className="text-lg px-8 py-6 shadow-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700"
+                >
                   Start your free interview today
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
