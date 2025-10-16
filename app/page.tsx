@@ -95,11 +95,10 @@ export default async function Home() {
 
             {/* Subheadline */}
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Upload your CV and job description — then experience an adaptive,
-              conversational AI interview that mirrors real hiring panels. Each
-              question evolves based on your responses, following proven
-              industry interview frameworks and delivering personalized feedback
-              at the end.
+              Experience an adaptive, conversational AI interview that mirrors
+              real hiring panels. Each question evolves based on your responses,
+              following proven industry interview frameworks used by the
+              world&apos;s top companies.
             </p>
 
             {/* CTAs */}
