@@ -7,6 +7,7 @@ import { isInAppBrowser, getInAppBrowserName } from '@/lib/browser-detection';
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { AlertCircle } from 'lucide-react';
+import Image from 'next/image';
 
 function SignInForm() {
   const [email, setEmail] = useState('');
@@ -154,11 +155,34 @@ function SignInForm() {
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center p-4">
-      <div className="w-full max-w-md space-y-8 p-8">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold">Sign In</h1>
-          <p className="text-muted-foreground mt-2">
+    <main className="min-h-screen bg-gradient-to-b from-background via-background to-muted/20 flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Background gradient orbs */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 right-1/4 w-96 h-96 bg-gradient-to-br from-cyan-400/20 to-blue-500/20 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 left-1/4 w-96 h-96 bg-gradient-to-br from-blue-500/20 to-cyan-400/20 rounded-full blur-3xl" />
+      </div>
+
+      <div className="w-full max-w-md space-y-6 p-8 relative z-10">
+        {/* Logo and Header */}
+        <div className="text-center space-y-4">
+          <div className="flex justify-center mb-6">
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-2xl blur-xl opacity-50" />
+              <div className="relative bg-white dark:bg-gray-900 p-4 rounded-2xl shadow-lg">
+                <Image
+                  src="/logo.png"
+                  alt="InterviewLab Logo"
+                  width={48}
+                  height={48}
+                  className="h-12 w-12"
+                />
+              </div>
+            </div>
+          </div>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">
+            Welcome Back
+          </h1>
+          <p className="text-muted-foreground">
             {isInApp
               ? 'Enter your email to receive a verification code'
               : 'Enter your email to receive a magic link'}
@@ -166,10 +190,10 @@ function SignInForm() {
         </div>
 
         {isInApp && browserName && (
-          <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900 rounded-lg p-4 flex gap-3">
-            <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-500 shrink-0 mt-0.5" />
-            <div className="text-sm text-amber-800 dark:text-amber-200">
-              <p className="font-medium mb-1">
+          <div className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20 border-2 border-amber-300 dark:border-amber-800 rounded-xl p-4 flex gap-3 shadow-sm">
+            <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+            <div className="text-sm text-amber-900 dark:text-amber-100">
+              <p className="font-semibold mb-1">
                 You&apos;re using {browserName}
               </p>
               <p>
@@ -182,19 +206,19 @@ function SignInForm() {
 
         {message && (
           <div
-            className={`p-4 rounded-lg border ${
+            className={`p-4 rounded-xl border-2 shadow-sm ${
               message.includes('Check') || message.includes('Success')
-                ? 'bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-900 text-green-800 dark:text-green-200'
-                : 'bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900 text-amber-800 dark:text-amber-200'
+                ? 'bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 border-green-300 dark:border-green-800 text-green-900 dark:text-green-100'
+                : 'bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20 border-amber-300 dark:border-amber-800 text-amber-900 dark:text-amber-100'
             }`}
           >
-            <p className="text-sm">{message}</p>
+            <p className="text-sm font-medium">{message}</p>
           </div>
         )}
 
         {!otpSent ? (
           <form onSubmit={handleSignIn} className="space-y-4">
-            <div>
+            <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-gray-200 dark:border-gray-800">
               <Input
                 type="email"
                 placeholder="your@email.com"
@@ -202,12 +226,13 @@ function SignInForm() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 disabled={loading || emailSent}
+                className="h-12 text-base"
               />
             </div>
 
             <Button
               type="submit"
-              className="w-full"
+              className="w-full h-12 text-base font-semibold bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 shadow-lg"
               disabled={loading || emailSent}
             >
               {loading
@@ -221,7 +246,7 @@ function SignInForm() {
               <Button
                 type="button"
                 variant="outline"
-                className="w-full"
+                className="w-full h-12 text-base font-semibold border-2"
                 onClick={() => {
                   setOtpSent(true);
                   setMessage('Enter the 6-digit code from your email below');
@@ -234,7 +259,7 @@ function SignInForm() {
         ) : (
           <form onSubmit={handleVerifyOtp} className="space-y-4">
             {!email && (
-              <div>
+              <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-gray-200 dark:border-gray-800">
                 <Input
                   type="email"
                   placeholder="Enter your email"
@@ -242,6 +267,7 @@ function SignInForm() {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   disabled={loading}
+                  className="h-12 text-base"
                 />
                 <p className="text-xs text-muted-foreground mt-2">
                   Enter the email address you used to sign in
@@ -249,10 +275,10 @@ function SignInForm() {
               </div>
             )}
 
-            <div>
+            <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-xl p-6 shadow-lg border-2 border-blue-200 dark:border-blue-800">
               <Input
                 type="text"
-                placeholder="Enter 6-digit code"
+                placeholder="000000"
                 value={otp}
                 onChange={(e) =>
                   setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))
@@ -263,18 +289,18 @@ function SignInForm() {
                 pattern="\d{6}"
                 inputMode="numeric"
                 autoComplete="one-time-code"
-                className="text-2xl text-center tracking-widest font-mono"
+                className="text-3xl text-center tracking-[0.5em] font-mono font-bold bg-transparent border-0 focus-visible:ring-0"
               />
               {email && (
-                <p className="text-xs text-muted-foreground mt-2">
-                  Code sent to {email}
+                <p className="text-xs text-muted-foreground mt-3 text-center">
+                  Code sent to <span className="font-medium">{email}</span>
                 </p>
               )}
             </div>
 
             <Button
               type="submit"
-              className="w-full"
+              className="w-full h-12 text-base font-semibold bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 shadow-lg"
               disabled={loading || otp.length !== 6 || !email}
             >
               {loading ? 'Verifying...' : 'Verify Code'}
@@ -283,7 +309,7 @@ function SignInForm() {
             <Button
               type="button"
               variant="ghost"
-              className="w-full"
+              className="w-full h-12 text-base"
               onClick={() => {
                 setOtpSent(false);
                 setEmailSent(false);
@@ -305,11 +331,23 @@ export default function SignInPage() {
   return (
     <Suspense
       fallback={
-        <main className="min-h-screen flex items-center justify-center p-4">
+        <main className="min-h-screen bg-gradient-to-b from-background via-background to-muted/20 flex items-center justify-center p-4">
           <div className="w-full max-w-md space-y-8 p-8">
             <div className="text-center">
-              <h1 className="text-3xl font-bold">Sign In</h1>
-              <p className="text-muted-foreground mt-2">Loading...</p>
+              <div className="flex justify-center mb-6">
+                <div className="relative bg-white dark:bg-gray-900 p-4 rounded-2xl shadow-lg">
+                  <Image
+                    src="/logo.png"
+                    alt="InterviewLab Logo"
+                    width={48}
+                    height={48}
+                    className="h-12 w-12"
+                  />
+                </div>
+              </div>
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">
+                Loading...
+              </h1>
             </div>
           </div>
         </main>
