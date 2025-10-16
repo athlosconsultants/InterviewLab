@@ -101,18 +101,55 @@ function SignInForm() {
     const supabase = createClient();
     const redirectUrl = searchParams?.get('redirect') || '/';
 
-    const { error } = await supabase.auth.verifyOtp({
-      email,
-      token: otp,
-      type: 'email',
-    });
+    try {
+      // Verify the OTP
+      const { data, error } = await supabase.auth.verifyOtp({
+        email,
+        token: otp,
+        type: 'email',
+      });
 
-    if (error) {
-      setMessage(error.message);
-      setLoading(false);
-    } else {
+      if (error) {
+        setMessage(error.message);
+        setLoading(false);
+        return;
+      }
+
+      // Verify session was actually created
+      const { data: sessionData, error: sessionError } =
+        await supabase.auth.getSession();
+
+      if (sessionError || !sessionData.session) {
+        console.error('Session check failed:', sessionError);
+        setMessage('Login failed. Please try again.');
+        setLoading(false);
+        return;
+      }
+
+      console.log('✅ Session established:', {
+        email: sessionData.session.user.email,
+        accessToken: sessionData.session.access_token.substring(0, 20) + '...',
+        expiresAt: sessionData.session.expires_at,
+      });
+
+      // Explicitly refresh the auth state to ensure cookies are written
+      await supabase.auth.refreshSession();
+      console.log('🔄 Session refreshed');
+
       setMessage('Success! Redirecting...');
-      router.push(redirectUrl);
+
+      // Wait a moment for cookies to fully persist in in-app browsers
+      // TikTok and other in-app browsers need this delay
+      await new Promise((resolve) => setTimeout(resolve, 800));
+
+      // Use window.location.href for full page reload to ensure cookies are sent
+      // This is more reliable for in-app browsers than router.push()
+      console.log('🔀 Redirecting to:', redirectUrl);
+      window.location.href = redirectUrl;
+    } catch (err) {
+      console.error('OTP verification error:', err);
+      setMessage('An error occurred. Please try again.');
+      setLoading(false);
     }
   };
 
