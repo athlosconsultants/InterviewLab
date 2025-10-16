@@ -16,6 +16,7 @@ function SignInForm() {
   const [isInApp, setIsInApp] = useState(false);
   const [browserName, setBrowserName] = useState<string | null>(null);
   const [otpSent, setOtpSent] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -67,20 +68,24 @@ function SignInForm() {
         setMessage(error.message);
       } else {
         setOtpSent(true);
+        setEmailSent(true);
         setMessage('Check your email for the 6-digit code!');
       }
     } else {
-      // Use magic link for standard browsers
+      // Use magic link for standard browsers, but still send with shouldCreateUser
+      // so the email will include both magic link AND 6-digit code
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
           emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectUrl)}`,
+          shouldCreateUser: true,
         },
       });
 
       if (error) {
         setMessage(error.message);
       } else {
+        setEmailSent(true);
         setMessage('Check your email for the login link!');
       }
     }
@@ -159,17 +164,35 @@ function SignInForm() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                disabled={loading}
+                disabled={loading || emailSent}
               />
             </div>
 
-            <Button type="submit" className="w-full" disabled={loading}>
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={loading || emailSent}
+            >
               {loading
                 ? 'Sending...'
                 : isInApp
                   ? 'Send Verification Code'
                   : 'Send Magic Link'}
             </Button>
+
+            {emailSent && !isInApp && (
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={() => {
+                  setOtpSent(true);
+                  setMessage('Enter the 6-digit code from your email below');
+                }}
+              >
+                I have a 6-digit code instead
+              </Button>
+            )}
           </form>
         ) : (
           <form onSubmit={handleVerifyOtp} className="space-y-4">
@@ -226,6 +249,7 @@ function SignInForm() {
               className="w-full"
               onClick={() => {
                 setOtpSent(false);
+                setEmailSent(false);
                 setOtp('');
                 setEmail('');
                 setMessage('');

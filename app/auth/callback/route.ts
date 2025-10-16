@@ -16,16 +16,25 @@ export async function GET(request: Request) {
 
   // Check if user is in an in-app browser (from User-Agent header)
   const userAgent = request.headers.get('user-agent')?.toLowerCase() || '';
-  const isInAppBrowser = [
+  const inAppBrowserPatterns = [
     'fban',
     'fbav',
     'instagram',
     'tiktok',
+    'bytedance',
+    'musical_ly',
     'snapchat',
     'line',
     'micromessenger',
     'twitter',
-  ].some((pattern) => userAgent.includes(pattern));
+    'linkedin',
+    'pinterestapp',
+    'reddit',
+  ];
+  const isWebView = userAgent.includes('wv') || userAgent.includes('webview');
+  const isInAppBrowser =
+    inAppBrowserPatterns.some((pattern) => userAgent.includes(pattern)) ||
+    isWebView;
 
   console.log('[Auth Callback] User-Agent:', userAgent);
   console.log('[Auth Callback] Is in-app browser:', isInAppBrowser);
