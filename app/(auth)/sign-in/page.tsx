@@ -25,7 +25,14 @@ function SignInForm() {
     if (inApp) {
       setBrowserName(getInAppBrowserName());
     }
-  }, []);
+
+    // Check for error messages from URL params (e.g., from callback redirect)
+    const error = searchParams?.get('error');
+    const urlMessage = searchParams?.get('message');
+    if (error === 'use_code' && urlMessage) {
+      setMessage(decodeURIComponent(urlMessage));
+    }
+  }, [searchParams]);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();

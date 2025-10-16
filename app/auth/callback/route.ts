@@ -14,6 +14,32 @@ export async function GET(request: Request) {
   const tokenType = searchParams.get('token_type');
   const expiresIn = searchParams.get('expires_in');
 
+  // Check if user is in an in-app browser (from User-Agent header)
+  const userAgent = request.headers.get('user-agent')?.toLowerCase() || '';
+  const isInAppBrowser = [
+    'fban',
+    'fbav',
+    'instagram',
+    'tiktok',
+    'snapchat',
+    'line',
+    'micromessenger',
+    'twitter',
+  ].some((pattern) => userAgent.includes(pattern));
+
+  // If in-app browser detected and they clicked a magic link, redirect to sign-in with instructions
+  if (isInAppBrowser && code) {
+    console.log(
+      '[Auth Callback] In-app browser detected, redirecting to OTP flow'
+    );
+    return NextResponse.redirect(
+      new URL(
+        '/sign-in?error=use_code&message=Please use the 6-digit code from your email instead of clicking the link',
+        request.url
+      )
+    );
+  }
+
   const supabase = await createClient();
 
   // Strategy 1: Try code exchange (primary method for magic links)
