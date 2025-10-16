@@ -168,11 +168,9 @@ export default async function Home() {
 
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             {/* Step 1 */}
-            <div className="relative bg-card rounded-2xl p-8 shadow-lg border border-border hover:border-primary/50 transition-all duration-300">
-              <div className="absolute -top-4 left-8 w-12 h-12 bg-primary rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg">
-                1
-              </div>
-              <div className="space-y-4 mt-4">
+            <div className="bg-card rounded-2xl p-8 shadow-lg border border-border hover:border-primary/50 transition-all duration-300">
+              <div className="space-y-4">
+                <p className="text-sm font-semibold text-muted-foreground">1</p>
                 <div className="w-12 h-12 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-xl flex items-center justify-center">
                   <svg
                     className="w-6 h-6 text-white"
@@ -197,11 +195,9 @@ export default async function Home() {
             </div>
 
             {/* Step 2 */}
-            <div className="relative bg-card rounded-2xl p-8 shadow-lg border border-border hover:border-primary/50 transition-all duration-300">
-              <div className="absolute -top-4 left-8 w-12 h-12 bg-primary rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg">
-                2
-              </div>
-              <div className="space-y-4 mt-4">
+            <div className="bg-card rounded-2xl p-8 shadow-lg border border-border hover:border-primary/50 transition-all duration-300">
+              <div className="space-y-4">
+                <p className="text-sm font-semibold text-muted-foreground">2</p>
                 <div className="w-12 h-12 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-xl flex items-center justify-center">
                   <Brain className="w-6 h-6 text-white" />
                 </div>
@@ -214,11 +210,9 @@ export default async function Home() {
             </div>
 
             {/* Step 3 */}
-            <div className="relative bg-card rounded-2xl p-8 shadow-lg border border-border hover:border-primary/50 transition-all duration-300">
-              <div className="absolute -top-4 left-8 w-12 h-12 bg-primary rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg">
-                3
-              </div>
-              <div className="space-y-4 mt-4">
+            <div className="bg-card rounded-2xl p-8 shadow-lg border border-border hover:border-primary/50 transition-all duration-300">
+              <div className="space-y-4">
+                <p className="text-sm font-semibold text-muted-foreground">3</p>
                 <div className="w-12 h-12 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-xl flex items-center justify-center">
                   <Target className="w-6 h-6 text-white" />
                 </div>
