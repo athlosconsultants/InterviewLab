@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
+import { Footer } from '@/components/Footer';
 import {
   Check,
   X,
@@ -74,6 +75,7 @@ export default function PricingPage() {
       // Automatically trigger the purchase
       handlePurchase(pendingTier as EntitlementTier);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const tiers = [
@@ -389,20 +391,9 @@ export default function PricingPage() {
             </div>
           </div>
         </motion.div>
-
-        {/* Footer */}
-        <div className="mt-16 text-center text-sm text-muted-foreground border-t pt-8">
-          <p>
-            Need help?{' '}
-            <a
-              href="mailto:support@theinterviewlab.io"
-              className="text-primary hover:underline"
-            >
-              support@theinterviewlab.io
-            </a>
-          </p>
-        </div>
       </div>
+
+      <Footer />
     </div>
   );
 }

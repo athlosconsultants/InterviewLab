@@ -4,6 +4,7 @@
  */
 
 import { Button } from '@/components/ui/button';
+import { Footer } from '@/components/Footer';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
@@ -484,26 +485,7 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="py-12 border-t border-border">
-        <div className="container mx-auto px-6">
-          <div className="text-center text-sm text-muted-foreground">
-            <p>© 2025 InterviewLab. Powered by OpenAI GPT-4.</p>
-            <p className="mt-2">
-              Practice makes perfect. Interview prep made intelligent.
-            </p>
-            <p className="mt-4">
-              Need help?{' '}
-              <a
-                href="mailto:support@theinterviewlab.io"
-                className="text-primary hover:underline"
-              >
-                support@theinterviewlab.io
-              </a>
-            </p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </main>
   );
 }

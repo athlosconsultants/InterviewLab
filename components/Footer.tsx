@@ -1,0 +1,82 @@
+import Link from 'next/link';
+
+export function Footer() {
+  return (
+    <footer className="py-12 border-t border-border bg-muted/30">
+      <div className="container mx-auto px-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+          {/* Company Info */}
+          <div>
+            <h3 className="font-semibold mb-3">InterviewLab</h3>
+            <p className="text-sm text-muted-foreground">
+              AI-powered interview practice for candidates preparing for real
+              opportunities.
+            </p>
+          </div>
+
+          {/* Legal Links */}
+          <div>
+            <h3 className="font-semibold mb-3">Legal</h3>
+            <ul className="space-y-2 text-sm">
+              <li>
+                <Link
+                  href="/terms"
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                >
+                  Terms & Conditions
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/privacy"
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                >
+                  Privacy Policy
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Support Links */}
+          <div>
+            <h3 className="font-semibold mb-3">Support</h3>
+            <ul className="space-y-2 text-sm">
+              <li>
+                <a
+                  href="mailto:support@theinterviewlab.io"
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                >
+                  support@theinterviewlab.io
+                </a>
+              </li>
+              <li>
+                <Link
+                  href="/report"
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                >
+                  Report a Problem
+                </Link>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        {/* Bottom Section */}
+        <div className="pt-8 border-t border-border">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
+            <div className="text-center md:text-left">
+              <p>© 2025 InterviewLab. Powered by OpenAI GPT-4.</p>
+              <p className="mt-1 text-xs">
+                The Interview Lab is a registered business name in Australia,
+                operated as a sole trader.
+              </p>
+            </div>
+            <p className="text-center md:text-right">
+              Practice makes perfect. Interview prep made intelligent.
+            </p>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+}
