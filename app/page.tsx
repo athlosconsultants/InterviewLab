@@ -168,23 +168,27 @@ export default async function Home() {
 
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             {/* Step 1 */}
-            <div className="bg-card rounded-2xl p-8 shadow-lg border border-border hover:border-primary/50 transition-all duration-300">
+            <div className="relative bg-card rounded-2xl p-8 shadow-lg border border-border hover:border-primary/50 transition-all duration-300">
               <div className="space-y-4">
-                <p className="text-sm font-semibold text-muted-foreground">1</p>
-                <div className="w-12 h-12 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-xl flex items-center justify-center">
-                  <svg
-                    className="w-6 h-6 text-white"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                    />
-                  </svg>
+                <div className="relative inline-block">
+                  <div className="w-12 h-12 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-xl flex items-center justify-center">
+                    <svg
+                      className="w-6 h-6 text-white"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                      />
+                    </svg>
+                  </div>
+                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-primary rounded-full flex items-center justify-center text-white text-xs font-bold shadow-lg">
+                    1
+                  </div>
                 </div>
                 <h3 className="text-xl font-semibold">Upload</h3>
                 <p className="text-muted-foreground">
@@ -195,11 +199,15 @@ export default async function Home() {
             </div>
 
             {/* Step 2 */}
-            <div className="bg-card rounded-2xl p-8 shadow-lg border border-border hover:border-primary/50 transition-all duration-300">
+            <div className="relative bg-card rounded-2xl p-8 shadow-lg border border-border hover:border-primary/50 transition-all duration-300">
               <div className="space-y-4">
-                <p className="text-sm font-semibold text-muted-foreground">2</p>
-                <div className="w-12 h-12 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-xl flex items-center justify-center">
-                  <Brain className="w-6 h-6 text-white" />
+                <div className="relative inline-block">
+                  <div className="w-12 h-12 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-xl flex items-center justify-center">
+                    <Brain className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-primary rounded-full flex items-center justify-center text-white text-xs font-bold shadow-lg">
+                    2
+                  </div>
                 </div>
                 <h3 className="text-xl font-semibold">Research</h3>
                 <p className="text-muted-foreground">
@@ -210,11 +218,15 @@ export default async function Home() {
             </div>
 
             {/* Step 3 */}
-            <div className="bg-card rounded-2xl p-8 shadow-lg border border-border hover:border-primary/50 transition-all duration-300">
+            <div className="relative bg-card rounded-2xl p-8 shadow-lg border border-border hover:border-primary/50 transition-all duration-300">
               <div className="space-y-4">
-                <p className="text-sm font-semibold text-muted-foreground">3</p>
-                <div className="w-12 h-12 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-xl flex items-center justify-center">
-                  <Target className="w-6 h-6 text-white" />
+                <div className="relative inline-block">
+                  <div className="w-12 h-12 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-xl flex items-center justify-center">
+                    <Target className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-primary rounded-full flex items-center justify-center text-white text-xs font-bold shadow-lg">
+                    3
+                  </div>
                 </div>
                 <h3 className="text-xl font-semibold">Interview</h3>
                 <p className="text-muted-foreground">
