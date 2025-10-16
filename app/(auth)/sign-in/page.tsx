@@ -190,9 +190,9 @@ function SignInForm() {
         </div>
 
         {isInApp && browserName && (
-          <div className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20 border-2 border-amber-300 dark:border-amber-800 rounded-xl p-4 flex gap-3 shadow-sm">
-            <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-            <div className="text-sm text-amber-900 dark:text-amber-100">
+          <div className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/20 dark:to-cyan-950/20 border-2 border-blue-300 dark:border-blue-800 rounded-xl p-4 flex gap-3 shadow-sm">
+            <AlertCircle className="w-5 h-5 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
+            <div className="text-sm text-blue-900 dark:text-blue-100">
               <p className="font-semibold mb-1">
                 You&apos;re using {browserName}
               </p>
@@ -209,7 +209,7 @@ function SignInForm() {
             className={`p-4 rounded-xl border-2 shadow-sm ${
               message.includes('Check') || message.includes('Success')
                 ? 'bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 border-green-300 dark:border-green-800 text-green-900 dark:text-green-100'
-                : 'bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20 border-amber-300 dark:border-amber-800 text-amber-900 dark:text-amber-100'
+                : 'bg-gradient-to-br from-red-50 to-rose-50 dark:from-red-950/20 dark:to-rose-950/20 border-red-300 dark:border-red-800 text-red-900 dark:text-red-100'
             }`}
           >
             <p className="text-sm font-medium">{message}</p>
