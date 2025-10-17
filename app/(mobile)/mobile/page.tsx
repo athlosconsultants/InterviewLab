@@ -1,12 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import { Zap, Target, Award, TrendingUp } from 'lucide-react';
+import { Zap, Target, Award, TrendingUp, ArrowRight } from 'lucide-react';
 import { MobileCTA } from '@/components/marketing/MobileCTA';
 import { Footer } from '@/components/Footer';
+import { createClient } from '@/lib/supabase-client';
 
 /**
  * Mobile Landing Page (Hormozi Offer Stack)
@@ -19,7 +20,22 @@ import { Footer } from '@/components/Footer';
  * - Sticky CTA button
  */
 export default function MobileLandingPage() {
-  const [ctaText] = useState('Start Your Free Interview Now');
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      setIsAuthenticated(!!user);
+      setIsLoading(false);
+    };
+    checkAuth();
+  }, []);
+
+  const ctaHref = isAuthenticated ? '/setup' : '/sign-in';
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white via-cyan-50/30 to-blue-50/50 pb-24">
@@ -70,6 +86,29 @@ export default function MobileLandingPage() {
           </div>
           <p className="text-sm text-gray-600">
             Trusted by thousands of job seekers
+          </p>
+        </div>
+
+        {/* Main CTA Button */}
+        <div className="px-6 mb-6">
+          <Button
+            asChild
+            size="lg"
+            disabled={isLoading}
+            className="w-full h-14 text-base font-bold bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 shadow-xl"
+          >
+            <Link
+              href={ctaHref}
+              className="flex items-center justify-center gap-2"
+            >
+              {isLoading ? 'Loading...' : 'Start Free Interview'}
+              {!isLoading && <ArrowRight className="w-5 h-5" />}
+            </Link>
+          </Button>
+          <p className="text-xs text-gray-500 text-center mt-2">
+            {isAuthenticated
+              ? 'Begin your practice session'
+              : 'Sign in to get started • Free to try'}
           </p>
         </div>
       </section>

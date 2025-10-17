@@ -29,9 +29,26 @@ export function ReportView({
   const jobTitle = session.job_spec?.role || 'Position';
   const company = session.company || 'Company';
 
-  const handleDownloadPDF = () => {
-    // Generate PDF-friendly view and trigger print dialog
-    window.print();
+  // Filter out small talk, confirmation, and welcome turns for accurate question count
+  const actualInterviewTurns = turns.filter(
+    (turn) =>
+      turn.question?.category !== 'small_talk' &&
+      (turn as any).turn_type !== 'small_talk' &&
+      (turn as any).turn_type !== 'confirmation'
+  );
+
+  const handleDownloadPDF = async () => {
+    // For mobile and in-app browsers, use a more robust download method
+    try {
+      // Try to use the native print dialog
+      if (window.print) {
+        window.print();
+      }
+    } catch (error) {
+      console.error('Print failed:', error);
+      // Fallback: open report in new window for manual save
+      window.open(window.location.href, '_blank');
+    }
   };
 
   return (
@@ -44,7 +61,8 @@ export function ReportView({
             {jobTitle} at {company}
           </p>
           <p className="text-sm text-muted-foreground">
-            Completed {turns.length} questions •{' '}
+            Completed {actualInterviewTurns.length} question
+            {actualInterviewTurns.length !== 1 ? 's' : ''} •{' '}
             {new Date(feedback.generated_at).toLocaleDateString()}
           </p>
         </div>

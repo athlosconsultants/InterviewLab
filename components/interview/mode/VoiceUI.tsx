@@ -68,6 +68,12 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
   // Autoplay blocker handling for browser restrictions
   const [needsUserInteraction, setNeedsUserInteraction] = useState(false);
   const [hasUserInteracted, setHasUserInteracted] = useState(false);
+  const [pendingAudio, setPendingAudio] = useState<{
+    type: 'intro' | 'bridge' | 'question';
+    text: string;
+    turnId?: string;
+    afterBridge?: boolean;
+  } | null>(null);
 
   // T127: Use AudioController to stop all audio
   const stopAllAudio = useCallback(() => {
@@ -251,7 +257,7 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
 
           // T115: Play bridge separately if it exists
           if (bridgeText) {
-            await playTextToSpeech(bridgeText, 'bridge', async () => {
+            playTextToSpeech(bridgeText, 'bridge', async () => {
               await pauseBetweenSections(800); // Brief pause after bridge
               playQuestionTTS(firstTurn.id, questionText);
             });
@@ -339,6 +345,7 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
           );
           setOrbState('speaking');
           setIsPlayingAudio(true);
+          setNeedsUserInteraction(false); // Audio started successfully
         },
         onEnd: () => {
           console.log(`[OrbState] speaking → idle (${type} playback ended)`);
@@ -348,23 +355,41 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
         },
         onError: (error) => {
           console.error(`[OrbState] Audio error for ${type}:`, error);
+          // Check if it's an autoplay error
+          if (
+            error &&
+            (error.name === 'NotAllowedError' ||
+              error.message?.includes('play'))
+          ) {
+            console.warn('[OrbState] Autoplay blocked by browser');
+            setNeedsUserInteraction(true);
+          }
           setOrbState('idle');
           setIsPlayingAudio(false);
-          toast.error('Audio playback failed');
         },
       });
     } catch (playError: any) {
-      // Handle autoplay blocking
-      if (playError?.name === 'NotAllowedError') {
+      // Handle autoplay blocking and other errors
+      console.error('TTS error:', playError);
+      if (
+        playError?.name === 'NotAllowedError' ||
+        playError?.message?.includes('play') ||
+        playError?.message?.includes('autoplay')
+      ) {
         console.warn(
-          '[OrbState] Autoplay blocked - requiring user interaction'
+          '[OrbState] Autoplay blocked - requiring user interaction for',
+          type
         );
+        // Store what we were trying to play (intro or bridge)
+        setPendingAudio({ type, text, afterBridge: false });
         setNeedsUserInteraction(true);
         setOrbState('idle');
       } else {
-        console.error('TTS error:', playError);
+        console.error('TTS generation/playback error:', playError);
         setOrbState('idle');
-        toast.error('Unable to play audio');
+        // Store what we were trying to play for retry
+        setPendingAudio({ type, text, afterBridge: false });
+        setNeedsUserInteraction(true); // Fallback to manual start on any error
       }
     }
   };
@@ -400,6 +425,7 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
           );
           setOrbState('speaking');
           setIsPlayingAudio(true);
+          setNeedsUserInteraction(false); // Audio started successfully
         },
         onEnd: () => {
           console.log(
@@ -426,23 +452,50 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
         },
         onError: (error) => {
           console.error(`[OrbState] Audio error for question:`, error);
+          // Check if it's an autoplay error
+          if (
+            error &&
+            (error.name === 'NotAllowedError' ||
+              error.message?.includes('play'))
+          ) {
+            console.warn('[OrbState] Autoplay blocked by browser');
+            setNeedsUserInteraction(true);
+          }
           setOrbState('idle');
           setIsPlayingAudio(false);
-          toast.error('Audio playback failed');
         },
       });
     } catch (playError: any) {
-      // Handle autoplay blocking
-      if (playError?.name === 'NotAllowedError') {
+      // Handle autoplay blocking and other errors
+      console.error('TTS error:', playError);
+      if (
+        playError?.name === 'NotAllowedError' ||
+        playError?.message?.includes('play') ||
+        playError?.message?.includes('autoplay')
+      ) {
         console.warn(
-          '[OrbState] Autoplay blocked - requiring user interaction'
+          '[OrbState] Autoplay blocked - requiring user interaction for question'
         );
+        // Store the question we were trying to play
+        setPendingAudio({
+          type: 'question',
+          text: questionText,
+          turnId,
+          afterBridge: false,
+        });
         setNeedsUserInteraction(true);
         setOrbState('idle');
       } else {
-        console.error('TTS error:', playError);
+        console.error('TTS generation/playback error:', playError);
         setOrbState('idle');
-        toast.error('Unable to play question audio');
+        // Store the question for retry
+        setPendingAudio({
+          type: 'question',
+          text: questionText,
+          turnId,
+          afterBridge: false,
+        });
+        setNeedsUserInteraction(true); // Fallback to manual start on any error
       }
     }
   };
@@ -450,52 +503,58 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
   // Handle user interaction to resume audio after autoplay block
   const handleResumeWithInteraction = useCallback(() => {
     console.log('[OrbState] User clicked to resume - enabling audio playback');
+    console.log('[OrbState] Pending audio:', pendingAudio);
     setHasUserInteracted(true);
     setNeedsUserInteraction(false);
 
-    // Retry playing the current question or intro
-    const currentQuestion = turns.find((t) => t.id === currentTurnId);
-    if (currentQuestion && !currentQuestion.answer_text) {
-      const questionText = currentQuestion.question.text;
-      const bridgeText = currentQuestion.bridge_text;
+    // Resume from where we left off using pendingAudio
+    if (pendingAudio) {
+      const { type, text, turnId: pendingTurnId, afterBridge } = pendingAudio;
 
-      if (bridgeText) {
-        playTextToSpeech(bridgeText, 'bridge', async () => {
-          await pauseBetweenSections(800);
-          playQuestionTTS(currentQuestion.id, questionText);
-        });
-      } else {
-        playQuestionTTS(currentQuestion.id, questionText);
-      }
-    } else if (introText && !introPlayed && turns.length > 0) {
-      // Replay intro if we haven't done so yet
-      const firstTurn = turns.find((t) => !t.answer_text);
-      if (firstTurn) {
-        playTextToSpeech(introText, 'intro', async () => {
-          setIntroPlayed(true);
-          await pauseBetweenSections(2000);
-          const questionText = firstTurn.question.text;
-          const bridgeText = firstTurn.bridge_text;
-          if (bridgeText) {
-            await playTextToSpeech(bridgeText, 'bridge', async () => {
-              await pauseBetweenSections(800);
+      if (type === 'intro') {
+        // Resume intro playback, then continue to first question
+        const firstTurn = turns.find((t) => !t.answer_text);
+        if (firstTurn) {
+          playTextToSpeech(text, 'intro', async () => {
+            setIntroPlayed(true);
+            setShowWelcomeScreen(false);
+            await pauseBetweenSections(2000);
+            const questionText = firstTurn.question.text;
+            const bridgeText = firstTurn.bridge_text;
+            if (bridgeText) {
+              await playTextToSpeech(bridgeText, 'bridge', async () => {
+                await pauseBetweenSections(800);
+                playQuestionTTS(firstTurn.id, questionText);
+              });
+            } else {
               playQuestionTTS(firstTurn.id, questionText);
-            });
-          } else {
-            playQuestionTTS(firstTurn.id, questionText);
-          }
-        });
+            }
+          });
+        }
+      } else if (type === 'bridge') {
+        // Bridge was blocked - play it, then play the question
+        const currentQuestion = turns.find((t) => t.id === currentTurnId);
+        if (currentQuestion) {
+          playTextToSpeech(text, 'bridge', async () => {
+            await pauseBetweenSections(800);
+            playQuestionTTS(currentQuestion.id, currentQuestion.question.text);
+          });
+        }
+      } else if (type === 'question' && pendingTurnId) {
+        // Question was blocked - just play the question directly
+        playQuestionTTS(pendingTurnId, text);
+      }
+
+      // Clear pending audio
+      setPendingAudio(null);
+    } else {
+      // Fallback: try to play current question
+      const currentQuestion = turns.find((t) => t.id === currentTurnId);
+      if (currentQuestion && !currentQuestion.answer_text) {
+        playQuestionTTS(currentQuestion.id, currentQuestion.question.text);
       }
     }
-  }, [
-    turns,
-    currentTurnId,
-    introText,
-    introPlayed,
-    playTextToSpeech,
-    playQuestionTTS,
-    pauseBetweenSections,
-  ]);
+  }, [turns, currentTurnId, introText, introPlayed, pendingAudio]);
 
   const handleReplay = useCallback(async () => {
     if (!audioController.getCurrentUrl()) {
@@ -879,25 +938,46 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
       <div className="mx-auto w-full max-w-4xl p-4 space-y-8">
         {/* T124: Welcome Screen for Voice Mode */}
         {showWelcomeScreen && introText && (
-          <div className="flex flex-col items-center justify-center min-h-[70vh] space-y-8">
+          <div className="flex flex-col items-center justify-center min-h-[70vh] space-y-8 px-4">
             <div className="max-w-2xl w-full">
-              <div className="rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-950/30 dark:to-blue-900/20 p-8 border-2 border-blue-200 dark:border-blue-800 shadow-lg">
+              <div className="rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-950/30 dark:to-blue-900/20 p-6 md:p-8 border-2 border-blue-200 dark:border-blue-800 shadow-lg">
                 <div className="mb-4">
                   <span className="text-sm font-semibold text-blue-700 dark:text-blue-300 uppercase tracking-wide">
                     Welcome
                   </span>
                 </div>
-                <p className="text-lg leading-relaxed text-foreground whitespace-pre-wrap mb-6">
+                <p className="text-base md:text-lg leading-relaxed text-foreground whitespace-pre-wrap mb-6">
                   {introText}
                 </p>
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-primary/10 rounded-full animate-pulse flex items-center justify-center">
-                    <Mic className="w-6 h-6 text-primary" />
+
+                {/* Show different UI based on whether audio is loading/playing or blocked */}
+                {needsUserInteraction ? (
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3 p-4 bg-amber-50 dark:bg-amber-950/20 rounded-lg border border-amber-200 dark:border-amber-800">
+                      <Mic className="w-6 h-6 text-amber-600 flex-shrink-0" />
+                      <p className="text-sm text-amber-900 dark:text-amber-100">
+                        Tap below to start the audio interview
+                      </p>
+                    </div>
+                    <Button
+                      onClick={handleResumeWithInteraction}
+                      size="lg"
+                      className="w-full h-14 text-base font-semibold bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700"
+                    >
+                      <Mic className="mr-2 h-5 w-5" />
+                      Begin Interview
+                    </Button>
                   </div>
-                  <p className="text-sm text-muted-foreground">
-                    Audio playing automatically...
-                  </p>
-                </div>
+                ) : (
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-primary/10 rounded-full animate-pulse flex items-center justify-center">
+                      <Mic className="w-6 h-6 text-primary" />
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Audio playing automatically...
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -925,133 +1005,133 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
               </div>
             </div>
 
-        {/* Voice Orb */}
-        <div className="flex flex-col items-center justify-center py-12">
-          <div className="flex items-center gap-6">
-            <VoiceOrb state={orbState} size="lg" />
+            {/* Voice Orb */}
+            <div className="flex flex-col items-center justify-center py-12">
+              <div className="flex items-center gap-6">
+                <VoiceOrb state={orbState} size="lg" />
 
-            {/* T126: Countdown Timer (only during main interview questions) */}
-            {isTimerActive && timerStartTime && currentQuestion && (
-              <TimerRing
-                timeLimit={90} // 90 seconds like text mode
-                startTime={timerStartTime}
-                onExpire={() => timerExpireRef.current?.()}
-              />
+                {/* T126: Countdown Timer (only during main interview questions) */}
+                {isTimerActive && timerStartTime && currentQuestion && (
+                  <TimerRing
+                    timeLimit={90} // 90 seconds like text mode
+                    startTime={timerStartTime}
+                    onExpire={() => timerExpireRef.current?.()}
+                  />
+                )}
+              </div>
+
+              {/* Resume button for autoplay block */}
+              {needsUserInteraction && (
+                <div className="mt-8 text-center space-y-4">
+                  <div className="space-y-2">
+                    <p className="text-sm text-muted-foreground">
+                      Browser blocked automatic audio playback
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Click below to continue your interview
+                    </p>
+                  </div>
+                  <Button onClick={handleResumeWithInteraction} size="lg">
+                    Click to Continue Interview
+                  </Button>
+                </div>
+              )}
+
+              {currentQuestion && !needsUserInteraction && (
+                <div className="mt-8 flex items-center gap-3">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleReplay}
+                    disabled={!currentAudioUrl || isPlayingAudio}
+                  >
+                    <RotateCcw className="mr-2 h-4 w-4" />
+                    Replay Question
+                  </Button>
+                  {/* T108: Show replay count for voice mode (no limit, just tracking) */}
+                  {replayCount > 0 && (
+                    <span className="text-xs text-muted-foreground">
+                      {replayCount} {replayCount === 1 ? 'replay' : 'replays'}
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Answer Input */}
+            {currentQuestion && !isSubmitting && !needsUserInteraction && (
+              <div className="border rounded-lg p-6 space-y-4 bg-card">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold">Your Answer</h3>
+                  <div className="flex gap-2">
+                    <Button
+                      variant={answerMode === 'audio' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setAnswerMode('audio')}
+                    >
+                      <Mic className="mr-2 h-4 w-4" />
+                      Voice
+                    </Button>
+                    <Button
+                      variant={answerMode === 'text' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setAnswerMode('text')}
+                    >
+                      <Type className="mr-2 h-4 w-4" />
+                      Text
+                    </Button>
+                  </div>
+                </div>
+
+                {answerMode === 'audio' ? (
+                  <AudioRecorder
+                    onRecordingComplete={(blob) => {
+                      setAudioBlob(blob);
+                      setOrbState('idle');
+                    }}
+                  />
+                ) : (
+                  <Textarea
+                    placeholder="Type your answer here..."
+                    value={answer}
+                    onChange={(e) => setAnswer(e.target.value)}
+                    rows={6}
+                    className="resize-none"
+                  />
+                )}
+
+                <Button
+                  onClick={handleSubmit}
+                  disabled={
+                    isSubmitting ||
+                    (answerMode === 'text' && !answer.trim()) ||
+                    (answerMode === 'audio' && !audioBlob)
+                  }
+                  className="w-full"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Submitting...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="mr-2 h-4 w-4" />
+                      Submit Answer
+                    </>
+                  )}
+                </Button>
+              </div>
             )}
-          </div>
 
-          {/* Resume button for autoplay block */}
-          {needsUserInteraction && (
-            <div className="mt-8 text-center space-y-4">
-              <div className="space-y-2">
+            {/* Transcript (if audio answer was recorded) */}
+            {audioBlob && answerMode === 'audio' && (
+              <div className="border rounded-lg p-4 bg-muted/50">
                 <p className="text-sm text-muted-foreground">
-                  Browser blocked automatic audio playback
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Click below to continue your interview
+                  Recording ready. Submit to transcribe and continue.
                 </p>
               </div>
-              <Button onClick={handleResumeWithInteraction} size="lg">
-                Click to Continue Interview
-              </Button>
-            </div>
-          )}
-
-          {currentQuestion && !needsUserInteraction && (
-            <div className="mt-8 flex items-center gap-3">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleReplay}
-                disabled={!currentAudioUrl || isPlayingAudio}
-              >
-                <RotateCcw className="mr-2 h-4 w-4" />
-                Replay Question
-              </Button>
-              {/* T108: Show replay count for voice mode (no limit, just tracking) */}
-              {replayCount > 0 && (
-                <span className="text-xs text-muted-foreground">
-                  {replayCount} {replayCount === 1 ? 'replay' : 'replays'}
-                </span>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Answer Input */}
-        {currentQuestion && !isSubmitting && !needsUserInteraction && (
-          <div className="border rounded-lg p-6 space-y-4 bg-card">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold">Your Answer</h3>
-              <div className="flex gap-2">
-                <Button
-                  variant={answerMode === 'audio' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setAnswerMode('audio')}
-                >
-                  <Mic className="mr-2 h-4 w-4" />
-                  Voice
-                </Button>
-                <Button
-                  variant={answerMode === 'text' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setAnswerMode('text')}
-                >
-                  <Type className="mr-2 h-4 w-4" />
-                  Text
-                </Button>
-              </div>
-            </div>
-
-            {answerMode === 'audio' ? (
-              <AudioRecorder
-                onRecordingComplete={(blob) => {
-                  setAudioBlob(blob);
-                  setOrbState('idle');
-                }}
-              />
-            ) : (
-              <Textarea
-                placeholder="Type your answer here..."
-                value={answer}
-                onChange={(e) => setAnswer(e.target.value)}
-                rows={6}
-                className="resize-none"
-              />
             )}
-
-            <Button
-              onClick={handleSubmit}
-              disabled={
-                isSubmitting ||
-                (answerMode === 'text' && !answer.trim()) ||
-                (answerMode === 'audio' && !audioBlob)
-              }
-              className="w-full"
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Submitting...
-                </>
-              ) : (
-                <>
-                  <Send className="mr-2 h-4 w-4" />
-                  Submit Answer
-                </>
-              )}
-            </Button>
-          </div>
-        )}
-
-        {/* Transcript (if audio answer was recorded) */}
-        {audioBlob && answerMode === 'audio' && (
-          <div className="border rounded-lg p-4 bg-muted/50">
-            <p className="text-sm text-muted-foreground">
-              Recording ready. Submit to transcribe and continue.
-            </p>
-          </div>
-        )}
           </>
         )}
       </div>
