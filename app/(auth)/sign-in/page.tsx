@@ -180,12 +180,12 @@ function SignInForm() {
             </div>
           </div>
           <h1 className="text-3xl font-bold bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">
-            Welcome Back
+            Sign In
           </h1>
           <p className="text-muted-foreground">
             {isInApp
               ? 'Enter your email to receive a verification code'
-              : 'Enter your email to receive a magic link'}
+              : 'Sign in or create an account with your email'}
           </p>
         </div>
 
