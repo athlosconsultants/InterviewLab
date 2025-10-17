@@ -20,23 +20,23 @@ export default function MobileLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const isMobile = useIsMobile();
+  const { isMobile, isReady } = useIsMobile();
   const router = useRouter();
 
-  // Redirect desktop users to main site
+  // Redirect desktop users to main site (only after detection is ready)
   useEffect(() => {
-    if (!isMobile && typeof window !== 'undefined') {
+    if (isReady && !isMobile && typeof window !== 'undefined') {
       console.log('[MobileLayout] Desktop detected, redirecting to main site');
       router.push('/');
     }
-  }, [isMobile, router]);
+  }, [isReady, isMobile, router]);
 
   // Log mobile layout rendering
   useEffect(() => {
-    if (isMobile) {
+    if (isReady && isMobile) {
       console.log('[MobileLayout] Rendering mobile-optimized layout');
     }
-  }, [isMobile]);
+  }, [isReady, isMobile]);
 
   // Always render children (root layout provides HTML structure)
   // The redirect happens via useEffect above

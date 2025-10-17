@@ -4,12 +4,13 @@ import { useState, useEffect } from 'react';
 
 /**
  * Hook to detect if the user is on a mobile device
- * Returns true for screen width ≤ 768px
+ * Returns an object with isMobile boolean and isReady flag
  *
- * @returns {boolean} - true if mobile viewport (≤768px), false otherwise
+ * @returns {{ isMobile: boolean; isReady: boolean }}
  */
-export function useIsMobile(): boolean {
+export function useIsMobile(): { isMobile: boolean; isReady: boolean } {
   const [isMobile, setIsMobile] = useState(false);
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
     // Create a media query for mobile viewports
@@ -17,6 +18,7 @@ export function useIsMobile(): boolean {
 
     // Set initial value
     setIsMobile(mediaQuery.matches);
+    setIsReady(true); // Mark as ready after first detection
 
     // Create event listener for changes
     const handleChange = (e: MediaQueryListEvent) => {
@@ -40,5 +42,5 @@ export function useIsMobile(): boolean {
     return () => mediaQuery.removeEventListener('change', handleChange);
   }, []);
 
-  return isMobile;
+  return { isMobile, isReady };
 }

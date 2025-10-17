@@ -14,7 +14,7 @@ import { useIsMobile } from '@/lib/useIsMobile';
  * 5. Observe the display changes and console logs
  */
 export default function MobileTestPage() {
-  const isMobile = useIsMobile();
+  const { isMobile } = useIsMobile();
 
   return (
     <div className="min-h-screen flex items-center justify-center p-8 bg-gradient-to-b from-background via-background to-muted/20">
