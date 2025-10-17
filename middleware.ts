@@ -1,19 +1,34 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 import { nanoid } from 'nanoid';
+import { isMobileUserAgent } from './lib/userAgent';
 
 export async function middleware(request: NextRequest) {
   try {
     // T143: Generate unique request ID for logging
     const requestId = nanoid();
 
+    // T153: Redirect mobile users to mobile landing page
+    const userAgent = request.headers.get('user-agent') || '';
+    const isMobile = isMobileUserAgent(userAgent);
+    const { pathname } = request.nextUrl;
+
+    // Redirect mobile users visiting root to /mobile
+    if (isMobile && pathname === '/') {
+      const redirectUrl = new URL('/mobile', request.url);
+      return NextResponse.redirect(redirectUrl);
+    }
+
     let supabaseResponse = NextResponse.next({
       request,
     });
 
     // Check if required env vars are available (support both formats)
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
-    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY;
+    const supabaseUrl =
+      process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
+    const supabaseAnonKey =
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+      process.env.SUPABASE_ANON_KEY;
 
     if (!supabaseUrl || !supabaseAnonKey) {
       console.error('[Middleware] Missing Supabase environment variables');
@@ -65,7 +80,7 @@ export async function middleware(request: NextRequest) {
 
     // T141: Add security headers (CSP, HSTS)
     const response = supabaseResponse;
-    
+
     // Add request ID for logging
     response.headers.set('X-Request-ID', requestId);
 
@@ -80,7 +95,7 @@ export async function middleware(request: NextRequest) {
       "base-uri 'self'",
       "form-action 'self'",
       "frame-ancestors 'none'",
-      "upgrade-insecure-requests",
+      'upgrade-insecure-requests',
       `connect-src 'self' ${supabaseUrl} https://api.openai.com https://api.stripe.com`,
       `media-src 'self' blob: ${supabaseUrl}`,
     ].join('; ');
