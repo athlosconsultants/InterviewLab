@@ -125,17 +125,18 @@ export function BaseInterviewUI({
       setIsLoading(true);
 
       // Check for resumable session
-      const resumeData = await getResumeData(sessionId);
+      const resumeDataResult = await getResumeData(sessionId);
       setResumeChecked(true);
 
       if (
-        resumeData &&
-        !resumeData.error &&
-        resumeData.canResume &&
-        !resumeData.isCompleted
+        resumeDataResult &&
+        !resumeDataResult.error &&
+        resumeDataResult.data &&
+        resumeDataResult.data.canResume &&
+        !resumeDataResult.data.isCompleted
       ) {
         setCanResume(true);
-        setResumeMessage(resumeData.message || null);
+        setResumeMessage(resumeDataResult.data.message || null);
         setIsLoading(false);
         return;
       }
