@@ -1103,6 +1103,7 @@ Greeting = solo message (no answer box); after "Start Interview" button, render 
 Voice mode automatically reads greeting then transitions to warm-up 1.
 
 **Implementation:**
+
 - Added `showWelcomeScreen` state to both `TextUI.tsx` and `VoiceUI.tsx`
 - Welcome screen displays intro text with dedicated UI (blue gradient card)
 - "Start Interview" button dismisses welcome and shows first question
@@ -1110,6 +1111,7 @@ Voice mode automatically reads greeting then transitions to warm-up 1.
 - Fixed JSX structure issues with conditional rendering
 
 **Files Modified:**
+
 - `components/interview/mode/TextUI.tsx`
 - `components/interview/mode/VoiceUI.tsx`
 
@@ -1124,12 +1126,14 @@ Replace all UI text and orb labels showing "Processing" → "Thinking."
 Renamed state internally to `thinking` for consistency.
 
 **Implementation:**
+
 - Changed `OrbState` type from `'processing'` to `'thinking'`
 - Updated all `setOrbState('processing')` → `setOrbState('thinking')`
 - Changed orb visual label from "Processing..." to "Thinking..."
 - Updated color scheme for thinking state (muted purple with slow pulse)
 
 **Files Modified:**
+
 - `components/interview/VoiceOrb.tsx`
 - `components/interview/mode/VoiceUI.tsx`
 
@@ -1145,6 +1149,7 @@ Only active during main interview (not warm-ups).
 When timer = 0 → auto-advance to next question (submit blank if needed).
 
 **Implementation:**
+
 - Added `timerStartTime` and `isTimerActive` state to `VoiceUI`
 - Timer starts in `playQuestionTTS` onEnd callback for main questions only
 - `TimerRing` component displays next to orb during active timer
@@ -1152,6 +1157,7 @@ When timer = 0 → auto-advance to next question (submit blank if needed).
 - Manual submission stops the timer
 
 **Files Modified:**
+
 - `components/interview/mode/VoiceUI.tsx`
 
 ---
@@ -1165,6 +1171,7 @@ Introduce global `AudioController` to cancel previous TTS before starting new au
 Block double play calls within 500 ms; log state changes for QA.
 
 **Implementation:**
+
 - Created `lib/audioController.ts` with singleton pattern
 - `AudioController.stop()` cancels all previous audio before new playback
 - Debounce delay of 500ms prevents rapid double-play calls
@@ -1172,9 +1179,11 @@ Block double play calls within 500 ms; log state changes for QA.
 - Used in `playTextToSpeech`, `playQuestionTTS`, and `handleReplay`
 
 **Files Created:**
+
 - `lib/audioController.ts`
 
 **Files Modified:**
+
 - `components/interview/mode/VoiceUI.tsx`
 
 ---
@@ -1190,6 +1199,7 @@ randomize count between lower and upper.
 Persist in `stage_targets`; end interview once limit reached.
 
 **Implementation:**
+
 - Added "Questions Per Stage" range input (1-10) to setup form (Pro users only)
 - Default: 3 for free, 7 for paid
 - Backend generates `stageTargets` array with randomized values
@@ -1198,6 +1208,7 @@ Persist in `stage_targets`; end interview once limit reached.
 - Dynamic `question_cap` based on `questionsPerStage * stagesPlanned`
 
 **Files Modified:**
+
 - `components/forms/IntakeForm.tsx`
 - `app/setup/actions.ts`
 
@@ -1218,6 +1229,7 @@ Rebuild `/app/(marketing)/page.tsx` with modern Apple-like aesthetic:
   Use Framer Motion for smooth section transitions.
 
 **Implementation:**
+
 - Complete rebuild of landing page with modern design
 - Hero section with gradient background and dual CTAs
 - 3-step visual process (Upload → Research → Interview)
@@ -1226,6 +1238,7 @@ Rebuild `/app/(marketing)/page.tsx` with modern Apple-like aesthetic:
 - Fixed ESLint errors (unescaped quotes → HTML entities)
 
 **Files Modified:**
+
 - `app/page.tsx`
 
 ---
@@ -1241,6 +1254,7 @@ Add clear descriptive copy and SEO meta:
 - "Start your free interview today" button linking to `/setup`.
 
 **Implementation:**
+
 - Updated page metadata for SEO
 - Headline: "Ace Your Next Interview"
 - Sub-text: "Practice with AI-powered mock interviews..."
@@ -1249,6 +1263,7 @@ Add clear descriptive copy and SEO meta:
 - Added descriptive copy for all feature sections
 
 **Files Modified:**
+
 - `app/page.tsx`
 
 ---
@@ -1260,10 +1275,12 @@ Add clear descriptive copy and SEO meta:
 **Commits:** `fix: update stage header + correct pro interview end flow (Phase 12)`
 
 **Issues Fixed:**
+
 1. **Stage Header Not Updating:** Added console logging for stage transitions and ensured reactive updates
 2. **Pro Users See Free Plan Modal:** Fixed conditional logic to skip upgrade dialog for pro users
 
 **Implementation:**
+
 - Backend returns `planTier` in all `submitAnswer` responses
 - Console logs stage changes: `[Interview] Stage advanced to: 2 of 3 (Technical Deep Dive)`
 - Pro users redirect directly to report with toast notification
@@ -1271,57 +1288,58 @@ Add clear descriptive copy and SEO meta:
 - Stage header updates reactively in both Text and Voice UIs
 
 **Files Modified:**
+
 - `lib/interview.ts`
 - `components/interview/mode/TextUI.tsx`
 - `components/interview/mode/VoiceUI.tsx`
 
 ---
 
-
-
 ## Phase 13 — Hormozi Offer System: Tiered Payments & Value Stacking
 
 ### 🎯 Overview
+
 We’re upgrading InterviewLab’s monetization into a **tiered offer system** inspired by **Alex Hormozi’s “$100M Offers”** principles.  
 The goal is to maximize perceived value, drive conversions, and clearly communicate the benefits of upgrading versus staying on the free plan.
 
 ---
 
 ### 🪜 Value Framework
+
 **Value = (Dream Outcome × Perceived Likelihood of Achievement) / (Time Delay × Effort & Sacrifice)**
 
-| Lever | InterviewLab Application |
-|--------|--------------------------|
-| **Dream Outcome** | Land your dream job faster by practicing realistic interviews trained on S&P 500 companies. |
-| **Perceived Likelihood of Achievement** | Proven AI trained on real interview data + adaptive feedback engine. |
-| **Time Delay** | Instant start — upload CV → start in 60 seconds. |
-| **Effort & Sacrifice** | Minimal input: everything is automated. |
+| Lever                                   | InterviewLab Application                                                                    |
+| --------------------------------------- | ------------------------------------------------------------------------------------------- |
+| **Dream Outcome**                       | Land your dream job faster by practicing realistic interviews trained on S&P 500 companies. |
+| **Perceived Likelihood of Achievement** | Proven AI trained on real interview data + adaptive feedback engine.                        |
+| **Time Delay**                          | Instant start — upload CV → start in 60 seconds.                                            |
+| **Effort & Sacrifice**                  | Minimal input: everything is automated.                                                     |
 
 ---
 
 ### 💎 Tiers and Pricing
 
-| Tier | Name | Price | Currency | What It Delivers |
-|------|------|--------|-----------|------------------|
-| **Free Plan** | “Practice Mode” | $0 | — | 1 stage, 3 questions, text-only interview, basic feedback. |
-| **Starter Pack** | “Kickstart Plan (3 Interviews)” | $26.99 | USD | 3 full premium interviews + voice mode + detailed feedback reports. |
-| **Professional Pack** | “Career Builder (5 Interviews)” | $39.99 | AUD | Adds multi-stage mode, adaptive difficulty, and advanced feedback analytics. |
-| **Elite Pack** | “Dream Job Pack (10 Interviews)” | $49.99 | AUD | Adds priority AI engine, deeper industry simulation, and confidence score report. |
+| Tier                  | Name                             | Price  | Currency | What It Delivers                                                                  |
+| --------------------- | -------------------------------- | ------ | -------- | --------------------------------------------------------------------------------- |
+| **Free Plan**         | “Practice Mode”                  | $0     | —        | 1 stage, 3 questions, text-only interview, basic feedback.                        |
+| **Starter Pack**      | “Kickstart Plan (3 Interviews)”  | $26.99 | USD      | 3 full premium interviews + voice mode + detailed feedback reports.               |
+| **Professional Pack** | “Career Builder (5 Interviews)”  | $39.99 | AUD      | Adds multi-stage mode, adaptive difficulty, and advanced feedback analytics.      |
+| **Elite Pack**        | “Dream Job Pack (10 Interviews)” | $49.99 | AUD      | Adds priority AI engine, deeper industry simulation, and confidence score report. |
 
 ---
 
 ### ⚖️ Comparison Table — Free vs Paid
 
-| Feature | Free Plan | Starter | Professional | Elite |
-|----------|-----------|----------|---------------|--------|
-| Interview Count | 1 × (3 Q) | 3 | 5 | 10 |
-| Voice Mode | ✗ | ✓ | ✓ | ✓ |
-| Full Feedback Report | Basic | ✓ | ✓ | ✓ |
-| Multi-Stage Interviews | ✗ | ✗ | ✓ | ✓ |
-| Adaptive Difficulty | ✗ | ✓ | ✓ | ✓ |
-| Priority AI Engine | ✗ | ✗ | ✗ | ✓ |
-| Confidence Score Report | ✗ | ✗ | ✗ | ✓ |
-| Price | Free | $26.99 USD | $39.99 AUD | $49.99 AUD |
+| Feature                 | Free Plan | Starter    | Professional | Elite      |
+| ----------------------- | --------- | ---------- | ------------ | ---------- |
+| Interview Count         | 1 × (3 Q) | 3          | 5            | 10         |
+| Voice Mode              | ✗         | ✓          | ✓            | ✓          |
+| Full Feedback Report    | Basic     | ✓          | ✓            | ✓          |
+| Multi-Stage Interviews  | ✗         | ✗          | ✓            | ✓          |
+| Adaptive Difficulty     | ✗         | ✓          | ✓            | ✓          |
+| Priority AI Engine      | ✗         | ✗          | ✗            | ✓          |
+| Confidence Score Report | ✗         | ✗          | ✗            | ✓          |
+| Price                   | Free      | $26.99 USD | $39.99 AUD   | $49.99 AUD |
 
 **Key Copy Angle:**  
 “Free is for testing — Premium is for transforming.”
@@ -1331,14 +1349,18 @@ The goal is to maximize perceived value, drive conversions, and clearly communic
 ## 🧩 Backend Implementation
 
 ### **T132 — Stripe Products & Price Setup**
-Create Stripe products & price IDs for each pack:  
-- `pack_starter_3` ($26.99 USD)  
-- `pack_pro_5` ($39.99 AUD)  
+
+Create Stripe products & price IDs for each pack:
+
+- `pack_starter_3` ($26.99 USD)
+- `pack_pro_5` ($39.99 AUD)
 - `pack_elite_10` ($49.99 AUD)  
-Store in `.env` and map to `purchase_type`.
+  Store in `.env` and map to `purchase_type`.
 
 ### **T133 — Entitlement Schema Upgrade**
+
 Extend `entitlements` table:
+
 ```sql
 ALTER TABLE entitlements
 ADD COLUMN remaining_interviews INT DEFAULT 0,
@@ -1346,24 +1368,29 @@ ADD COLUMN tier TEXT CHECK (tier IN ('starter','professional','elite')),
 ADD COLUMN purchase_type TEXT,
 ADD COLUMN perks JSONB DEFAULT '{}'::jsonb;
 ```
-- When a purchase completes, increment or create entitlement for that user.  
+
+- When a purchase completes, increment or create entitlement for that user.
 - Example: buying 5-pack with 2 left → 7 remaining.
 
 ### **T134 — Stripe Checkout Flow + Webhook**
-- Implement `/api/checkout/session` → Stripe Checkout Session based on selected tier.  
-- On `checkout.session.completed` (webhook):  
-  - Verify signature.  
-  - Grant entitlement (remaining_interviews += tier_count).  
+
+- Implement `/api/checkout/session` → Stripe Checkout Session based on selected tier.
+- On `checkout.session.completed` (webhook):
+  - Verify signature.
+  - Grant entitlement (remaining_interviews += tier_count).
   - Store `purchase_type`, `stripe_session_id`, and `currency`.
 
 ### **T135 — Credit Tracking + Consumption**
-- Guard `createSession()` → reject if `remaining_interviews <= 0`.  
-- On interview completion: `remaining_interviews –= 1`.  
-- Log consumption in `entitlement_history` table.  
+
+- Guard `createSession()` → reject if `remaining_interviews <= 0`.
+- On interview completion: `remaining_interviews –= 1`.
+- Log consumption in `entitlement_history` table.
 - If balance = 0 → trigger “Buy More” prompt.
 
 ### **T136 — Entitlement Summary Endpoint**
+
 Expose `/api/user/entitlements` to return:
+
 ```json
 {
   "tier": "professional",
@@ -1377,36 +1404,42 @@ Expose `/api/user/entitlements` to return:
 ## 💻 Frontend Implementation
 
 ### **T137 — Pricing Page + Offer Stack UI**
+
 Rebuild `/app/(marketing)/pricing/page.tsx`:
-- Three animated tier cards with Framer Motion.  
-- Feature comparison table (Free vs Paid).  
-- Highlight “Most Popular” Professional tier.  
+
+- Three animated tier cards with Framer Motion.
+- Feature comparison table (Free vs Paid).
+- Highlight “Most Popular” Professional tier.
 - CTAs → `/api/checkout/session?packType=…`.
 
 ### **T138 — Upgrade Modal Rework**
+
 Replace existing UpgradeDialog with value-stacked copy:
+
 > “Unlock 10 interviews, priority AI feedback, and multi-stage simulations.”  
-Add pricing cards inline.
+> Add pricing cards inline.
 
 ### **T139 — Entitlement Counter + Zero Balance UX**
-- Show remaining interviews on dashboard & navbar.  
-- If balance = 0 → disable “Start Interview” button + display:  
-  > “You’ve used all your interviews — purchase another pack to continue.”  
+
+- Show remaining interviews on dashboard & navbar.
+- If balance = 0 → disable “Start Interview” button + display:
+  > “You’ve used all your interviews — purchase another pack to continue.”
 - CTA → Pricing page.
 
 ### **T140 — Thank You & Upsell Flows**
-- After purchase → show confirmation:  
-  > “Welcome to the Elite Pack — 10 interviews unlocked.”  
-- After interview completion → upsell modal if balance < 2.  
+
+- After purchase → show confirmation:
+  > “Welcome to the Elite Pack — 10 interviews unlocked.”
+- After interview completion → upsell modal if balance < 2.
 - Add bonus copy: “Upgrade to Elite for Priority Feedback & Confidence Report.”
 
 ---
 
 ## 🧠 Technical Notes
-- Implement per-tier perks via `perks` JSONB object.  
-- Use `currency` field for multi-currency logic.  
-- Add QA logs: `[Entitlement] Remaining: x (Tier: pro)`.
 
+- Implement per-tier perks via `perks` JSONB object.
+- Use `currency` field for multi-currency logic.
+- Add QA logs: `[Entitlement] Remaining: x (Tier: pro)`.
 
 ## Phase 14 — Production Hardening
 
@@ -1474,6 +1507,183 @@ Add pricing cards inline.
 **Test:** Real sign-in → short interview → report.
 
 ---
+
+## Phase 15 — Mobile Web UX Expansion
+
+> Goal: Create a dedicated mobile-optimized frontend UI/UX experience, while preserving existing desktop experience. Focus on:
+>
+> - A new, high-converting mobile landing page using Hormozi-style offer stack
+> - Responsive optimization of existing interview flows (text + voice)
+> - Seamless backend integration with zero duplication of logic
+
+### T150 — Device Detection Hook (Client-Side)
+
+**Goal:** Detect if user is on a mobile browser.
+**Edits:** `lib/useIsMobile.ts`
+**Steps:**
+
+1. Create `useIsMobile()` using `window.matchMedia('(max-width: 768px)')`
+2. Fallback to user agent sniffing if necessary
+   **DoD:** Returns `true` for mobile widths.
+   **Test:** Console log hook in a layout.
+
+---
+
+### T151 — Mobile Route Wrapper
+
+**Goal:** Render alternate mobile layout for marketing pages.
+**Edits:** `app/(mobile)/layout.tsx`
+**Steps:**
+
+1. Create `(mobile)` route group with custom `layout.tsx`
+2. Use `useIsMobile()` to render or redirect
+   **DoD:** Renders mobile layout on small screens.
+   **Test:** Visit route on mobile viewport.
+
+---
+
+### T152 — Mobile Landing Page (Hormozi Offer Stack)
+
+**Goal:** Design landing page optimized for TikTok traffic.
+**Edits:** `app/(mobile)/page.tsx`
+**Steps:**
+
+1. Hero: pain-focused headline + dream outcome
+2. CTA: Sticky "Start Free Interview" button
+3. Hormozi-style offer stack: value bullets, guarantee, scarcity
+   **DoD:** Loads with mobile layout and offer copy.
+   **Test:** Inspect layout on Chrome iPhone simulator.
+
+---
+
+### T153 — Route Guard: Detect & Redirect Mobile Visitors
+
+**Goal:** Route mobile visitors to mobile version.
+**Edits:** `middleware.ts`, `lib/userAgent.ts`
+**Steps:**
+
+1. Add middleware to check user-agent
+2. If mobile and path is `/`, redirect to `/m`
+   **DoD:** Mobile visits auto-redirect
+   **Test:** Use Chrome DevTools emulation to verify
+
+---
+
+### T154 — Shared Interview UI Base Layout
+
+**Goal:** Ensure shared logic for both mobile/desktop interview UIs.
+**Edits:** `components/interview/BaseInterviewUI.tsx`
+**Steps:**
+
+1. Extract all shared logic (resume, turn state, session)
+2. Use composition to plug in mobile or desktop subcomponents
+   **DoD:** Shared state container renders both modes.
+   **Test:** No regression on desktop.
+
+---
+
+### T155 — Mobile Interview Layout Wrapper
+
+**Goal:** Style container layout for mobile.
+**Edits:** `components/interview/layout/MobileContainer.tsx`
+**Steps:**
+
+1. Add Tailwind mobile-first layout (padding, scroll)
+2. Include action bar and sticky footer
+   **DoD:** Container styles differ between mobile/desktop
+   **Test:** Layout adapts at small screen widths
+
+---
+
+### T156 — Mobile Text UI Shell
+
+**Goal:** Adapt text interview for mobile.
+**Edits:** `components/interview/mode/MobileTextUI.tsx`
+**Steps:**
+
+1. Use shared interview logic
+2. Optimize component spacing for touch input
+3. Ensure timer and composer visible without scroll
+   **DoD:** Mobile-optimized text interview works.
+   **Test:** Run full session on mobile emulator
+
+---
+
+### T157 — Mobile Voice UI Shell
+
+**Goal:** Adapt voice interview for mobile.
+**Edits:** `components/interview/mode/MobileVoiceUI.tsx`
+**Steps:**
+
+1. Reuse VoiceOrb with scaled visuals
+2. Optimize for tap-to-speak interactions
+3. Adjust timer/ring size for touch UX
+   **DoD:** Mobile voice session feels native
+   **Test:** Run voice session on Safari iOS
+
+---
+
+### T158 — Interview Mode Routing Wrapper
+
+**Goal:** Automatically render mobile or desktop UI based on viewport
+**Edits:** `app/interview/[id]/page.tsx`
+**Steps:**
+
+1. Use `useIsMobile()`
+2. Import mobile/desktop UI conditionally
+3. Use suspense fallback for SSR
+   **DoD:** Device-specific UI renders correctly
+   **Test:** Resize window → component re-mounts
+
+---
+
+### T159 — E2E Mobile Interview Test
+
+**Goal:** Validate flow across devices
+**Edits:** `tests/e2e/mobile-interview.spec.ts`
+**Steps:**
+
+1. Use Playwright mobile viewport
+2. Run full interview flow (text + voice)
+3. Validate UI stability and audio events
+   **DoD:** Passes with no regressions
+   **Test:** CI passes mobile test suite
+
+---
+
+### T160 — Mobile CTA Banner for Deep Links
+
+**Goal:** Prompt mobile visitors to start interview
+**Edits:** `components/marketing/MobileCTA.tsx`
+**Steps:**
+
+1. Sticky banner with CTA
+2. Appears only on mobile landing
+   **DoD:** Banner visible and tappable
+   **Test:** Navigates to setup
+
+---
+
+## Migration Note
+
+No database schema changes required.
+
+---
+
+## Post-Merge Testing Plan
+
+- ✅ Desktop regression test: `/setup`, `/interview`, `/report`
+- ✅ Mobile viewport: landing page, CTA, full session
+- ✅ Audio playback & mic capture
+- ✅ SSR fallback coverage for mobile detection
+
+---
+
+## Deployment Notes
+
+- Mobile routes live at `/m/*` via `(mobile)` group
+- SSR detection + `useIsMobile()` dual check
+- Components split for clarity, not logic duplication
 
 ## Appendix — Env Vars (Example)
 
