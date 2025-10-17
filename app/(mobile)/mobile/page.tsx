@@ -41,56 +41,23 @@ export default function MobileLandingPage() {
     <div className="min-h-screen bg-gradient-to-b from-white via-cyan-50/30 to-blue-50/50 pb-24">
       {/* Hero Section - Pain + Dream Outcome */}
       <section className="px-6 pt-12 pb-8 text-center">
-        <div className="mb-6">
-          <div className="inline-block px-4 py-2 bg-gray-100 rounded-full mb-4">
-            <p className="text-gray-700 font-medium text-sm">
-              AI-Powered Interview Practice
-            </p>
-          </div>
-        </div>
-
         <h1 className="text-4xl font-bold leading-tight mb-4">
-          Ace Your Next Interview
+          Ace Your Next Interview — With AI That Feels Real
         </h1>
 
-        <p className="text-lg text-gray-600 mb-6 leading-relaxed">
-          Practice with AI trained on real company interview frameworks. Get
-          instant, personalized feedback that actually improves your
-          performance.
+        <p className="text-lg text-gray-600 mb-4 leading-relaxed">
+          Practice immersive mock interviews built from real hiring frameworks
+          used by top companies. Get instant feedback that actually improves
+          your answers.
         </p>
 
-        {/* Social Proof */}
-        <div className="flex items-center justify-center gap-2 mb-8">
-          <div className="flex -space-x-2">
-            <Image
-              src="/Sarah_Chen Headshot.png"
-              alt="User"
-              width={32}
-              height={32}
-              className="w-8 h-8 rounded-full border-2 border-white object-cover"
-            />
-            <Image
-              src="/Marcus_Johnson Headshot.png"
-              alt="User"
-              width={32}
-              height={32}
-              className="w-8 h-8 rounded-full border-2 border-white object-cover"
-            />
-            <Image
-              src="/Priya_Patel Headshot.png"
-              alt="User"
-              width={32}
-              height={32}
-              className="w-8 h-8 rounded-full border-2 border-white object-cover"
-            />
-          </div>
-          <p className="text-sm text-gray-600">
-            Trusted by thousands of job seekers
-          </p>
-        </div>
+        <p className="text-sm text-gray-500 mb-8">
+          Trusted by hundreds of job seekers preparing for their next big
+          opportunity.
+        </p>
 
         {/* Main CTA Button */}
-        <div className="px-6 mb-6">
+        <div className="px-6 mb-3">
           <Button
             asChild
             size="lg"
@@ -105,12 +72,10 @@ export default function MobileLandingPage() {
               {!isLoading && <ArrowRight className="w-5 h-5" />}
             </Link>
           </Button>
-          <p className="text-xs text-gray-500 text-center mt-2">
-            {isAuthenticated
-              ? 'Begin your practice session'
-              : 'Sign in to get started • Free to try'}
-          </p>
         </div>
+        <p className="text-xs text-gray-500 text-center mb-6">
+          3 questions • Text-based only • No credit card required
+        </p>
       </section>
 
       {/* Features */}
@@ -119,7 +84,7 @@ export default function MobileLandingPage() {
           {/* Header */}
           <div className="px-6 py-5 border-b border-gray-100">
             <h2 className="font-bold text-xl text-gray-900 text-center">
-              Everything You Need to Succeed
+              Everything You Need to Nail the Interview
             </h2>
           </div>
 
@@ -128,30 +93,31 @@ export default function MobileLandingPage() {
             <FeatureItem
               icon={<Target className="w-5 h-5" />}
               title="Industry-Specific Questions"
-              description="Practice with questions based on real interview frameworks from leading companies"
+              description="Practice with interview frameworks based on real roles at top global companies."
             />
             <FeatureItem
               icon={<Zap className="w-5 h-5" />}
               title="Instant Feedback"
-              description="Receive detailed analysis and suggestions after each response"
+              description="Get detailed analysis and improvement suggestions after every answer."
             />
             <FeatureItem
               icon={<Award className="w-5 h-5" />}
               title="Multiple Practice Modes"
-              description="Choose between voice interviews or text-based responses"
+              description="Switch between voice and text interviews to simulate the real thing."
             />
             <FeatureItem
               icon={<TrendingUp className="w-5 h-5" />}
               title="Track Your Progress"
-              description="Monitor your improvement with detailed performance metrics"
+              description="See measurable improvement with detailed performance insights."
             />
           </div>
 
           {/* CTA in card */}
           <div className="px-6 pb-6">
             <div className="bg-gradient-to-br from-cyan-50 to-blue-50 rounded-xl p-4 text-center border border-cyan-100">
-              <p className="text-sm text-gray-600 mb-1">Get started today</p>
-              <p className="text-2xl font-bold text-gray-900">Free to try</p>
+              <p className="text-sm font-medium text-blue-600 mb-1">
+                Try your first interview free — see how you perform.
+              </p>
             </div>
           </div>
         </div>
@@ -166,41 +132,51 @@ export default function MobileLandingPage() {
           <StepItem
             number={1}
             title="Upload Your Details"
-            description="Share your CV and target job description"
+            description="Add your CV, target job, and company."
           />
           <StepItem
             number={2}
             title="Start Practicing"
-            description="Answer AI-generated questions tailored to your role"
+            description="Answer AI-generated questions tailored to your role."
           />
           <StepItem
             number={3}
             title="Get Feedback"
-            description="Review personalized insights to improve your answers"
+            description="Review personalized insights to refine your answers."
           />
+        </div>
+        <div className="mt-5 text-center">
+          <p className="text-sm font-medium text-blue-600">
+            Take your first interview — it&apos;s free to try.
+          </p>
         </div>
       </section>
 
       {/* Testimonials */}
       <section className="px-6 pb-8">
         <h2 className="font-bold text-xl text-gray-900 mb-4 text-center">
-          What Our Users Say
+          What Candidates Are Saying
         </h2>
         <div className="space-y-3">
           <Testimonial
             name="Sarah Chen"
             role="Software Engineer"
             company="at Google"
-            quote="The feedback helped me identify gaps in my responses. I felt much more prepared going into my actual interview."
+            quote="The feedback helped me identify gaps in my answers. I felt much more confident walking into my real interview."
             image="/Sarah_Chen Headshot.png"
           />
           <Testimonial
             name="Marcus Johnson"
             role="Product Manager"
             company="at Amazon"
-            quote="Practicing with AI allowed me to refine my answers without the pressure. Great tool for interview preparation."
+            quote="Practicing with AI felt like a real conversation. I refined my answers without pressure — it's an incredible tool."
             image="/Marcus_Johnson Headshot.png"
           />
+        </div>
+        <div className="mt-5 text-center">
+          <p className="text-sm text-gray-600">
+            ⭐ Hundreds of candidates are using InterviewLab to prepare smarter.
+          </p>
         </div>
       </section>
 
