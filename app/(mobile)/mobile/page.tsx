@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Zap, Target, Award, TrendingUp } from 'lucide-react';
 import { MobileCTA } from '@/components/marketing/MobileCTA';
+import { Footer } from '@/components/Footer';
 
 /**
  * Mobile Landing Page (Hormozi Offer Stack)
@@ -166,6 +167,9 @@ export default function MobileLandingPage() {
 
       {/* Mobile CTA Banner */}
       <MobileCTA />
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }
