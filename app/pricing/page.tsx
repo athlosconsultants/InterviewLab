@@ -161,7 +161,7 @@ export default function PricingPage() {
                     isPopular
                       ? 'border-primary bg-primary/5 shadow-lg scale-105'
                       : isElite
-                        ? 'border-purple-500 bg-purple-50 dark:bg-purple-950/20'
+                        ? 'border-blue-500 bg-gradient-to-br from-cyan-50 to-blue-50 dark:from-cyan-950/20 dark:to-blue-950/20'
                         : 'border-border bg-card'
                   }`}
                 >
@@ -170,7 +170,7 @@ export default function PricingPage() {
                     <div className="flex items-center gap-2 mb-2">
                       <h2 className="text-2xl font-bold">{tier.name}</h2>
                       {isElite && (
-                        <Sparkles className="h-5 w-5 text-purple-500" />
+                        <Sparkles className="h-5 w-5 text-blue-500" />
                       )}
                     </div>
                     <p className="text-sm text-muted-foreground mb-4">
@@ -199,7 +199,7 @@ export default function PricingPage() {
                   <Button
                     onClick={() => handlePurchase(tier.tier)}
                     disabled={isLoading !== null}
-                    className={`w-full ${isPopular ? 'bg-primary hover:bg-primary/90' : isElite ? 'bg-purple-600 hover:bg-purple-700' : ''}`}
+                    className={`w-full ${isPopular ? 'bg-primary hover:bg-primary/90' : isElite ? 'bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700' : ''}`}
                     size="lg"
                   >
                     {isLoading === tier.tier ? (

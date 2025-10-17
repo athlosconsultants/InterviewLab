@@ -43,15 +43,15 @@ export function MobileCTA({ className = '' }: MobileCTAProps) {
 
   return (
     <div
-      className={`fixed bottom-0 left-0 right-0 bg-gradient-to-r from-cyan-500 to-blue-600 text-white px-4 py-3 shadow-2xl z-50 ${className}`}
+      className={`fixed bottom-0 left-0 right-0 bg-gradient-to-r from-cyan-500 to-blue-600 text-white px-5 py-5 shadow-2xl z-50 ${className}`}
     >
-      <div className="flex items-center justify-between gap-3 max-w-md mx-auto">
+      <div className="flex items-center justify-between gap-4 max-w-md mx-auto">
         {/* Message */}
         <div className="flex-1">
-          <p className="font-semibold text-sm leading-tight">
+          <p className="font-bold text-base leading-tight mb-1">
             Ready to practice?
           </p>
-          <p className="text-xs text-cyan-50 leading-tight">
+          <p className="text-sm text-cyan-50 leading-tight">
             Start your free interview now
           </p>
         </div>
@@ -59,22 +59,22 @@ export function MobileCTA({ className = '' }: MobileCTAProps) {
         {/* CTA Button */}
         <Button
           asChild
-          size="sm"
-          className="bg-white text-cyan-600 hover:bg-cyan-50 font-semibold shadow-lg"
+          size="default"
+          className="bg-white text-cyan-600 hover:bg-cyan-50 font-bold shadow-lg h-12 px-5"
         >
-          <Link href="/setup" className="flex items-center gap-1">
+          <Link href="/setup" className="flex items-center gap-1.5">
             Start
-            <ArrowRight className="w-4 h-4" />
+            <ArrowRight className="w-5 h-5" />
           </Link>
         </Button>
 
         {/* Dismiss Button */}
         <button
           onClick={handleDismiss}
-          className="p-1 hover:bg-white/20 rounded transition-colors"
+          className="p-1.5 hover:bg-white/20 rounded transition-colors"
           aria-label="Dismiss banner"
         >
-          <X className="w-5 h-5" />
+          <X className="w-6 h-6" />
         </button>
       </div>
     </div>

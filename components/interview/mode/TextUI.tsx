@@ -743,7 +743,7 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
                 </div>
                 {/* Subtle text */}
                 <span className="text-sm font-light text-gray-500">
-                  Analyzing
+                  Thinking
                 </span>
               </div>
             </div>

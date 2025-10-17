@@ -48,7 +48,7 @@ export function LowBalanceUpsellDialog({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <div className="flex items-center gap-2 mb-2">
             <div className="rounded-full bg-amber-100 dark:bg-amber-900/30 p-2">
@@ -61,17 +61,19 @@ export function LowBalanceUpsellDialog({
               : `Only ${remainingInterviews} Interview${remainingInterviews === 1 ? '' : 's'} Left`}
           </DialogTitle>
           <DialogDescription className="text-base">
-            Don&apos;t let your momentum stop now. Upgrade to keep practicing and
-            unlock advanced features.
+            Don&apos;t let your momentum stop now. Upgrade to keep practicing
+            and unlock advanced features.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
           {/* Recommended Tier Highlight */}
-          <div className="rounded-xl border-2 border-purple-500 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/30 dark:to-pink-950/30 p-6">
+          <div className="rounded-xl border-2 border-blue-500 bg-gradient-to-br from-cyan-50 to-blue-50 dark:from-cyan-950/30 dark:to-blue-950/30 p-6">
             <div className="flex items-center gap-2 mb-3">
-              <Sparkles className="h-5 w-5 text-purple-600" />
-              <p className="font-bold text-lg">Recommended: {recommendedTier.name}</p>
+              <Sparkles className="h-5 w-5 text-blue-600" />
+              <p className="font-bold text-lg">
+                Recommended: {recommendedTier.name}
+              </p>
             </div>
 
             <p className="text-sm text-muted-foreground mb-4">
@@ -123,22 +125,22 @@ export function LowBalanceUpsellDialog({
           {/* Social Proof */}
           <div className="text-center">
             <p className="text-xs text-muted-foreground italic">
-              &ldquo;The more I practiced, the more confident I felt. Worth every
-              penny!&rdquo; — Sarah K.
+              &ldquo;The more I practiced, the more confident I felt. Worth
+              every penny!&rdquo; — Sarah K.
             </p>
           </div>
         </div>
 
-        <DialogFooter className="flex-col sm:flex-col gap-3">
+        <DialogFooter className="flex-col sm:flex-col gap-3 mt-2">
           <Button
             onClick={handleUpgrade}
-            className="w-full h-12 text-base bg-purple-600 hover:bg-purple-700"
+            className="w-full h-12 text-base bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700"
             size="lg"
           >
             <Sparkles className="mr-2 h-5 w-5" />
             View All Packages
           </Button>
-          <Button variant="ghost" onClick={onClose} className="w-full">
+          <Button variant="ghost" onClick={onClose} className="w-full h-11">
             Maybe Later
           </Button>
         </DialogFooter>
@@ -146,4 +148,3 @@ export function LowBalanceUpsellDialog({
     </Dialog>
   );
 }
-
