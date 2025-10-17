@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Zap, Target, Award, TrendingUp } from 'lucide-react';
 
@@ -31,24 +32,39 @@ export default function MobileLandingPage() {
         </div>
 
         <h1 className="text-4xl font-bold leading-tight mb-4">
-          Practice Interviews with{' '}
-          <span className="bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">
-            Confidence
-          </span>
+          Ace Your Next Interview
         </h1>
 
         <p className="text-lg text-gray-600 mb-6 leading-relaxed">
-          Experience realistic interview scenarios powered by AI trained on real
-          company interview frameworks. Get actionable feedback to improve your
+          Practice with AI trained on real company interview frameworks. Get
+          instant, personalized feedback that actually improves your
           performance.
         </p>
 
         {/* Social Proof */}
         <div className="flex items-center justify-center gap-2 mb-8">
           <div className="flex -space-x-2">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 border-2 border-white" />
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 border-2 border-white" />
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 border-2 border-white" />
+            <Image
+              src="/Sarah_Chen Headshot.png"
+              alt="User"
+              width={32}
+              height={32}
+              className="w-8 h-8 rounded-full border-2 border-white object-cover"
+            />
+            <Image
+              src="/Marcus_Johnson Headshot.png"
+              alt="User"
+              width={32}
+              height={32}
+              className="w-8 h-8 rounded-full border-2 border-white object-cover"
+            />
+            <Image
+              src="/Priya_Patel Headshot.png"
+              alt="User"
+              width={32}
+              height={32}
+              className="w-8 h-8 rounded-full border-2 border-white object-cover"
+            />
           </div>
           <p className="text-sm text-gray-600">
             Trusted by thousands of job seekers
@@ -135,12 +151,14 @@ export default function MobileLandingPage() {
             role="Software Engineer"
             company="at Google"
             quote="The feedback helped me identify gaps in my responses. I felt much more prepared going into my actual interview."
+            image="/Sarah_Chen Headshot.png"
           />
           <Testimonial
             name="Marcus Johnson"
             role="Product Manager"
             company="at Amazon"
             quote="Practicing with AI allowed me to refine my answers without the pressure. Great tool for interview preparation."
+            image="/Marcus_Johnson Headshot.png"
           />
         </div>
       </section>
@@ -228,17 +246,25 @@ function Testimonial({
   role,
   company,
   quote,
+  image,
 }: {
   name: string;
   role: string;
   company: string;
   quote: string;
+  image: string;
 }) {
   return (
     <div className="bg-white rounded-lg p-4 border border-gray-200 text-left shadow-sm">
       <p className="text-sm text-gray-700 mb-3 italic">&quot;{quote}&quot;</p>
       <div className="flex items-center gap-2">
-        <div className="w-8 h-8 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-full" />
+        <Image
+          src={image}
+          alt={name}
+          width={32}
+          height={32}
+          className="w-8 h-8 rounded-full object-cover"
+        />
         <div>
           <p className="font-semibold text-sm text-gray-900">{name}</p>
           <p className="text-xs text-gray-600">
