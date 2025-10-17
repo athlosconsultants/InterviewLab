@@ -141,14 +141,19 @@ export async function submitInterviewAnswer(params: {
     }
 
     // T85: Verify free tier hasn't exceeded limits before submitting
+    // Free tier gets 3 questions total, so check for answered turns (turns with answer_text)
     if (session.plan_tier === 'free') {
       const { data: existingTurns, error: turnsError } = await supabase
         .from('turns')
-        .select('id')
+        .select('id, answer_text')
         .eq('session_id', params.sessionId)
         .eq('user_id', user.id);
 
-      if (!turnsError && existingTurns && existingTurns.length >= 3) {
+      // Count turns that already have answers
+      const answeredTurns = existingTurns?.filter((t) => t.answer_text) || [];
+
+      // If they've already answered 3 questions, don't allow more
+      if (!turnsError && answeredTurns.length >= 3) {
         return {
           error: 'Free tier limit reached (3 questions maximum)',
           data: { done: true, nextQuestion: null },

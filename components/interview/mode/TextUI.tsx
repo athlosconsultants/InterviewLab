@@ -569,8 +569,8 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
               </p>
             )}
           </div>
-          <div className="flex items-center space-x-2">
-            <AccessibilityIcon className="h-4 w-4 text-muted-foreground" />
+          <div className="flex items-center space-x-2 flex-shrink-0">
+            <AccessibilityIcon className="h-4 w-4 text-muted-foreground flex-shrink-0" />
             <Switch
               id="accessibility-mode"
               checked={accessibilityMode}
@@ -578,9 +578,10 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
             />
             <Label
               htmlFor="accessibility-mode"
-              className="text-sm cursor-pointer"
+              className="text-sm cursor-pointer whitespace-nowrap"
             >
-              No Timer/Reveals
+              <span className="hidden sm:inline">No Timer/Reveals</span>
+              <span className="sm:hidden">No Timer</span>
             </Label>
           </div>
         </div>
@@ -615,271 +616,277 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
       {/* T102: Current Question Only Display */}
       {!showWelcomeScreen && (
         <div className="space-y-6">
+          {/* T102: Render only the FIRST unanswered turn (current question) - Hide during analyzing */}
+          {currentQuestion &&
+            !isAnalyzing &&
+            (() => {
+              // Calculate index in original turns array for progress tracking
+              const index = turns.findIndex((t) => t.id === currentQuestion.id);
 
-        {/* T102: Render only the FIRST unanswered turn (current question) - Hide during analyzing */}
-        {currentQuestion &&
-          !isAnalyzing &&
-          (() => {
-            // Calculate index in original turns array for progress tracking
-            const index = turns.findIndex((t) => t.id === currentQuestion.id);
+              // T106: Check if this is a small talk or confirmation turn
+              const turnType = (currentQuestion as any).turn_type;
+              const isSmallTalk = turnType === 'small_talk';
+              const isConfirmation = turnType === 'confirmation';
+              const isSpecialTurn = isSmallTalk || isConfirmation;
 
-            // T106: Check if this is a small talk or confirmation turn
-            const turnType = (currentQuestion as any).turn_type;
-            const isSmallTalk = turnType === 'small_talk';
-            const isConfirmation = turnType === 'confirmation';
-            const isSpecialTurn = isSmallTalk || isConfirmation;
-
-            return (
-              <div key={currentQuestion.id} className="space-y-4">
-                {/* T119: Bridge Text - synced with question visibility */}
-                {currentQuestion.bridge_text &&
-                  index > 0 &&
-                  (isSpecialTurn || accessibilityMode || questionVisible) && (
-                    <div className="flex justify-start">
-                      <div className="max-w-[75%] rounded-lg bg-muted/50 p-4 border-l-2 border-primary/40">
-                        <p className="text-sm italic text-muted-foreground leading-relaxed">
-                          {currentQuestion.bridge_text}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-
-                {/* T106: Small Talk / Confirmation - Simple display, no timer */}
-                {isSpecialTurn ? (
-                  <div className="flex justify-start">
-                    <div
-                      className={`max-w-[85%] rounded-lg p-5 border-l-4 ${
-                        isConfirmation
-                          ? 'bg-green-50 dark:bg-green-950/30 border-green-500'
-                          : 'bg-amber-50 dark:bg-amber-950/30 border-amber-500'
-                      }`}
-                    >
-                      <div className="mb-2">
-                        <span
-                          className={`text-xs font-semibold uppercase tracking-wide ${
-                            isConfirmation
-                              ? 'text-green-700 dark:text-green-300'
-                              : 'text-amber-700 dark:text-amber-300'
-                          }`}
-                        >
-                          {isConfirmation ? 'Ready Check' : 'Warm-up'}
-                        </span>
-                      </div>
-                      <p className="text-base leading-relaxed text-foreground">
-                        {currentQuestion.question.text}
-                      </p>
-                    </div>
-                  </div>
-                ) : /* Regular Interview Question - T93: With Countdown & Reveal System */
-                currentQuestion.id === currentTurnId && !accessibilityMode ? (
-                  <div className="space-y-4">
-                    {/* T93: Countdown Display */}
-                    {countdown !== null && (
+              return (
+                <div key={currentQuestion.id} className="space-y-4">
+                  {/* T119: Bridge Text - synced with question visibility */}
+                  {currentQuestion.bridge_text &&
+                    index > 0 &&
+                    (isSpecialTurn || accessibilityMode || questionVisible) && (
                       <div className="flex justify-start">
-                        <div className="max-w-[85%] rounded-lg bg-gradient-to-r from-primary/20 to-primary/10 p-8 border-2 border-primary/30">
-                          <div className="flex flex-col items-center justify-center">
-                            <p className="text-sm font-medium text-muted-foreground mb-2">
-                              Question {index + 1} starting in...
-                            </p>
-                            <div className="text-6xl font-bold text-primary animate-pulse">
-                              {countdown}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* T93: Question (conditionally visible) */}
-                    {countdown === null && questionVisible && (
-                      <QuestionBubble
-                        question={currentQuestion.question}
-                        questionNumber={index + 1}
-                        turnId={currentQuestion.id}
-                      />
-                    )}
-
-                    {/* T93: Hidden question message */}
-                    {countdown === null && !questionVisible && (
-                      <div className="flex justify-start">
-                        <div className="max-w-[85%] rounded-lg bg-muted/50 p-6 border-2 border-dashed border-muted-foreground/30">
-                          <p className="text-sm font-medium text-muted-foreground">
-                            Question hidden. Answer from memory or use the
-                            Replay button below to review.
+                        <div className="max-w-[75%] rounded-lg bg-muted/50 p-4 border-l-2 border-primary/40">
+                          <p className="text-sm italic text-muted-foreground leading-relaxed">
+                            {currentQuestion.bridge_text}
                           </p>
                         </div>
                       </div>
                     )}
-                  </div>
-                ) : (
-                  /* Accessibility mode - always visible */
-                  <QuestionBubble
-                    question={currentQuestion.question}
-                    questionNumber={index + 1}
-                    turnId={currentQuestion.id}
+
+                  {/* T106: Small Talk / Confirmation - Simple display, no timer */}
+                  {isSpecialTurn ? (
+                    <div className="flex justify-start">
+                      <div
+                        className={`max-w-[85%] rounded-lg p-5 border-l-4 ${
+                          isConfirmation
+                            ? 'bg-green-50 dark:bg-green-950/30 border-green-500'
+                            : 'bg-amber-50 dark:bg-amber-950/30 border-amber-500'
+                        }`}
+                      >
+                        <div className="mb-2">
+                          <span
+                            className={`text-xs font-semibold uppercase tracking-wide ${
+                              isConfirmation
+                                ? 'text-green-700 dark:text-green-300'
+                                : 'text-amber-700 dark:text-amber-300'
+                            }`}
+                          >
+                            {isConfirmation ? 'Ready Check' : 'Warm-up'}
+                          </span>
+                        </div>
+                        <p className="text-base leading-relaxed text-foreground">
+                          {currentQuestion.question.text}
+                        </p>
+                      </div>
+                    </div>
+                  ) : /* Regular Interview Question - T93: With Countdown & Reveal System */
+                  currentQuestion.id === currentTurnId && !accessibilityMode ? (
+                    <div className="space-y-4">
+                      {/* T93: Countdown Display */}
+                      {countdown !== null && (
+                        <div className="flex justify-start">
+                          <div className="max-w-[85%] rounded-lg bg-gradient-to-r from-primary/20 to-primary/10 p-8 border-2 border-primary/30">
+                            <div className="flex flex-col items-center justify-center">
+                              <p className="text-sm font-medium text-muted-foreground mb-2">
+                                Question {index + 1} starting in...
+                              </p>
+                              <div className="text-6xl font-bold text-primary animate-pulse">
+                                {countdown}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* T93: Question (conditionally visible) */}
+                      {countdown === null && questionVisible && (
+                        <QuestionBubble
+                          question={currentQuestion.question}
+                          questionNumber={index + 1}
+                          turnId={currentQuestion.id}
+                        />
+                      )}
+
+                      {/* T93: Hidden question message */}
+                      {countdown === null && !questionVisible && (
+                        <div className="flex justify-start">
+                          <div className="max-w-[85%] rounded-lg bg-muted/50 p-6 border-2 border-dashed border-muted-foreground/30">
+                            <p className="text-sm font-medium text-muted-foreground">
+                              Question hidden. Answer from memory or use the
+                              Replay button below to review.
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    /* Accessibility mode - always visible */
+                    <QuestionBubble
+                      question={currentQuestion.question}
+                      questionNumber={index + 1}
+                      turnId={currentQuestion.id}
+                    />
+                  )}
+                </div>
+              );
+            })()}
+
+          {/* T120: Analyzing Answer Transition - Apple-style minimalist animation */}
+          {isAnalyzing && (
+            <div className="flex justify-center py-12 animate-in fade-in duration-500">
+              <div className="flex flex-col items-center space-y-3">
+                {/* Animated dots */}
+                <div className="flex items-center space-x-1.5">
+                  <div
+                    className="h-2 w-2 rounded-full bg-gray-400 animate-pulse-slow"
+                    style={{ animationDelay: '0ms' }}
                   />
-                )}
+                  <div
+                    className="h-2 w-2 rounded-full bg-gray-400 animate-pulse-slow"
+                    style={{ animationDelay: '150ms' }}
+                  />
+                  <div
+                    className="h-2 w-2 rounded-full bg-gray-400 animate-pulse-slow"
+                    style={{ animationDelay: '300ms' }}
+                  />
+                </div>
+                {/* Subtle text */}
+                <span className="text-sm font-light text-gray-500">
+                  Analyzing
+                </span>
               </div>
-            );
-          })()}
-
-      {/* T120: Analyzing Answer Transition - Apple-style minimalist animation */}
-      {isAnalyzing && (
-        <div className="flex justify-center py-12 animate-in fade-in duration-500">
-          <div className="flex flex-col items-center space-y-3">
-            {/* Animated dots */}
-            <div className="flex items-center space-x-1.5">
-              <div
-                className="h-2 w-2 rounded-full bg-gray-400 animate-pulse-slow"
-                style={{ animationDelay: '0ms' }}
-              />
-              <div
-                className="h-2 w-2 rounded-full bg-gray-400 animate-pulse-slow"
-                style={{ animationDelay: '150ms' }}
-              />
-              <div
-                className="h-2 w-2 rounded-full bg-gray-400 animate-pulse-slow"
-                style={{ animationDelay: '300ms' }}
-              />
             </div>
-            {/* Subtle text */}
-            <span className="text-sm font-light text-gray-500">Analyzing</span>
-          </div>
-        </div>
-      )}
+          )}
 
-      {/* Answer Input */}
-      {currentQuestion && !isAnalyzing && (
-        <div className="sticky bottom-0 bg-background border-t pt-4">
-          {/* T106: Timer and Replay Controls - Only for actual interview questions */}
-          {(() => {
-            const turnType = (currentQuestion as any).turn_type;
-            const isSpecialTurn =
-              turnType === 'small_talk' || turnType === 'confirmation';
+          {/* Answer Input */}
+          {currentQuestion && !isAnalyzing && (
+            <div className="sticky bottom-0 bg-background border-t pt-4">
+              {/* T106: Timer and Replay Controls - Only for actual interview questions */}
+              {(() => {
+                const turnType = (currentQuestion as any).turn_type;
+                const isSpecialTurn =
+                  turnType === 'small_talk' || turnType === 'confirmation';
 
-            return (
-              !isSpecialTurn && (
-                <div className="mb-4 flex items-center justify-between">
-                  <ReplayButton
-                    replayCount={revealCount}
-                    replayCap={maxReveals}
-                    onReplay={handleReplay}
-                    disabled={isSubmitting || !canReplay}
-                  />
-                  {!accessibilityMode &&
-                    (currentQuestion.timing as Timing | null)?.started_at && (
-                      <TimerRing
-                        timeLimit={timerSec}
-                        startTime={
-                          (currentQuestion.timing as Timing).started_at
-                        }
-                        onExpire={() => {
-                          // T121: Auto-submit with allowEmpty flag
-                          toast.warning("Time's up – moving on");
-                          // Auto-submit even if answer is empty
-                          handleSubmit(undefined, true);
-                        }}
+                return (
+                  !isSpecialTurn && (
+                    <div className="mb-4 flex items-center justify-between">
+                      <ReplayButton
+                        replayCount={revealCount}
+                        replayCap={maxReveals}
+                        onReplay={handleReplay}
+                        disabled={isSubmitting || !canReplay}
                       />
-                    )}
-                </div>
-              )
-            );
-          })()}
+                      {!accessibilityMode &&
+                        (currentQuestion.timing as Timing | null)
+                          ?.started_at && (
+                          <TimerRing
+                            timeLimit={timerSec}
+                            startTime={
+                              (currentQuestion.timing as Timing).started_at
+                            }
+                            onExpire={() => {
+                              // T121: Auto-submit with allowEmpty flag
+                              toast.warning("Time's up – moving on");
+                              // Auto-submit even if answer is empty
+                              handleSubmit(undefined, true);
+                            }}
+                          />
+                        )}
+                    </div>
+                  )
+                );
+              })()}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Answer Mode Toggle */}
-            <div className="flex items-center gap-2 mb-4">
-              <Button
-                type="button"
-                variant={answerMode === 'text' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => {
-                  setAnswerMode('text');
-                  setAudioBlob(null);
-                }}
-                disabled={isSubmitting}
-                className="gap-2"
-              >
-                <Type className="h-4 w-4" />
-                Text
-              </Button>
-              <Button
-                type="button"
-                variant={answerMode === 'audio' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => {
-                  setAnswerMode('audio');
-                  setAnswer('');
-                }}
-                disabled={isSubmitting}
-                className="gap-2"
-              >
-                <Mic className="h-4 w-4" />
-                Voice
-              </Button>
-            </div>
-
-            {/* Text Input */}
-            {answerMode === 'text' && (
-              <>
-                <Textarea
-                  value={answer}
-                  onChange={(e) => setAnswer(e.target.value)}
-                  placeholder="Type your answer"
-                  rows={6}
-                  disabled={isSubmitting}
-                  className="resize-none"
-                />
-                <div className="flex justify-between items-center">
-                  <p className="text-sm text-muted-foreground">
-                    {answer.trim().split(/\s+/).filter(Boolean).length} words
-                  </p>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                {/* Answer Mode Toggle */}
+                <div className="flex items-center gap-2 mb-4">
                   <Button
-                    type="submit"
-                    disabled={isSubmitting || !answer.trim()}
+                    type="button"
+                    variant={answerMode === 'text' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => {
+                      setAnswerMode('text');
+                      setAudioBlob(null);
+                    }}
+                    disabled={isSubmitting}
+                    className="gap-2"
                   >
-                    {isSubmitting ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Submitting
-                      </>
-                    ) : (
-                      <>
-                        <Send className="mr-2 h-4 w-4" />
-                        Submit
-                      </>
-                    )}
+                    <Type className="h-4 w-4" />
+                    Text
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={answerMode === 'audio' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => {
+                      setAnswerMode('audio');
+                      setAnswer('');
+                    }}
+                    disabled={isSubmitting}
+                    className="gap-2"
+                  >
+                    <Mic className="h-4 w-4" />
+                    Voice
                   </Button>
                 </div>
-              </>
-            )}
 
-            {/* Audio Recorder */}
-            {answerMode === 'audio' && (
-              <>
-                <AudioRecorder
-                  onRecordingComplete={(blob) => setAudioBlob(blob)}
-                  disabled={isSubmitting}
-                />
-                <div className="flex justify-end">
-                  <Button type="submit" disabled={isSubmitting || !audioBlob}>
-                    {isSubmitting ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Submitting
-                      </>
-                    ) : (
-                      <>
-                        <Send className="mr-2 h-4 w-4" />
-                        Submit
-                      </>
-                    )}
-                  </Button>
-                </div>
-              </>
-            )}
-          </form>
-        </div>
-      )}
+                {/* Text Input */}
+                {answerMode === 'text' && (
+                  <>
+                    <Textarea
+                      value={answer}
+                      onChange={(e) => setAnswer(e.target.value)}
+                      placeholder="Type your answer"
+                      rows={6}
+                      disabled={isSubmitting}
+                      className="resize-none"
+                    />
+                    <div className="flex justify-between items-center">
+                      <p className="text-sm text-muted-foreground">
+                        {answer.trim().split(/\s+/).filter(Boolean).length}{' '}
+                        words
+                      </p>
+                      <Button
+                        type="submit"
+                        disabled={isSubmitting || !answer.trim()}
+                      >
+                        {isSubmitting ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Submitting
+                          </>
+                        ) : (
+                          <>
+                            <Send className="mr-2 h-4 w-4" />
+                            Submit
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </>
+                )}
+
+                {/* Audio Recorder */}
+                {answerMode === 'audio' && (
+                  <>
+                    <AudioRecorder
+                      onRecordingComplete={(blob) => setAudioBlob(blob)}
+                      disabled={isSubmitting}
+                    />
+                    <div className="flex justify-end">
+                      <Button
+                        type="submit"
+                        disabled={isSubmitting || !audioBlob}
+                      >
+                        {isSubmitting ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Submitting
+                          </>
+                        ) : (
+                          <>
+                            <Send className="mr-2 h-4 w-4" />
+                            Submit
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </>
+                )}
+              </form>
+            </div>
+          )}
         </div>
       )}
 

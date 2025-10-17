@@ -13,19 +13,19 @@ export async function Header() {
 
   return (
     <header className="border-b">
-      <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-        <Link href="/" className="flex items-center gap-2">
+      <div className="container mx-auto px-4 py-4 flex justify-between items-center gap-2">
+        <Link href="/" className="flex items-center gap-2 min-w-0 flex-shrink">
           <Image
             src="/logo.png"
             alt="InterviewLab Logo"
             width={32}
             height={32}
-            className="h-8 w-8"
+            className="h-8 w-8 flex-shrink-0"
           />
-          <span className="text-xl font-bold">InterviewLab</span>
+          <span className="text-xl font-bold truncate">InterviewLab</span>
         </Link>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 md:gap-4 flex-shrink-0">
           {user ? (
             <>
               {/* T139: Show entitlement counter for logged-in users */}
