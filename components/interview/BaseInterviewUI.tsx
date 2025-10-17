@@ -162,7 +162,9 @@ export function BaseInterviewUI({
       setStagesPlanned(stagesPlanned || 1);
       setStageName(stageName || null);
 
-      const unansweredTurn = (initialTurns || []).find((t) => !t.answer_text);
+      const unansweredTurn = (initialTurns || []).find(
+        (t: Turn) => !t.answer_text
+      );
       if (unansweredTurn) {
         setCurrentTurnId(unansweredTurn.id);
         setQuestionNumber(result.data.questionNumber || 1);
@@ -349,7 +351,9 @@ export function BaseInterviewUI({
       setStagesPlanned(stagesPlanned || 1);
       setStageName(stageName || null);
 
-      const unansweredTurn = (initialTurns || []).find((t) => !t.answer_text);
+      const unansweredTurn = (initialTurns || []).find(
+        (t: Turn) => !t.answer_text
+      );
       if (unansweredTurn) {
         setCurrentTurnId(unansweredTurn.id);
         setQuestionNumber(result.data.questionNumber || 1);
@@ -405,7 +409,9 @@ export function BaseInterviewUI({
       setStagesPlanned(stagesPlanned || 1);
       setStageName(stageName || null);
 
-      const unansweredTurn = (initialTurns || []).find((t) => !t.answer_text);
+      const unansweredTurn = (initialTurns || []).find(
+        (t: Turn) => !t.answer_text
+      );
       if (unansweredTurn) {
         setCurrentTurnId(unansweredTurn.id);
         setQuestionNumber(result.data.questionNumber || 1);
