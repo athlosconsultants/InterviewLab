@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Zap, Target, Award, TrendingUp } from 'lucide-react';
+import { MobileCTA } from '@/components/marketing/MobileCTA';
 
 /**
  * Mobile Landing Page (Hormozi Offer Stack)
@@ -163,19 +164,8 @@ export default function MobileLandingPage() {
         </div>
       </section>
 
-      {/* Sticky CTA Button */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-6 py-4 shadow-lg z-50">
-        <Button
-          asChild
-          size="lg"
-          className="w-full h-12 text-base font-semibold bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700"
-        >
-          <Link href="/setup">Start Practice Interview</Link>
-        </Button>
-        <p className="text-center text-xs text-gray-500 mt-2">
-          No credit card required
-        </p>
-      </div>
+      {/* Mobile CTA Banner */}
+      <MobileCTA />
     </div>
   );
 }
