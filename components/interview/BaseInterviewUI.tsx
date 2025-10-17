@@ -132,8 +132,7 @@ export function BaseInterviewUI({
         resumeDataResult &&
         !resumeDataResult.error &&
         resumeDataResult.data &&
-        resumeDataResult.data.canResume &&
-        !resumeDataResult.data.isCompleted
+        resumeDataResult.data.canResume
       ) {
         setCanResume(true);
         setResumeMessage(resumeDataResult.data.message || null);
