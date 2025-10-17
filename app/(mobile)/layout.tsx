@@ -3,10 +3,6 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useIsMobile } from '@/lib/useIsMobile';
-import { Header } from '@/components/header';
-import { Footer } from '@/components/Footer';
-import { Toaster } from '@/components/ui/sonner';
-import { Analytics } from '@vercel/analytics/react';
 
 /**
  * Mobile Route Layout
@@ -15,6 +11,9 @@ import { Analytics } from '@vercel/analytics/react';
  * Automatically redirects desktop users to the main site.
  *
  * Route group: app/(mobile)/*
+ *
+ * Note: This layout wraps the page content. The root layout (app/layout.tsx)
+ * provides the HTML structure, header, footer, and global components.
  */
 export default function MobileLayout({
   children,
@@ -32,30 +31,14 @@ export default function MobileLayout({
     }
   }, [isMobile, router]);
 
-  // Show mobile layout for mobile users
-  if (isMobile) {
-    console.log('[MobileLayout] Rendering mobile-optimized layout');
+  // Log mobile layout rendering
+  useEffect(() => {
+    if (isMobile) {
+      console.log('[MobileLayout] Rendering mobile-optimized layout');
+    }
+  }, [isMobile]);
 
-    return (
-      <html lang="en">
-        <body className="mobile-layout">
-          {/* Mobile-optimized header (could be customized) */}
-          <Header />
-
-          {/* Main mobile content */}
-          <main className="min-h-screen">{children}</main>
-
-          {/* Mobile-optimized footer */}
-          <Footer />
-
-          {/* Global components */}
-          <Toaster />
-          <Analytics />
-        </body>
-      </html>
-    );
-  }
-
-  // Return null while redirecting desktop users
-  return null;
+  // Always render children (root layout provides HTML structure)
+  // The redirect happens via useEffect above
+  return <div className="mobile-layout-wrapper">{children}</div>;
 }
