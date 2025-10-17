@@ -3,15 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import {
-  CheckCircle2,
-  Zap,
-  Target,
-  Award,
-  TrendingUp,
-  Clock,
-  Users,
-} from 'lucide-react';
+import { Zap, Target, Award, TrendingUp } from 'lucide-react';
 
 /**
  * Mobile Landing Page (Hormozi Offer Stack)
@@ -31,23 +23,24 @@ export default function MobileLandingPage() {
       {/* Hero Section - Pain + Dream Outcome */}
       <section className="px-6 pt-12 pb-8 text-center">
         <div className="mb-6">
-          <div className="inline-block px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-full mb-4">
-            <p className="text-white font-semibold text-sm">
-              ⚡ Free AI Interview Practice
+          <div className="inline-block px-4 py-2 bg-gray-100 rounded-full mb-4">
+            <p className="text-gray-700 font-medium text-sm">
+              AI-Powered Interview Practice
             </p>
           </div>
         </div>
 
         <h1 className="text-4xl font-bold leading-tight mb-4">
-          Nervous About Your Next{' '}
+          Practice Interviews with{' '}
           <span className="bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">
-            Job Interview?
+            Confidence
           </span>
         </h1>
 
         <p className="text-lg text-gray-600 mb-6 leading-relaxed">
-          Practice with AI trained on <strong>S&amp;P 500 companies</strong> —
-          Get personalized feedback in minutes, not days.
+          Experience realistic interview scenarios powered by AI trained on real
+          company interview frameworks. Get actionable feedback to improve your
+          performance.
         </p>
 
         {/* Social Proof */}
@@ -58,144 +51,111 @@ export default function MobileLandingPage() {
             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 border-2 border-white" />
           </div>
           <p className="text-sm text-gray-600">
-            <strong>1,247+</strong> users landed jobs this month
+            Trusted by thousands of job seekers
           </p>
         </div>
       </section>
 
-      {/* Value Stack - Hormozi Style */}
+      {/* Features */}
       <section className="px-6 pb-8">
-        <div className="bg-white rounded-2xl shadow-xl border-2 border-gray-100 overflow-hidden">
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
           {/* Header */}
-          <div className="bg-gradient-to-r from-cyan-500 to-blue-600 px-6 py-4 text-center">
-            <h2 className="text-white font-bold text-xl mb-1">
-              What You Get (FREE)
+          <div className="px-6 py-5 border-b border-gray-100">
+            <h2 className="font-bold text-xl text-gray-900 text-center">
+              Everything You Need to Succeed
             </h2>
-            <p className="text-cyan-100 text-sm">
-              Everything you need to crush your interview
-            </p>
           </div>
 
           {/* Value Items */}
-          <div className="p-6 space-y-4">
-            <ValueItem
+          <div className="p-6 space-y-5">
+            <FeatureItem
               icon={<Target className="w-5 h-5" />}
-              title="AI Interviewer Trained on Real Companies"
-              value="$997/mo value"
-              description="Practice with questions from Google, Amazon, Microsoft & more"
+              title="Industry-Specific Questions"
+              description="Practice with questions based on real interview frameworks from leading companies"
             />
-            <ValueItem
+            <FeatureItem
               icon={<Zap className="w-5 h-5" />}
-              title="Instant Personalized Feedback"
-              value="$497/mo value"
-              description="Know exactly what to improve after every answer"
+              title="Instant Feedback"
+              description="Receive detailed analysis and suggestions after each response"
             />
-            <ValueItem
+            <FeatureItem
               icon={<Award className="w-5 h-5" />}
-              title="Voice + Text Interview Modes"
-              value="$297/mo value"
-              description="Practice speaking out loud or type your responses"
+              title="Multiple Practice Modes"
+              description="Choose between voice interviews or text-based responses"
             />
-            <ValueItem
+            <FeatureItem
               icon={<TrendingUp className="w-5 h-5" />}
-              title="Progress Tracking & Analytics"
-              value="$197/mo value"
-              description="See your improvement over time with detailed metrics"
+              title="Track Your Progress"
+              description="Monitor your improvement with detailed performance metrics"
             />
+          </div>
 
-            {/* Total Value */}
-            <div className="pt-4 border-t-2 border-dashed border-gray-200">
-              <div className="flex justify-between items-center mb-2">
-                <span className="font-semibold text-gray-700">
-                  Total Value:
-                </span>
-                <span className="text-gray-400 line-through text-lg">
-                  $1,988/mo
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="font-bold text-xl">Your Price Today:</span>
-                <span className="font-bold text-4xl bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
-                  FREE
-                </span>
-              </div>
+          {/* CTA in card */}
+          <div className="px-6 pb-6">
+            <div className="bg-gradient-to-br from-cyan-50 to-blue-50 rounded-xl p-4 text-center border border-cyan-100">
+              <p className="text-sm text-gray-600 mb-1">Get started today</p>
+              <p className="text-2xl font-bold text-gray-900">Free to try</p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Guarantee */}
+      {/* How It Works */}
       <section className="px-6 pb-8">
-        <div className="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl p-6 text-center">
-          <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-3">
-            <CheckCircle2 className="w-7 h-7 text-white" />
-          </div>
-          <h3 className="font-bold text-lg text-green-900 mb-2">
-            Our Guarantee
-          </h3>
-          <p className="text-green-800 text-sm leading-relaxed">
-            If you don&apos;t feel more confident after your first practice
-            interview, we&apos;ll personally coach you through it — for free.
-          </p>
+        <h2 className="font-bold text-xl text-gray-900 mb-4 text-center">
+          How It Works
+        </h2>
+        <div className="space-y-3">
+          <StepItem
+            number={1}
+            title="Upload Your Details"
+            description="Share your CV and target job description"
+          />
+          <StepItem
+            number={2}
+            title="Start Practicing"
+            description="Answer AI-generated questions tailored to your role"
+          />
+          <StepItem
+            number={3}
+            title="Get Feedback"
+            description="Review personalized insights to improve your answers"
+          />
         </div>
       </section>
 
-      {/* Urgency/Scarcity */}
+      {/* Testimonials */}
       <section className="px-6 pb-8">
-        <div className="bg-gradient-to-br from-orange-50 to-red-50 border-2 border-orange-200 rounded-xl p-5">
-          <div className="flex items-start gap-3">
-            <Clock className="w-6 h-6 text-orange-600 flex-shrink-0 mt-0.5" />
-            <div>
-              <h3 className="font-bold text-orange-900 mb-1">
-                Limited Free Access
-              </h3>
-              <p className="text-orange-800 text-sm leading-relaxed">
-                We&apos;re currently offering free interviews to the first{' '}
-                <strong>10,000 users</strong>. After that, it&apos;s $49/month.
-                Secure your spot now.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Final Social Proof */}
-      <section className="px-6 pb-8">
-        <div className="text-center">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <Users className="w-5 h-5 text-gray-600" />
-            <p className="font-semibold text-gray-700">
-              Join 5,000+ Job Seekers
-            </p>
-          </div>
-          <div className="space-y-3">
-            <Testimonial
-              name="Sarah Chen"
-              role="Software Engineer"
-              company="at Google"
-              quote="Got my dream job offer after 3 practice sessions. The feedback was spot-on."
-            />
-            <Testimonial
-              name="Marcus Johnson"
-              role="Product Manager"
-              company="at Amazon"
-              quote="Went from nervous to confident. This is a game-changer for interview prep."
-            />
-          </div>
+        <h2 className="font-bold text-xl text-gray-900 mb-4 text-center">
+          What Our Users Say
+        </h2>
+        <div className="space-y-3">
+          <Testimonial
+            name="Sarah Chen"
+            role="Software Engineer"
+            company="at Google"
+            quote="The feedback helped me identify gaps in my responses. I felt much more prepared going into my actual interview."
+          />
+          <Testimonial
+            name="Marcus Johnson"
+            role="Product Manager"
+            company="at Amazon"
+            quote="Practicing with AI allowed me to refine my answers without the pressure. Great tool for interview preparation."
+          />
         </div>
       </section>
 
       {/* Sticky CTA Button */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t-2 border-gray-200 px-6 py-4 shadow-2xl z-50">
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-6 py-4 shadow-lg z-50">
         <Button
           asChild
           size="lg"
-          className="w-full h-14 text-lg font-bold bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 shadow-lg"
+          className="w-full h-12 text-base font-semibold bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700"
         >
-          <Link href="/setup">{ctaText} →</Link>
+          <Link href="/setup">Start Practice Interview</Link>
         </Button>
         <p className="text-center text-xs text-gray-500 mt-2">
-          No credit card required • Start in 30 seconds
+          No credit card required
         </p>
       </div>
     </div>
@@ -203,36 +163,58 @@ export default function MobileLandingPage() {
 }
 
 /**
- * Value Item Component
+ * Feature Item Component
  */
-function ValueItem({
+function FeatureItem({
   icon,
   title,
-  value,
   description,
 }: {
   icon: React.ReactNode;
   title: string;
-  value: string;
   description: string;
 }) {
   return (
-    <div className="flex gap-3">
+    <div className="flex gap-4">
       <div className="flex-shrink-0">
         <div className="w-10 h-10 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-lg flex items-center justify-center text-white">
           {icon}
         </div>
       </div>
       <div className="flex-1">
-        <div className="flex items-start justify-between gap-2 mb-1">
-          <h3 className="font-semibold text-gray-900 text-sm leading-tight">
+        <h3 className="font-semibold text-gray-900 text-base mb-1">{title}</h3>
+        <p className="text-sm text-gray-600 leading-relaxed">{description}</p>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Step Item Component
+ */
+function StepItem({
+  number,
+  title,
+  description,
+}: {
+  number: number;
+  title: string;
+  description: string;
+}) {
+  return (
+    <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
+      <div className="flex gap-4">
+        <div className="flex-shrink-0">
+          <div className="w-10 h-10 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-full flex items-center justify-center">
+            <span className="text-white font-bold text-lg">{number}</span>
+          </div>
+        </div>
+        <div className="flex-1">
+          <h3 className="font-semibold text-gray-900 text-base mb-1">
             {title}
           </h3>
-          <span className="text-xs font-bold text-green-600 whitespace-nowrap">
-            {value}
-          </span>
+          <p className="text-sm text-gray-600">{description}</p>
         </div>
-        <p className="text-xs text-gray-600 leading-relaxed">{description}</p>
       </div>
     </div>
   );
