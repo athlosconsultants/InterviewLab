@@ -41,19 +41,20 @@ export default function MobileLandingPage() {
     <div className="min-h-screen bg-gradient-to-b from-white via-cyan-50/30 to-blue-50/50 pb-24">
       {/* Hero Section - Pain + Dream Outcome */}
       <section className="px-6 pt-12 pb-8 text-center">
+        <div className="mb-3">
+          <span className="inline-block px-4 py-1.5 bg-blue-50 text-blue-700 rounded-full text-sm font-medium">
+            For Job Seekers
+          </span>
+        </div>
+
         <h1 className="text-4xl font-bold leading-tight mb-4">
-          Ace Your Next Interview — With AI That Feels Real
+          Job Interview Practice — That Feels Like The Real Thing
         </h1>
 
-        <p className="text-lg text-gray-600 mb-4 leading-relaxed">
-          Practice immersive mock interviews built from real hiring frameworks
-          used by top companies. Get instant feedback that actually improves
-          your answers.
-        </p>
-
-        <p className="text-sm text-gray-500 mb-8">
-          Trusted by hundreds of job seekers preparing for their next big
-          opportunity.
+        <p className="text-lg text-gray-600 mb-8 leading-relaxed">
+          Practice real-world interviews with AI built from real hiring data
+          used by top global companies — and get instant feedback that helps you
+          improve fast.
         </p>
 
         {/* Main CTA Button */}
@@ -74,7 +75,7 @@ export default function MobileLandingPage() {
           </Button>
         </div>
         <p className="text-xs text-gray-500 text-center mb-6">
-          3 questions • Text-based only • No credit card required
+          3 questions • Text-based only • No credit card needed
         </p>
       </section>
 
@@ -84,7 +85,7 @@ export default function MobileLandingPage() {
           {/* Header */}
           <div className="px-6 py-5 border-b border-gray-100">
             <h2 className="font-bold text-xl text-gray-900 text-center">
-              Everything You Need to Nail the Interview
+              Everything You Need to Ace Your Next Interview
             </h2>
           </div>
 
@@ -93,22 +94,22 @@ export default function MobileLandingPage() {
             <FeatureItem
               icon={<Target className="w-5 h-5" />}
               title="Industry-Specific Questions"
-              description="Practice with interview frameworks based on real roles at top global companies."
+              description="Practice questions based on real roles at top companies, tailored to your target job."
             />
             <FeatureItem
               icon={<Zap className="w-5 h-5" />}
               title="Instant Feedback"
-              description="Get detailed analysis and improvement suggestions after every answer."
+              description="Get clear improvement suggestions after each session so you always know what to work on next."
             />
             <FeatureItem
               icon={<Award className="w-5 h-5" />}
               title="Multiple Practice Modes"
-              description="Switch between voice and text interviews to simulate the real thing."
+              description="Switch between voice or text interviews to simulate real conversations."
             />
             <FeatureItem
               icon={<TrendingUp className="w-5 h-5" />}
               title="Track Your Progress"
-              description="See measurable improvement with detailed performance insights."
+              description="Watch your scores rise with detailed performance insights after every interview."
             />
           </div>
 
@@ -126,28 +127,46 @@ export default function MobileLandingPage() {
       {/* How It Works */}
       <section className="px-6 pb-8">
         <h2 className="font-bold text-xl text-gray-900 mb-4 text-center">
-          How It Works
+          How It Works (In 3 Easy Steps)
         </h2>
         <div className="space-y-3">
           <StepItem
             number={1}
             title="Upload Your Details"
-            description="Add your CV, target job, and company."
+            description="Add your CV, job title, job description, location, and company name — it only takes a minute. This helps the AI understand the exact role you're preparing for."
           />
           <StepItem
             number={2}
-            title="Start Practicing"
-            description="Answer AI-generated questions tailored to your role."
+            title="Practice a Real Interview"
+            description="Answer dynamic, AI-generated questions that flow naturally — just like talking to a real interviewer. Every session feels human, tailored, and unique."
           />
           <StepItem
             number={3}
-            title="Get Feedback"
-            description="Review personalized insights to refine your answers."
+            title="Get Your Personalised Report"
+            description="When the interview ends, receive a full analysis document with your overall score, key strengths, and specific areas to improve before your next interview."
           />
         </div>
         <div className="mt-5 text-center">
           <p className="text-sm font-medium text-blue-600">
             Take your first interview — it&apos;s free to try.
+          </p>
+        </div>
+      </section>
+
+      {/* Why It Works */}
+      <section className="px-6 pb-8">
+        <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+          <h2 className="font-bold text-xl text-gray-900 mb-4 text-center">
+            Why It Works
+          </h2>
+          <p className="text-gray-700 leading-relaxed mb-4">
+            InterviewLab is trained on real interview data from top global
+            companies like Google, Deloitte, and Amazon — so every question and
+            insight mirrors how real hiring teams evaluate candidates.
+          </p>
+          <p className="text-gray-700 leading-relaxed">
+            Most users see measurable improvement after just one session —
+            gaining confidence and clarity before their next big opportunity.
           </p>
         </div>
       </section>
@@ -162,7 +181,7 @@ export default function MobileLandingPage() {
             name="Sarah Chen"
             role="Software Engineer"
             company="at Google"
-            quote="The feedback helped me identify gaps in my answers. I felt much more confident walking into my real interview."
+            quote="The feedback helped me spot gaps in my answers and boosted my confidence before my real interview."
             image="/Sarah_Chen Headshot.png"
           />
           <Testimonial
@@ -175,7 +194,38 @@ export default function MobileLandingPage() {
         </div>
         <div className="mt-5 text-center">
           <p className="text-sm text-gray-600">
-            ⭐ Hundreds of candidates are using InterviewLab to prepare smarter.
+            ⭐ Hundreds of candidates use InterviewLab to prepare smarter and
+            walk into interviews with confidence.
+          </p>
+        </div>
+      </section>
+
+      {/* Final CTA Section */}
+      <section className="px-6 pb-12">
+        <div className="bg-gradient-to-br from-cyan-50 to-blue-50 rounded-2xl p-8 text-center border-2 border-cyan-200 shadow-lg">
+          <h2 className="font-bold text-2xl text-gray-900 mb-3">
+            Get Interview-Ready — Without the Stress
+          </h2>
+          <p className="text-base text-gray-700 mb-6 leading-relaxed">
+            Experience your first AI interview free. Real questions, real
+            feedback, real confidence.
+          </p>
+          <Button
+            asChild
+            size="lg"
+            disabled={isLoading}
+            className="w-full h-14 text-base font-bold bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 shadow-xl"
+          >
+            <Link
+              href={ctaHref}
+              className="flex items-center justify-center gap-2"
+            >
+              {isLoading ? 'Loading...' : 'Start Free Interview'}
+              {!isLoading && <ArrowRight className="w-5 h-5" />}
+            </Link>
+          </Button>
+          <p className="text-xs text-gray-500 text-center mt-3">
+            3 questions • Text-based only • No credit card needed
           </p>
         </div>
       </section>

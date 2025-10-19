@@ -9,8 +9,8 @@ export function Footer() {
           <div>
             <h3 className="font-semibold mb-3">InterviewLab</h3>
             <p className="text-sm text-muted-foreground">
-              AI-powered interview practice for candidates preparing for real
-              opportunities.
+              AI-powered mock interviews that help candidates prepare with
+              confidence for real-world opportunities.
             </p>
           </div>
 
