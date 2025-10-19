@@ -557,10 +557,10 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
     <div className="mx-auto w-full max-w-4xl p-4 space-y-6">
       {/* Header */}
       <div className="border-b pb-4">
-        <div className="flex items-start justify-between">
-          <div>
-            <h1 className="text-2xl font-bold">{jobTitle}</h1>
-            <p className="text-muted-foreground">{company}</p>
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex-1 min-w-0">
+            <h1 className="text-2xl font-bold truncate">{jobTitle}</h1>
+            <p className="text-muted-foreground truncate">{company}</p>
             {/* T123: Removed question counter for greater immersion */}
             {/* T91: Display stage information for multi-stage interviews */}
             {stagesPlanned > 1 && stageName && (
@@ -569,16 +569,17 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
               </p>
             )}
           </div>
-          <div className="flex items-center space-x-2 flex-shrink-0">
-            <AccessibilityIcon className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+          <div className="flex items-center gap-2 sm:gap-2.5 flex-shrink-0">
+            <AccessibilityIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground flex-shrink-0" />
             <Switch
               id="accessibility-mode"
               checked={accessibilityMode}
               onCheckedChange={setAccessibilityMode}
+              className="scale-90 sm:scale-100"
             />
             <Label
               htmlFor="accessibility-mode"
-              className="text-sm cursor-pointer whitespace-nowrap"
+              className="text-xs sm:text-sm cursor-pointer whitespace-nowrap"
             >
               <span className="hidden sm:inline">No Timer/Reveals</span>
               <span className="sm:hidden">No Timer</span>

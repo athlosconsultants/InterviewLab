@@ -1006,10 +1006,15 @@ export async function submitAnswer(params: {
   });
 
   // T89: Generate bridge text referencing the previous answer (paid tier only)
+  // T167: Pass stage transition information for enhanced bridges
   let bridgeText: string | null = null;
   if (planTier === 'paid') {
     try {
-      bridgeText = await generateBridge(sessionId, turnId);
+      bridgeText = await generateBridge(
+        sessionId,
+        turnId,
+        newStage !== currentStage ? newStage : undefined
+      );
     } catch (error) {
       console.error('Failed to generate bridge:', error);
       // Continue without bridge if generation fails
@@ -1322,13 +1327,16 @@ Return ONLY the questions, one per line, no numbering or bullet points.`;
  * Generates a conversational bridge between questions that references
  * the candidate's previous answer (T89).
  * This makes the interview feel more natural and connected.
+ * T167: Enhanced with stage transition announcements
  * @param sessionId The session ID
  * @param lastTurnId The ID of the previous turn (to reference the answer)
+ * @param newStage If provided, indicates a stage transition to announce
  * @returns A short, natural bridge text (1-2 sentences)
  */
 export async function generateBridge(
   sessionId: string,
-  lastTurnId: string
+  lastTurnId: string,
+  newStage?: number
 ): Promise<string> {
   const supabase = await createClient();
 
@@ -1372,6 +1380,13 @@ export async function generateBridge(
 
   const role = researchSnapshot.job_spec_summary.role;
   const tone = researchSnapshot.interview_config?.tone || 'professional';
+  const stagesPlanned = (session as any).stages_planned || 1;
+
+  // T167: Determine if this is a stage transition
+  const isStageTransition = newStage !== undefined;
+  const stageName = isStageTransition
+    ? getStageLabel(newStage, stagesPlanned)
+    : undefined;
 
   const prompt = `You are a professional interviewer conducting a ${role} interview.
 
@@ -1381,12 +1396,33 @@ The candidate just answered the following question:
 Their response was:
 "${lastAnswer.substring(0, 500)}${lastAnswer.length > 500 ? '...' : ''}"
 
-Generate a brief, natural conversational bridge (1-2 sentences maximum) that:
+${
+  isStageTransition && stageName
+    ? `**IMPORTANT - STAGE TRANSITION**: This is the beginning of ${stageName}. Your bridge must announce this stage transition clearly and naturally.
+
+Generate a brief, natural conversational bridge (2-3 sentences maximum) that:
+1. Briefly acknowledges their previous answer
+2. Announces the transition to ${stageName}
+3. Creates excitement or focus for the new stage
+4. Maintains a ${tone} tone
+5. IMPORTANT: Do NOT include a question. This is just a contextual comment that will lead into the next question.
+
+Examples of good stage transition bridges:
+- "Thank you for that insight. Now, let's move into ${stageName}, where we'll explore your technical expertise more deeply."
+- "Great answer. We're now transitioning to ${stageName}, focusing on role-specific scenarios."
+- "I appreciate your perspective. Let's shift gears and begin ${stageName}, where we'll discuss leadership and team dynamics."`
+    : `Generate a brief, natural conversational bridge (1-2 sentences maximum) that:
 1. Acknowledges or reflects on something specific from their answer
 2. Creates a smooth transition to the next question
 3. Maintains a ${tone} tone
 4. Sounds like a real interviewer would speak
 5. IMPORTANT: Do NOT include a question. This is just a contextual comment that will lead into the next question.
+
+Examples of good bridges:
+- "That's an interesting approach to stakeholder management."
+- "I appreciate your insight on technical debt and the trade-offs you mentioned."
+- "Your experience with cross-functional teams sounds valuable."`
+}
 
 T109 Mode Requirements:
 ${
@@ -1400,11 +1436,6 @@ ${
 - Standard professional bridge format is fine
 - Can use standard punctuation and formatting`
 }
-
-Examples of good bridges:
-- "That's an interesting approach to stakeholder management."
-- "I appreciate your insight on technical debt and the trade-offs you mentioned."
-- "Your experience with cross-functional teams sounds valuable."
 
 Return ONLY the bridge text, no quotes, no additional formatting. Keep it concise and conversational for ${mode} delivery. Do not end with a question.`;
 

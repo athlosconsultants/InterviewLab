@@ -1687,6 +1687,140 @@ No database schema changes required.
 
 ## Appendix — Env Vars (Example)
 
+---
+
+## Phase 16 — Mobile & Interview UX Fixes
+
+> Goal: Resolve functional and UX issues discovered during mobile interview testing. Apply improvements across mobile and desktop versions where needed.
+
+### T161 — Fix Mobile Toggle Timer Button UI
+
+**Goal:** Improve spacing and appearance of the timer toggle button on mobile.
+**Edits:** `components/interview/TimerRing.tsx`
+**Steps:**
+
+1. Detect small screen via Tailwind responsive classes
+2. Adjust padding, margin, and icon size for mobile view
+   **DoD:** Button no longer appears squashed on mobile
+   **Test:** Validate UI on iPhone 13 Chrome emulation
+
+---
+
+### T162 — Exclude Small Talk from Question Count
+
+**Goal:** Ensure UI counter begins from real interview question 1
+**Edits:** `lib/interview.ts`, `components/interview/*UI.tsx`
+**Steps:**
+
+1. Filter `turns` by `turn_type === 'question'`
+2. Display `Q x of y` based only on real questions
+   **DoD:** UI starts at Q1 post-small talk
+   **Test:** Try 2-stage interview, validate question numbering
+
+---
+
+### T163 — Fix Interview Usage Counter on Completion
+
+**Goal:** Ensure entitlement counter decreases after valid completion
+**Edits:** `lib/interview.ts`, `lib/entitlements.ts`, `app/interview/actions.ts`
+**Steps:**
+
+1. Track `session.complete === true`
+2. Trigger `consumeEntitlement()` in post-processing step
+   **DoD:** Count goes from 16 → 15 after interview
+   **Test:** Check entitlement summary in header after feedback
+
+---
+
+### T164 — Remove Extra Voice Button (Mobile Voice UI)
+
+**Goal:** Clean UI by removing unused voice input button
+**Edits:** `components/interview/mode/MobileVoiceUI.tsx`
+**Steps:**
+
+1. Render only `Record` and `Text` buttons
+2. Remove or disable third voice input
+   **DoD:** Only two inputs visible
+   **Test:** Voice interview input area shows 2 buttons only
+
+---
+
+### T165 — Disable Replay During Speaking/Thinking
+
+**Goal:** Restrict replay button when orb is not ready
+**Edits:** `components/interview/ReplayButton.tsx`
+**Steps:**
+
+1. Conditionally disable replay based on orb state
+2. Valid state = `ready`
+   **DoD:** Button is disabled during TTS or loading
+   **Test:** Attempt to click replay during speech — no action
+
+---
+
+### T166 — Cut Off TTS on Early Answer
+
+**Goal:** If user answers while orb is speaking, advance early
+**Edits:** `components/interview/mode/MobileVoiceUI.tsx`, `lib/audioController.ts`
+**Steps:**
+
+1. Add `AudioController.stop()` on answer submit
+2. Skip remaining TTS, transition to analyzing
+   **DoD:** Voice cuts off mid-sentence if user answers early
+   **Test:** Answer quickly on Q1, verify skip
+
+---
+
+### T167 — Fix Stage Display and Transitions in Interviews
+
+**Goal:** Ensure interview stage transitions are accurately reflected in both the UI and UX across desktop and mobile. Display the current stage clearly in the header and provide a smooth, identifiable transition between stages.
+**Edits:** `lib/interview.ts`, `components/interview/VoiceHeader.tsx`, `components/interview/TextHeader.tsx`, `components/interview/BaseInterviewUI.tsx`, `lib/audioController.ts`, `lib/stageHelpers.ts`
+**Steps:**
+
+1. Fix stage tracking logic in the interview state machine (`lib/interview.ts`) so that the `current_stage` value updates correctly after each stage's final question.
+2. Display the correct stage number and name in both mobile and desktop headers.
+3. Add clear visual transitions when the stage changes — e.g., a brief interstitial, color or style change in the header, or short delay before next stage begins.
+4. For voice interviews, insert a bridge message via TTS at the start of each new stage (e.g., “Next, let's begin Stage 2: Role Fit”).
+5. For text interviews, display a stage title separator or banner to introduce each new stage.
+6. Audit the stage logic to ensure the correct number of questions per stage are being served and counted accurately in all views.
+   **DoD:**
+
+- Stage transitions are visually and audibly obvious.
+- Headers correctly reflect active stage.
+- No overlap or missed transitions.
+  **Test:**
+- Run both voice and text interviews on desktop and mobile with multiple stages.
+- Validate UI headers and orb voice announcements.
+- Confirm transitions and question/stage counts behave as expected.
+
+---
+
+### T168 — Add Download Report to Mobile Text UI
+
+**Goal:** Enable report PDF download for mobile text sessions
+**Edits:** `app/report/[id]/page.tsx`, `components/results/DownloadButton.tsx`
+**Steps:**
+
+1. Render working Download button for text mode
+2. Link to `/api/report-pdf?id=xxx` endpoint
+   **DoD:** Button appears and returns valid PDF
+   **Test:** Validate download on mobile Safari
+
+---
+
+### T169 — Fix Broken Download Button on Mobile Voice UI
+
+**Goal:** Repair non-functional PDF button
+**Edits:** `components/results/DownloadButton.tsx`
+**Steps:**
+
+1. Check prop errors, ensure `href` or `onClick` triggers correctly
+2. Validate PDF exists and endpoint succeeds
+   **DoD:** Button downloads file when clicked
+   **Test:** Test on TikTok in-app browser and iOS Safari
+
+---
+
 ```
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=

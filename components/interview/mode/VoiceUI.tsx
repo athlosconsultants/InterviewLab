@@ -591,6 +591,12 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
     async (e?: React.FormEvent, autoAdvance = false) => {
       e?.preventDefault();
 
+      // T166: Stop any playing TTS when user submits answer early
+      if (!autoAdvance && audioController) {
+        audioController.stop();
+        console.log('[T166] Stopped TTS playback - user answered early');
+      }
+
       // T126: Stop timer on manual submit
       if (!autoAdvance) {
         setIsTimerActive(false);
@@ -1043,7 +1049,12 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
                     variant="outline"
                     size="sm"
                     onClick={handleReplay}
-                    disabled={!currentAudioUrl || isPlayingAudio}
+                    disabled={
+                      !currentAudioUrl ||
+                      isPlayingAudio ||
+                      orbState === 'speaking' ||
+                      orbState === 'thinking'
+                    }
                   >
                     <RotateCcw className="mr-2 h-4 w-4" />
                     Replay Question
