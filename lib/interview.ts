@@ -1385,7 +1385,7 @@ export async function generateBridge(
   // T167: Determine if this is a stage transition
   const isStageTransition = newStage !== undefined;
   const stageName = isStageTransition
-    ? getStageLabel(newStage, stagesPlanned)
+    ? getStageName(researchSnapshot, newStage)
     : undefined;
 
   const prompt = `You are a professional interviewer conducting a ${role} interview.
