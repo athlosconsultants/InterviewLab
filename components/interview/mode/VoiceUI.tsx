@@ -1074,24 +1074,27 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
               <div className="border rounded-lg p-6 space-y-4 bg-card">
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-semibold">Your Answer</h3>
-                  <div className="flex gap-2">
+                  {/* T164: Only show Text toggle in voice mode - Record button handles voice input */}
+                  {answerMode === 'text' && (
                     <Button
-                      variant={answerMode === 'audio' ? 'default' : 'outline'}
+                      variant="outline"
                       size="sm"
                       onClick={() => setAnswerMode('audio')}
                     >
                       <Mic className="mr-2 h-4 w-4" />
-                      Voice
+                      Switch to Voice
                     </Button>
+                  )}
+                  {answerMode === 'audio' && (
                     <Button
-                      variant={answerMode === 'text' ? 'default' : 'outline'}
+                      variant="outline"
                       size="sm"
                       onClick={() => setAnswerMode('text')}
                     >
                       <Type className="mr-2 h-4 w-4" />
-                      Text
+                      Type Instead
                     </Button>
-                  </div>
+                  )}
                 </div>
 
                 {answerMode === 'audio' ? (
