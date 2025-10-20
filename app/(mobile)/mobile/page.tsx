@@ -47,8 +47,11 @@ export default function MobileLandingPage() {
           </span>
         </div>
 
-        <h1 className="text-4xl font-bold leading-tight mb-4 bg-gradient-to-b from-gray-900 via-gray-600 to-blue-600 bg-clip-text text-transparent">
-          Job Interview Practice — That Feels Like The Real Thing
+        <h1 className="text-4xl font-bold leading-tight mb-4">
+          Job Interview Practice —{' '}
+          <span className="bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
+            That Feels Like The Real Thing
+          </span>
         </h1>
 
         <p className="text-lg text-gray-600 mb-8 leading-relaxed">
