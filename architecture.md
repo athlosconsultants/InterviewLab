@@ -9,7 +9,7 @@ InterviewLab is a SaaS web app that simulates realistic, AI-driven interviews us
 - **Auth & DB:** **Supabase** (Postgres + Auth; Row-Level Security)
 - **AI Services:** OpenAI (LLM for Q&A + feedback), Whisper (STT), TTS (OpenAI or ElevenLabs)
 - **Storage:** Supabase Storage (CVs, audio, reports)
-- **Payments (optional):** Stripe
+- **Payments:** Stripe Checkout for time-based access passes
 
 ---
 
@@ -23,7 +23,7 @@ InterviewLab is a SaaS web app that simulates realistic, AI-driven interviews us
    |---> Supabase (Auth, Postgres, Storage)
    |---> OpenAI (LLM, Whisper)
    |---> TTS Provider (OpenAI/ElevenLabs)
-   '--- Stripe (optional)
+   '--- Stripe (Checkout, Webhooks)
 ```
 
 - The frontend only keeps ephemeral UI state; sensitive data flows through secure server routes.
@@ -91,6 +91,101 @@ InterviewLab is a SaaS web app that simulates realistic, AI-driven interviews us
 ├─ package.json
 └─ README.md
 ```
+
+---
+
+## Time-Based Access Pass System
+
+### Overview
+
+InterviewLab uses a **time-based access pass model** instead of per-interview credits. Users purchase passes that grant unlimited interview access for a specific duration.
+
+### Plans
+
+- **Access Passes** (via Stripe Checkout):
+  - 48 hours
+  - 7 days
+  - 30 days
+  - Lifetime
+
+### Purchase Flow
+
+1. **Frontend** calls a server action to create a Stripe Checkout session with metadata (`user_id`, `pass_tier`, etc).
+2. **Stripe Checkout** completes → webhook triggers `/api/stripe-webhook/route.ts`.
+3. **Webhook Handler** validates event, reads metadata, and upserts an `entitlements` row with expiry timestamp.
+4. **Supabase** stores entitlements with:
+   - `user_id`, `tier`, `expires_at`, `stripe_session_id`, `created_at`
+5. **App access** is checked via `getUserEntitlements()` (in `lib/entitlements.ts`) during interview/report routes.
+6. **Frontend UX** reflects status ("X days left", "Upgrade Now", etc).
+
+### Key Files
+
+- `app/api/stripe-webhook/route.ts` → Verifies and records entitlements
+- `lib/entitlements.ts` → Gets current active entitlement
+- `lib/payments/timepasses.ts` → Product catalog, Stripe session creation
+- `components/Paywall.tsx` → Gating component
+- `components/PerkDisplay.tsx` → Benefits of each plan
+
+### Entitlements Schema
+
+```
+entitlements (
+  id uuid pk,
+  user_id uuid fk → auth.uid(),
+  tier text,
+  expires_at timestamptz,
+  stripe_session_id text,
+  created_at timestamptz default now()
+)
+```
+
+- Enforced by RLS: `user_id = auth.uid()`
+- Expiry checked before unlocking interview/session/report
+- Lifetime plan: `expires_at = NULL`
+
+### State Management
+
+#### Client
+
+- Auth session (via Supabase)
+- UI state (timers, playback, upload status)
+- Passive entitlement awareness (via SSR or hydration)
+
+#### Server
+
+- **Entitlements:** Authoritative source of user access
+- **Stripe session metadata** ties payments to Supabase updates
+- **Time gating** logic lives in `lib/entitlements.ts`
+
+### API & Utilities
+
+- `createCheckoutSession(tier)` → Returns Stripe URL
+- `getUserEntitlements(user)` → Returns `{ tier, expiresAt, isActive }`
+- `isEntitled(user, feature)` → Boolean guard for interviews, reports, etc
+- `renderPerkDisplay(tier)` → Perk marketing breakdown
+
+### Frontend Gating & UX
+
+- Entitlement is checked before:
+  - Starting interview
+  - Viewing report
+- If not entitled:
+  - Redirect to `/pricing`
+  - Prompt checkout via `Paywall.tsx`
+- Active users see remaining time banner ("3 days left")
+
+### Security
+
+- Stripe webhook validates event authenticity (signature + event type)
+- Entitlements RLS-enforced: no cross-user access
+- All entitlements updates happen via server (no client-side writes)
+- Expiry enforcement applies server-side only
+
+### Migration Notes
+
+- Legacy credit-based model removed
+- Stripe SKU model replaced with time-pass SKUs
+- All previous gating mechanisms now funnel through `getUserEntitlements()`
 
 ---
 
@@ -227,6 +322,14 @@ Additional profile table (optional):
 
 - `profiles(id uuid pk, user_id uuid unique, plan text, created_at)`
 
+**entitlements**
+
+- `id uuid pk, user_id uuid fk → auth.uid()`
+- `tier text` (48h|7d|30d|lifetime)
+- `expires_at timestamptz` (nullable for lifetime)
+- `stripe_session_id text`
+- `created_at timestamptz`
+
 **documents**
 
 - `id uuid pk, user_id uuid fk → auth.uid()`
@@ -330,13 +433,17 @@ Additional profile table (optional):
    - LLM returns rubric scores + tips + exemplars (JSON).
    - Persist in `reports` and render UI; optional PDF render stored in Storage.
 
-6. **Payments (optional):**
-   - Server creates Stripe Checkout session (with user ID).
-   - Webhook (route handler) verifies signature and updates `profiles.plan`.
+6. **Payments:**
+   - Server creates Stripe Checkout session with metadata (`user_id`, `pass_tier`).
+   - Stripe Checkout completes → webhook `/api/stripe-webhook/route.ts` triggered.
+   - Webhook verifies signature and upserts `entitlements` row with expiry timestamp.
+   - All interview/report routes check entitlements via `getUserEntitlements()` before granting access.
 
 ---
 
 ## API / Actions (Examples)
+
+### Interview Flow
 
 - `startInterview(sessionId)` → returns `{ question, ttsUrl, timeLimit, replaysLeft }`
 - `submitAnswer(sessionId, { text?, audioKey? })` → transcribe if audio → store turn → returns `{ nextQuestion | done }`
@@ -344,7 +451,13 @@ Additional profile table (optional):
 - `finalizeFeedback(sessionId)` → returns `reportId`
 - `getPresignedUpload({ type })` → returns `{ url, fields }`
 
-All **server actions** validate: user session, session ownership, and rate limits.
+### Payment & Entitlements
+
+- `createCheckoutSession(tier)` → returns Stripe Checkout URL
+- `getUserEntitlements(user)` → returns `{ tier, expiresAt, isActive }`
+- `isEntitled(user, feature)` → Boolean guard for interviews, reports, etc
+
+All **server actions** validate: user session, session ownership, entitlements, and rate limits.
 
 ---
 
@@ -379,7 +492,14 @@ All **server actions** validate: user session, session ownership, and rate limit
 ## Done-Definition (MVP)
 
 - Users can: sign in, upload CV/job spec, run a short adaptive interview, and receive a scored report.
+- Time-based access pass system fully integrated:
+  - Purchase passes via Stripe Checkout (48h, 7d, 30d, lifetime)
+  - Immediate access post-checkout via webhook
+  - Automatic blocking when pass expires
+  - Clear UX showing remaining time
 - All sensitive data goes through server; RLS enforced.
+- Entitlement gating centralized and RLS-compliant.
+- Clean Stripe ↔ Supabase integration; recoverable from webhook retry.
 - Basic analytics (page views, interview completions).
 - CI pipeline: typecheck, lint, unit tests; preview deployments on PR.
 
