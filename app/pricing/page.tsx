@@ -66,6 +66,7 @@ const SHARED_FEATURES = [
 export default function PricingPage() {
   const [loading, setLoading] = useState<PassTier | null>(null);
   const [hoveredTier, setHoveredTier] = useState<PassTier | null>(null);
+  const [selectedPlan, setSelectedPlan] = useState<PassTier>('7d'); // Default: 7-Day Accelerator
 
   const handlePurchase = async (tier: PassTier) => {
     setLoading(tier);
@@ -103,11 +104,16 @@ export default function PricingPage() {
     }
   };
 
+  // Separate time-based plans from lifetime
+  const timeLimitedPlans = TIERS.filter((t) => t.id !== 'lifetime');
+  const lifetimePlan = TIERS.find((t) => t.id === 'lifetime')!;
+  const currentPlan = TIERS.find((t) => t.id === selectedPlan)!;
+
   return (
     <main className="min-h-screen bg-gradient-to-b from-white via-slate-50 to-white">
       {/* Hero Section */}
       <div className="container mx-auto px-6 pt-24 pb-16">
-        <div className="max-w-3xl mx-auto text-center mb-16">
+        <div className="max-w-3xl mx-auto text-center mb-12">
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -125,6 +131,44 @@ export default function PricingPage() {
             One-time payment · No subscriptions · Immediate access
           </motion.p>
         </div>
+
+        {/* Mobile-First Pill Selector */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.15 }}
+          className="max-w-md mx-auto mb-12"
+        >
+          <div className="bg-white rounded-2xl p-2 shadow-lg border-2 border-slate-200">
+            <div className="grid grid-cols-3 gap-2">
+              {timeLimitedPlans.map((tier) => (
+                <button
+                  key={tier.id}
+                  onClick={() => setSelectedPlan(tier.id)}
+                  className={`relative px-4 py-3 rounded-xl font-semibold text-sm transition-all duration-300 ${
+                    selectedPlan === tier.id
+                      ? 'bg-gradient-to-r from-[#3E8BFF] to-[#3DCBFF] text-white shadow-lg'
+                      : 'bg-white text-slate-600 hover:bg-slate-50'
+                  }`}
+                >
+                  {tier.id === '7d' &&
+                    tier.badge &&
+                    selectedPlan !== tier.id && (
+                      <span className="absolute -top-2 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-gradient-to-r from-[#3E8BFF] to-[#3DCBFF] text-white text-[10px] font-bold rounded-full whitespace-nowrap">
+                        {tier.badge}
+                      </span>
+                    )}
+                  <div className="text-center">
+                    <div className="font-bold">{tier.duration}</div>
+                    <div className="text-xs opacity-90 mt-0.5">
+                      {tier.price}
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </motion.div>
 
         {/* Shared Features Section */}
         <motion.div
@@ -156,91 +200,146 @@ export default function PricingPage() {
           </div>
         </motion.div>
 
-        {/* Pricing Cards */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto mb-12">
-          {TIERS.map((tier, index) => (
-            <motion.div
-              key={tier.id}
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.4 + index * 0.1 }}
-              onMouseEnter={() => setHoveredTier(tier.id)}
-              onMouseLeave={() => setHoveredTier(null)}
-              className={`relative rounded-2xl bg-white border-2 transition-all duration-300 ${
-                tier.recommended
-                  ? 'border-[#3E8BFF] shadow-2xl shadow-[#3E8BFF]/20 scale-105'
-                  : hoveredTier === tier.id
-                    ? 'border-[#3DCBFF] shadow-xl shadow-[#3DCBFF]/10'
-                    : 'border-slate-200 shadow-lg'
-              }`}
-              style={{
-                transform:
-                  hoveredTier === tier.id && !tier.recommended
-                    ? 'translateY(-4px) scale(1.02)'
-                    : tier.recommended
-                      ? 'scale(1.05)'
-                      : 'scale(1)',
-              }}
-            >
-              {/* Badge */}
-              {tier.badge && (
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
-                  <div className="px-4 py-1.5 rounded-full bg-gradient-to-r from-[#3E8BFF] to-[#3DCBFF] text-white text-xs font-semibold whitespace-nowrap shadow-lg">
-                    {tier.badge}
-                  </div>
+        {/* Pricing Cards: Selected Plan + Lifetime */}
+        <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto mb-12">
+          {/* Selected Time-Limited Plan Card */}
+          <motion.div
+            key={selectedPlan}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.3 }}
+            onMouseEnter={() => setHoveredTier(selectedPlan)}
+            onMouseLeave={() => setHoveredTier(null)}
+            className="relative rounded-2xl bg-white border-2 border-[#3E8BFF] shadow-2xl shadow-[#3E8BFF]/20 transition-all duration-300"
+            style={{
+              transform:
+                hoveredTier === selectedPlan
+                  ? 'translateY(-4px) scale(1.02)'
+                  : 'scale(1)',
+            }}
+          >
+            {/* Badge */}
+            {currentPlan.badge && (
+              <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
+                <div className="px-4 py-1.5 rounded-full bg-gradient-to-r from-[#3E8BFF] to-[#3DCBFF] text-white text-xs font-semibold whitespace-nowrap shadow-lg">
+                  {currentPlan.badge}
                 </div>
-              )}
-
-              <div className="p-6">
-                {/* Duration Badge */}
-                <div className="flex items-center justify-center gap-2 mb-4 text-slate-600">
-                  <Clock className="w-4 h-4" />
-                  <span className="text-sm font-semibold uppercase tracking-wide">
-                    {tier.duration}
-                  </span>
-                </div>
-
-                {/* Plan Name */}
-                <h3 className="text-2xl font-bold text-center mb-6 bg-gradient-to-r from-[#3E8BFF] to-[#3DCBFF] bg-clip-text text-transparent">
-                  {tier.name}
-                </h3>
-
-                {/* Pricing */}
-                <div className="text-center mb-8">
-                  <div className="text-5xl font-bold text-slate-900 mb-1">
-                    {tier.price}
-                  </div>
-                  <p className="text-sm text-slate-500 font-medium">
-                    One-time payment
-                  </p>
-                </div>
-
-                {/* CTA */}
-                <Button
-                  onClick={() => handlePurchase(tier.id)}
-                  disabled={loading !== null}
-                  className={`w-full h-12 text-base font-semibold transition-all duration-300 ${
-                    tier.recommended
-                      ? 'bg-gradient-to-r from-[#3E8BFF] to-[#3DCBFF] hover:shadow-xl hover:shadow-[#3E8BFF]/30 text-white'
-                      : 'bg-white border-2 border-[#3E8BFF] text-[#3E8BFF] hover:bg-gradient-to-r hover:from-[#3E8BFF]/10 hover:to-[#3DCBFF]/10 hover:shadow-lg'
-                  }`}
-                  style={{
-                    transform:
-                      hoveredTier === tier.id ? 'translateY(-2px)' : 'none',
-                  }}
-                >
-                  {loading === tier.id ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Processing...
-                    </>
-                  ) : (
-                    tier.cta
-                  )}
-                </Button>
               </div>
-            </motion.div>
-          ))}
+            )}
+
+            <div className="p-8">
+              {/* Duration Badge */}
+              <div className="flex items-center justify-center gap-2 mb-4 text-slate-600">
+                <Clock className="w-4 h-4" />
+                <span className="text-sm font-semibold uppercase tracking-wide">
+                  {currentPlan.duration}
+                </span>
+              </div>
+
+              {/* Plan Name */}
+              <h3 className="text-3xl font-bold text-center mb-6 bg-gradient-to-r from-[#3E8BFF] to-[#3DCBFF] bg-clip-text text-transparent">
+                {currentPlan.name}
+              </h3>
+
+              {/* Pricing */}
+              <div className="text-center mb-8">
+                <div className="text-6xl font-bold text-slate-900 mb-2">
+                  {currentPlan.price}
+                </div>
+                <p className="text-sm text-slate-500 font-medium">
+                  One-time payment
+                </p>
+              </div>
+
+              {/* CTA */}
+              <Button
+                onClick={() => handlePurchase(currentPlan.id)}
+                disabled={loading !== null}
+                className="w-full h-14 text-lg font-semibold transition-all duration-300 bg-gradient-to-r from-[#3E8BFF] to-[#3DCBFF] hover:shadow-xl hover:shadow-[#3E8BFF]/30 text-white"
+                style={{
+                  transform:
+                    hoveredTier === selectedPlan ? 'translateY(-2px)' : 'none',
+                }}
+              >
+                {loading === currentPlan.id ? (
+                  <>
+                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  currentPlan.cta
+                )}
+              </Button>
+            </div>
+          </motion.div>
+
+          {/* Lifetime Plan Card (Price Anchor) */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.3, delay: 0.1 }}
+            onMouseEnter={() => setHoveredTier('lifetime')}
+            onMouseLeave={() => setHoveredTier(null)}
+            className="relative rounded-2xl bg-white border-2 border-slate-200 shadow-lg transition-all duration-300"
+            style={{
+              transform:
+                hoveredTier === 'lifetime'
+                  ? 'translateY(-4px) scale(1.02)'
+                  : 'scale(1)',
+            }}
+          >
+            {/* Badge */}
+            <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
+              <div className="px-4 py-1.5 rounded-full bg-gradient-to-r from-[#3E8BFF] to-[#3DCBFF] text-white text-xs font-semibold whitespace-nowrap shadow-lg">
+                {lifetimePlan.badge}
+              </div>
+            </div>
+
+            <div className="p-8">
+              {/* Duration Badge */}
+              <div className="flex items-center justify-center gap-2 mb-4 text-slate-600">
+                <Clock className="w-4 h-4" />
+                <span className="text-sm font-semibold uppercase tracking-wide">
+                  {lifetimePlan.duration}
+                </span>
+              </div>
+
+              {/* Plan Name */}
+              <h3 className="text-3xl font-bold text-center mb-6 bg-gradient-to-r from-[#3E8BFF] to-[#3DCBFF] bg-clip-text text-transparent">
+                {lifetimePlan.name}
+              </h3>
+
+              {/* Pricing */}
+              <div className="text-center mb-8">
+                <div className="text-6xl font-bold text-slate-900 mb-2">
+                  {lifetimePlan.price}
+                </div>
+                <p className="text-sm text-slate-500 font-medium">
+                  One-time payment
+                </p>
+              </div>
+
+              {/* CTA */}
+              <Button
+                onClick={() => handlePurchase('lifetime')}
+                disabled={loading !== null}
+                className="w-full h-14 text-lg font-semibold transition-all duration-300 bg-white border-2 border-[#3E8BFF] text-[#3E8BFF] hover:bg-gradient-to-r hover:from-[#3E8BFF]/10 hover:to-[#3DCBFF]/10 hover:shadow-lg"
+                style={{
+                  transform:
+                    hoveredTier === 'lifetime' ? 'translateY(-2px)' : 'none',
+                }}
+              >
+                {loading === 'lifetime' ? (
+                  <>
+                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  lifetimePlan.cta
+                )}
+              </Button>
+            </div>
+          </motion.div>
         </div>
 
         {/* Reassurance Line */}
