@@ -112,30 +112,32 @@ export default function PricingSuperCard() {
           </p>
         </div>
 
-        {/* Super Tab Container */}
-        <div className="bg-slate-50 rounded-2xl p-4 border-2 border-slate-200">
-          {/* Most Popular Badge - Above Tabs */}
-          <div className="flex justify-center mb-3">
-            <span className="inline-block px-3 py-1 bg-gradient-to-r from-[#3E8BFF] to-[#3DCBFF] text-white text-xs font-semibold rounded-full shadow-md">
-              Most Popular
-            </span>
-          </div>
+        {/* Super Tab Container - Time-based Plans */}
+        <div className="rounded-2xl border-2 border-blue-100 bg-gradient-to-b from-blue-50/50 to-blue-50 p-5">
+          {/* Most Popular Badge - Only show when 7d selected */}
+          {selectedPlan === '7d' && (
+            <div className="flex justify-center mb-4">
+              <span className="inline-block px-3 py-1 bg-gradient-to-r from-[#3E8BFF] to-[#3DCBFF] text-white text-xs font-semibold rounded-full shadow-md">
+                Most Popular
+              </span>
+            </div>
+          )}
 
           {/* Inner Tab Pills */}
-          <div className="grid grid-cols-3 gap-2 mb-4">
+          <div className="flex gap-2 mb-5 bg-white/60 backdrop-blur-sm rounded-xl p-1.5 border border-blue-100">
             {TEMP_PLANS.map((plan) => (
               <button
                 key={plan.id}
                 onClick={() => setSelectedPlan(plan.id)}
-                className={`px-3 py-3 rounded-xl font-semibold text-xs transition-all duration-300 ${
+                className={`flex-1 px-3 py-2.5 rounded-lg font-semibold text-xs transition-all duration-300 ${
                   selectedPlan === plan.id
-                    ? 'bg-gradient-to-r from-[#3E8BFF] to-[#3DCBFF] text-white shadow-lg scale-105'
-                    : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200'
+                    ? 'bg-gradient-to-r from-[#3E8BFF] to-[#3DCBFF] text-white shadow-lg'
+                    : 'bg-transparent text-slate-600 hover:bg-white/50'
                 }`}
               >
                 <div className="text-center">
                   <div className="font-bold">{plan.label}</div>
-                  <div className="text-[11px] opacity-90 mt-1">
+                  <div className="text-[10px] opacity-90 mt-0.5">
                     {plan.price}
                   </div>
                 </div>
@@ -146,10 +148,9 @@ export default function PricingSuperCard() {
           {/* Active Plan Content */}
           <motion.div
             key={selectedPlan}
-            initial={{ opacity: 0, scale: 0.98 }}
-            animate={{ opacity: 1, scale: 1 }}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.2 }}
-            className="bg-white rounded-xl p-5 border-2 border-blue-100"
           >
             {/* Duration */}
             <div className="flex items-center justify-center gap-2 mb-2 text-slate-600">
@@ -176,7 +177,7 @@ export default function PricingSuperCard() {
             <Button
               onClick={() => handlePurchase(currentPlan.id)}
               disabled={loading !== null}
-              className="w-full rounded-xl bg-gradient-to-r from-[#3E8BFF] to-[#3DCBFF] py-3 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 h-12"
+              className="w-full rounded-xl bg-gradient-to-r from-[#3E8BFF] to-[#3DCBFF] py-3 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 h-12 mb-6"
             >
               {loading === currentPlan.id ? (
                 <>
@@ -187,24 +188,24 @@ export default function PricingSuperCard() {
                 currentPlan.cta
               )}
             </Button>
-          </motion.div>
-        </div>
 
-        {/* Every Plan Includes */}
-        <div className="pt-2">
-          <h4 className="text-base font-bold mb-4 text-slate-900 text-center">
-            Every Plan Includes
-          </h4>
-          <ul className="space-y-2.5 text-sm text-slate-700">
-            {SHARED_FEATURES.map((item) => (
-              <li key={item} className="flex items-start gap-3">
-                <span className="mt-0.5 h-5 w-5 rounded-full bg-gradient-to-r from-[#3E8BFF] to-[#3DCBFF] flex items-center justify-center flex-shrink-0">
-                  <Check className="w-3 h-3 text-white" />
-                </span>
-                <span className="font-medium">{item}</span>
-              </li>
-            ))}
-          </ul>
+            {/* Every Plan Includes - Inside the card */}
+            <div className="pt-4 border-t-2 border-blue-100">
+              <h4 className="text-base font-bold mb-3 text-slate-900 text-center">
+                Every Plan Includes
+              </h4>
+              <ul className="space-y-2.5 text-sm text-slate-700">
+                {SHARED_FEATURES.map((item) => (
+                  <li key={item} className="flex items-start gap-3">
+                    <span className="mt-0.5 h-5 w-5 rounded-full bg-gradient-to-r from-[#3E8BFF] to-[#3DCBFF] flex items-center justify-center flex-shrink-0">
+                      <Check className="w-3 h-3 text-white" />
+                    </span>
+                    <span className="font-medium">{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </motion.div>
         </div>
 
         {/* Divider */}
