@@ -146,11 +146,8 @@ export default function PricingPage() {
             transition={{ duration: 0.6, delay: 0.1 }}
             className="text-xl text-slate-600 leading-relaxed max-w-2xl mx-auto"
           >
-            Designed for professionals who take their preparation as seriously
-            as their career.
-            <br />
-            Every pass includes unlimited AI interviews, full performance
-            reports, and voice & text modes.
+            Unlimited AI interviews, full performance reports, voice & text
+            modes.
           </motion.p>
         </div>
 
@@ -241,7 +238,7 @@ export default function PricingPage() {
                   className={`w-full h-12 text-base font-semibold transition-all duration-300 ${
                     tier.recommended
                       ? 'bg-gradient-to-r from-[#3E8BFF] to-[#3DCBFF] hover:shadow-xl hover:shadow-[#3E8BFF]/30 text-white'
-                      : 'bg-gradient-to-r from-slate-900 to-slate-800 hover:from-[#3E8BFF] hover:to-[#3DCBFF] hover:shadow-lg text-white'
+                      : 'bg-white border-2 border-[#3E8BFF] text-[#3E8BFF] hover:bg-gradient-to-r hover:from-[#3E8BFF]/10 hover:to-[#3DCBFF]/10 hover:shadow-lg'
                   }`}
                   style={{
                     transform:
