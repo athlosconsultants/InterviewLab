@@ -465,6 +465,14 @@ export async function startInterview(sessionId: string, supabaseClient?: any) {
     );
   }
 
+  // Check entitlement before starting interview
+  const { isEntitled } = await import('@/lib/entitlements');
+  const hasAccess = await isEntitled(session.user_id);
+
+  if (!hasAccess) {
+    throw new Error('ENTITLEMENT_REQUIRED');
+  }
+
   // Check if session is in correct state
   if (session.status !== 'ready' && session.status !== 'running') {
     throw new Error(`Cannot start interview in ${session.status} state`);

@@ -21,6 +21,14 @@ export default async function ReportPage({
     redirect('/sign-in');
   }
 
+  // Check entitlement
+  const { isEntitled } = await import('@/lib/entitlements');
+  const hasAccess = await isEntitled(user.id);
+
+  if (!hasAccess) {
+    redirect('/pricing');
+  }
+
   // Fetch session with turns
   const { data: session, error: sessionError } = await supabase
     .from('sessions')

@@ -1,47 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { createServiceRoleClient } from '@/lib/supabase-server';
-import { TIER_CONFIGS, type EntitlementTier } from '@/lib/schema';
 
 /**
- * T134 - Phase 13: Stripe Webhook Handler
- * Processes successful payments and grants entitlements
+ * Stripe Webhook Handler - Time-Based Access Pass System
+ * Processes checkout.session.completed events and creates entitlements
  */
 export async function POST(request: NextRequest) {
   try {
-    // Check for required environment variables
     const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
     const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
-    
-    if (!stripeSecretKey) {
-      console.error('[T134 Webhook] Missing STRIPE_SECRET_KEY environment variable');
+
+    if (!stripeSecretKey || !webhookSecret) {
+      console.error('[Webhook] Missing Stripe configuration');
       return NextResponse.json(
-        { error: 'Stripe configuration missing' },
-        { status: 500 }
-      );
-    }
-    
-    if (!webhookSecret) {
-      console.error('[T134 Webhook] Missing STRIPE_WEBHOOK_SECRET environment variable');
-      return NextResponse.json(
-        { error: 'Webhook configuration missing' },
+        { error: 'Configuration missing' },
         { status: 500 }
       );
     }
 
-    // Lazy-initialize Stripe to avoid build-time errors
     const stripe = new Stripe(stripeSecretKey, {
-      apiVersion: '2025-09-30.clover',
+      apiVersion: '2024-11-20.acacia',
     });
+
     const body = await request.text();
     const signature = request.headers.get('stripe-signature');
 
     if (!signature) {
-      console.error('[T134 Webhook] Missing Stripe signature');
-      return NextResponse.json(
-        { error: 'Missing signature' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Missing signature' }, { status: 400 });
     }
 
     // Verify webhook signature
@@ -49,175 +35,87 @@ export async function POST(request: NextRequest) {
     try {
       event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
     } catch (err) {
-      console.error('[T134 Webhook] Signature verification failed:', err);
-      return NextResponse.json(
-        { error: 'Invalid signature' },
-        { status: 400 }
-      );
+      console.error('[Webhook] Signature verification failed:', err);
+      return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
     }
 
-    console.log(`[T134 Webhook] Received event: ${event.type}`);
-
-    // Handle checkout.session.completed event
+    // Handle checkout.session.completed
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object as Stripe.Checkout.Session;
 
-      console.log(`[T134 Webhook] Processing checkout session: ${session.id}`);
+      const userId = session.metadata?.user_id;
+      const tier = session.metadata?.pass_tier;
 
-      // Extract metadata
-      const userId = session.metadata?.user_id || session.client_reference_id;
-      const tier = session.metadata?.tier as EntitlementTier;
-      const purchaseType = session.metadata?.purchase_type;
-      const interviewCount = parseInt(session.metadata?.interview_count || '0');
-
-      if (!userId || !tier || !purchaseType) {
-        console.error('[T134 Webhook] Missing required metadata:', {
-          userId,
-          tier,
-          purchaseType,
-        });
+      if (!userId || !tier) {
+        console.error('[Webhook] Missing metadata:', { userId, tier });
         return NextResponse.json(
           { error: 'Missing metadata' },
           { status: 400 }
         );
       }
 
-      // Get tier config
-      const tierConfig = TIER_CONFIGS[tier];
+      // Calculate expiry date based on tier
+      let expiresAt: string | null = null;
+      const now = new Date();
 
-      // Create Supabase client with service role (bypasses RLS)
+      switch (tier) {
+        case '48h':
+          expiresAt = new Date(
+            now.getTime() + 48 * 60 * 60 * 1000
+          ).toISOString();
+          break;
+        case '7d':
+          expiresAt = new Date(
+            now.getTime() + 7 * 24 * 60 * 60 * 1000
+          ).toISOString();
+          break;
+        case '30d':
+          expiresAt = new Date(
+            now.getTime() + 30 * 24 * 60 * 60 * 1000
+          ).toISOString();
+          break;
+        case 'lifetime':
+          expiresAt = null; // null = never expires
+          break;
+        default:
+          console.error('[Webhook] Invalid tier:', tier);
+          return NextResponse.json({ error: 'Invalid tier' }, { status: 400 });
+      }
+
+      // Insert entitlement (use service role client to bypass RLS)
       const supabase = createServiceRoleClient();
 
-      // Check if user already has an active entitlement for this purchase
-      const { data: existingEntitlements } = await supabase
+      const { data, error } = await supabase
         .from('entitlements')
-        .select('*')
-        .eq('user_id', userId)
-        .eq('status', 'active')
-        .eq('tier', tier);
-
-      let entitlementId: string;
-      let previousBalance = 0;
-      let newBalance = interviewCount;
-
-      if (existingEntitlements && existingEntitlements.length > 0) {
-        // User already has an entitlement of this tier - add to existing balance
-        const existingEntitlement = existingEntitlements[0];
-        previousBalance = (existingEntitlement as any).remaining_interviews || 0;
-        newBalance = previousBalance + interviewCount;
-        entitlementId = existingEntitlement.id;
-
-        // Update existing entitlement
-        const { error: updateError } = await supabase
-          .from('entitlements')
-          .update({
-            remaining_interviews: newBalance,
-            stripe_session_id: session.id,
-            metadata: {
-              ...((existingEntitlement.metadata as any) || {}),
-              last_purchase: new Date().toISOString(),
-              purchases: [
-                ...((existingEntitlement.metadata as any)?.purchases || []),
-                {
-                  session_id: session.id,
-                  amount: session.amount_total,
-                  currency: session.currency,
-                  timestamp: new Date().toISOString(),
-                },
-              ],
-            },
-          })
-          .eq('id', existingEntitlement.id);
-
-        if (updateError) {
-          console.error('[T134 Webhook] Failed to update entitlement:', updateError);
-          throw updateError;
-        }
-
-        console.log(
-          `[T134 Webhook] Updated entitlement ${entitlementId}: ${previousBalance} → ${newBalance} interviews`
-        );
-      } else {
-        // Create new entitlement
-        const { data: newEntitlement, error: insertError } = await supabase
-          .from('entitlements')
-          .insert({
-            user_id: userId,
-            type: 'interview_package',
-            status: 'active',
-            tier: tier,
-            purchase_type: purchaseType,
-            remaining_interviews: interviewCount,
-            perks: tierConfig.perks,
-            stripe_session_id: session.id,
-            currency: tierConfig.currency,
-            metadata: {
-              session_id: session.id,
-              amount_paid: session.amount_total,
-              currency: session.currency,
-              purchased_at: new Date().toISOString(),
-            },
-          })
-          .select()
-          .single();
-
-        if (insertError || !newEntitlement) {
-          console.error('[T134 Webhook] Failed to create entitlement:', insertError);
-          throw insertError;
-        }
-
-        entitlementId = newEntitlement.id;
-
-        console.log(
-          `[T134 Webhook] Created new entitlement ${entitlementId} with ${interviewCount} interviews`
-        );
-      }
-
-      // Log the purchase in entitlement_history
-      const { error: historyError } = await supabase
-        .from('entitlement_history')
         .insert({
           user_id: userId,
-          entitlement_id: entitlementId,
-          action: 'purchase',
-          previous_balance: previousBalance,
-          new_balance: newBalance,
-          metadata: {
-            tier: tier,
-            purchase_type: purchaseType,
-            stripe_session_id: session.id,
-            amount: session.amount_total,
-            currency: session.currency,
-          },
-        });
+          tier: tier,
+          expires_at: expiresAt,
+          stripe_session_id: session.id,
+        })
+        .select()
+        .single();
 
-      if (historyError) {
-        console.error('[T134 Webhook] Failed to log history:', historyError);
-        // Don't throw - this is not critical
+      if (error) {
+        console.error('[Webhook] Failed to create entitlement:', error);
+        return NextResponse.json(
+          { error: 'Database insert failed' },
+          { status: 500 }
+        );
       }
 
-      console.log(
-        `[T134 Webhook] Successfully processed purchase for user ${userId}: ${tier} pack (${interviewCount} interviews)`
-      );
+      console.log(`[Webhook] Created entitlement for user ${userId}: ${tier}`);
 
-      return NextResponse.json({
-        success: true,
-        entitlementId,
-        balance: newBalance,
-      });
+      return NextResponse.json({ success: true, entitlement: data });
     }
 
-    // Return 200 for unhandled event types
+    // Return 200 for other event types
     return NextResponse.json({ received: true });
   } catch (error) {
-    console.error('[T134 Webhook] Error processing webhook:', error);
+    console.error('[Webhook] Error:', error);
     return NextResponse.json(
-      {
-        error:
-          error instanceof Error ? error.message : 'Webhook processing failed',
-      },
+      { error: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }
 }
-
