@@ -110,25 +110,32 @@ export default function PricingPage() {
   const currentPlan = TIERS.find((t) => t.id === selectedPlan)!;
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-white via-slate-50 to-white">
-      {/* Hero Section */}
-      <div className="container mx-auto px-6 pt-24 pb-16">
-        <div className="max-w-3xl mx-auto text-center mb-12">
+    <main className="min-h-screen bg-gradient-to-b from-white via-slate-50 to-white relative overflow-hidden">
+      {/* Background gradient orbs */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 right-1/4 w-96 h-96 bg-gradient-to-br from-cyan-400/20 to-blue-500/20 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 left-1/4 w-96 h-96 bg-gradient-to-br from-blue-500/20 to-cyan-400/20 rounded-full blur-3xl" />
+      </div>
+
+      {/* Content */}
+      <div className="container mx-auto px-4 md:px-6 pt-12 md:pt-20 pb-12 relative z-10">
+        {/* Compact Hero */}
+        <div className="max-w-3xl mx-auto text-center mb-6 md:mb-8">
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-[#3E8BFF] to-[#3DCBFF] bg-clip-text text-transparent"
+            transition={{ duration: 0.5 }}
+            className="text-3xl md:text-5xl font-bold mb-3 bg-gradient-to-r from-[#3E8BFF] to-[#3DCBFF] bg-clip-text text-transparent"
           >
-            Choose Your Access Duration
+            Choose Your Access
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-lg text-slate-600 leading-relaxed"
+            transition={{ duration: 0.5, delay: 0.05 }}
+            className="text-sm md:text-base text-slate-600"
           >
-            One-time payment · No subscriptions · Immediate access
+            One-time payment · Immediate access
           </motion.p>
         </div>
 
@@ -136,31 +143,31 @@ export default function PricingPage() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.15 }}
-          className="max-w-md mx-auto mb-12"
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="max-w-md mx-auto mb-6 md:mb-8"
         >
-          <div className="bg-white rounded-2xl p-2 shadow-lg border-2 border-slate-200">
-            <div className="grid grid-cols-3 gap-2">
+          <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-1.5 shadow-lg border-2 border-slate-200">
+            <div className="grid grid-cols-3 gap-1.5">
               {timeLimitedPlans.map((tier) => (
                 <button
                   key={tier.id}
                   onClick={() => setSelectedPlan(tier.id)}
-                  className={`relative px-4 py-3 rounded-xl font-semibold text-sm transition-all duration-300 ${
+                  className={`relative px-2 py-2 rounded-xl font-semibold text-xs transition-all duration-300 ${
                     selectedPlan === tier.id
-                      ? 'bg-gradient-to-r from-[#3E8BFF] to-[#3DCBFF] text-white shadow-lg'
+                      ? 'bg-gradient-to-r from-[#3E8BFF] to-[#3DCBFF] text-white shadow-lg scale-105'
                       : 'bg-white text-slate-600 hover:bg-slate-50'
                   }`}
                 >
                   {tier.id === '7d' &&
                     tier.badge &&
                     selectedPlan !== tier.id && (
-                      <span className="absolute -top-2 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-gradient-to-r from-[#3E8BFF] to-[#3DCBFF] text-white text-[10px] font-bold rounded-full whitespace-nowrap">
+                      <span className="absolute -top-2 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-gradient-to-r from-[#3E8BFF] to-[#3DCBFF] text-white text-[9px] font-bold rounded-full whitespace-nowrap shadow-md">
                         {tier.badge}
                       </span>
                     )}
                   <div className="text-center">
                     <div className="font-bold">{tier.duration}</div>
-                    <div className="text-xs opacity-90 mt-0.5">
+                    <div className="text-[10px] opacity-90 mt-0.5">
                       {tier.price}
                     </div>
                   </div>
@@ -170,38 +177,8 @@ export default function PricingPage() {
           </div>
         </motion.div>
 
-        {/* Shared Features Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="max-w-4xl mx-auto mb-16 bg-white rounded-2xl border-2 border-slate-200 shadow-lg p-8 md:p-10"
-        >
-          <h2 className="text-2xl font-bold text-slate-900 mb-6 text-center">
-            Every Plan Includes
-          </h2>
-          <div className="grid md:grid-cols-2 gap-x-8 gap-y-4">
-            {SHARED_FEATURES.map((feature, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.4, delay: 0.3 + i * 0.05 }}
-                className="flex items-start gap-3"
-              >
-                <div className="mt-0.5 flex-shrink-0">
-                  <div className="w-5 h-5 rounded-full bg-gradient-to-r from-[#3E8BFF] to-[#3DCBFF] flex items-center justify-center">
-                    <Check className="w-3 h-3 text-white" />
-                  </div>
-                </div>
-                <span className="text-slate-700 font-medium">{feature}</span>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
-
         {/* Pricing Cards: Selected Plan + Lifetime */}
-        <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto mb-12">
+        <div className="grid md:grid-cols-2 gap-4 md:gap-6 max-w-4xl mx-auto mb-8 md:mb-12">
           {/* Selected Time-Limited Plan Card */}
           <motion.div
             key={selectedPlan}
@@ -210,7 +187,7 @@ export default function PricingPage() {
             transition={{ duration: 0.3 }}
             onMouseEnter={() => setHoveredTier(selectedPlan)}
             onMouseLeave={() => setHoveredTier(null)}
-            className="relative rounded-2xl bg-white border-2 border-[#3E8BFF] shadow-2xl shadow-[#3E8BFF]/20 transition-all duration-300"
+            className="relative rounded-2xl bg-white/90 backdrop-blur-sm border-2 border-[#3E8BFF] shadow-2xl shadow-[#3E8BFF]/20 transition-all duration-300"
             style={{
               transform:
                 hoveredTier === selectedPlan
@@ -220,33 +197,33 @@ export default function PricingPage() {
           >
             {/* Badge */}
             {currentPlan.badge && (
-              <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
-                <div className="px-4 py-1.5 rounded-full bg-gradient-to-r from-[#3E8BFF] to-[#3DCBFF] text-white text-xs font-semibold whitespace-nowrap shadow-lg">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
+                <div className="px-3 py-1 rounded-full bg-gradient-to-r from-[#3E8BFF] to-[#3DCBFF] text-white text-[10px] md:text-xs font-semibold whitespace-nowrap shadow-lg">
                   {currentPlan.badge}
                 </div>
               </div>
             )}
 
-            <div className="p-8">
+            <div className="p-6 md:p-8">
               {/* Duration Badge */}
-              <div className="flex items-center justify-center gap-2 mb-4 text-slate-600">
+              <div className="flex items-center justify-center gap-2 mb-3 text-slate-600">
                 <Clock className="w-4 h-4" />
-                <span className="text-sm font-semibold uppercase tracking-wide">
+                <span className="text-xs md:text-sm font-semibold uppercase tracking-wide">
                   {currentPlan.duration}
                 </span>
               </div>
 
               {/* Plan Name */}
-              <h3 className="text-3xl font-bold text-center mb-6 bg-gradient-to-r from-[#3E8BFF] to-[#3DCBFF] bg-clip-text text-transparent">
+              <h3 className="text-2xl md:text-3xl font-bold text-center mb-4 md:mb-6 bg-gradient-to-r from-[#3E8BFF] to-[#3DCBFF] bg-clip-text text-transparent">
                 {currentPlan.name}
               </h3>
 
               {/* Pricing */}
-              <div className="text-center mb-8">
-                <div className="text-6xl font-bold text-slate-900 mb-2">
+              <div className="text-center mb-6 md:mb-8">
+                <div className="text-5xl md:text-6xl font-bold text-slate-900 mb-1">
                   {currentPlan.price}
                 </div>
-                <p className="text-sm text-slate-500 font-medium">
+                <p className="text-xs md:text-sm text-slate-500 font-medium">
                   One-time payment
                 </p>
               </div>
@@ -255,7 +232,7 @@ export default function PricingPage() {
               <Button
                 onClick={() => handlePurchase(currentPlan.id)}
                 disabled={loading !== null}
-                className="w-full h-14 text-lg font-semibold transition-all duration-300 bg-gradient-to-r from-[#3E8BFF] to-[#3DCBFF] hover:shadow-xl hover:shadow-[#3E8BFF]/30 text-white"
+                className="w-full h-12 md:h-14 text-base md:text-lg font-semibold transition-all duration-300 bg-gradient-to-r from-[#3E8BFF] to-[#3DCBFF] hover:shadow-xl hover:shadow-[#3E8BFF]/30 text-white"
                 style={{
                   transform:
                     hoveredTier === selectedPlan ? 'translateY(-2px)' : 'none',
@@ -280,7 +257,7 @@ export default function PricingPage() {
             transition={{ duration: 0.3, delay: 0.1 }}
             onMouseEnter={() => setHoveredTier('lifetime')}
             onMouseLeave={() => setHoveredTier(null)}
-            className="relative rounded-2xl bg-white border-2 border-slate-200 shadow-lg transition-all duration-300"
+            className="relative rounded-2xl bg-white/90 backdrop-blur-sm border-2 border-slate-200 shadow-lg transition-all duration-300"
             style={{
               transform:
                 hoveredTier === 'lifetime'
@@ -289,32 +266,32 @@ export default function PricingPage() {
             }}
           >
             {/* Badge */}
-            <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
-              <div className="px-4 py-1.5 rounded-full bg-gradient-to-r from-[#3E8BFF] to-[#3DCBFF] text-white text-xs font-semibold whitespace-nowrap shadow-lg">
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
+              <div className="px-3 py-1 rounded-full bg-gradient-to-r from-[#3E8BFF] to-[#3DCBFF] text-white text-[10px] md:text-xs font-semibold whitespace-nowrap shadow-lg">
                 {lifetimePlan.badge}
               </div>
             </div>
 
-            <div className="p-8">
+            <div className="p-6 md:p-8">
               {/* Duration Badge */}
-              <div className="flex items-center justify-center gap-2 mb-4 text-slate-600">
+              <div className="flex items-center justify-center gap-2 mb-3 text-slate-600">
                 <Clock className="w-4 h-4" />
-                <span className="text-sm font-semibold uppercase tracking-wide">
+                <span className="text-xs md:text-sm font-semibold uppercase tracking-wide">
                   {lifetimePlan.duration}
                 </span>
               </div>
 
               {/* Plan Name */}
-              <h3 className="text-3xl font-bold text-center mb-6 bg-gradient-to-r from-[#3E8BFF] to-[#3DCBFF] bg-clip-text text-transparent">
+              <h3 className="text-2xl md:text-3xl font-bold text-center mb-4 md:mb-6 bg-gradient-to-r from-[#3E8BFF] to-[#3DCBFF] bg-clip-text text-transparent">
                 {lifetimePlan.name}
               </h3>
 
               {/* Pricing */}
-              <div className="text-center mb-8">
-                <div className="text-6xl font-bold text-slate-900 mb-2">
+              <div className="text-center mb-6 md:mb-8">
+                <div className="text-5xl md:text-6xl font-bold text-slate-900 mb-1">
                   {lifetimePlan.price}
                 </div>
-                <p className="text-sm text-slate-500 font-medium">
+                <p className="text-xs md:text-sm text-slate-500 font-medium">
                   One-time payment
                 </p>
               </div>
@@ -323,7 +300,7 @@ export default function PricingPage() {
               <Button
                 onClick={() => handlePurchase('lifetime')}
                 disabled={loading !== null}
-                className="w-full h-14 text-lg font-semibold transition-all duration-300 bg-white border-2 border-[#3E8BFF] text-[#3E8BFF] hover:bg-gradient-to-r hover:from-[#3E8BFF]/10 hover:to-[#3DCBFF]/10 hover:shadow-lg"
+                className="w-full h-12 md:h-14 text-base md:text-lg font-semibold transition-all duration-300 bg-white border-2 border-[#3E8BFF] text-[#3E8BFF] hover:bg-gradient-to-r hover:from-[#3E8BFF]/10 hover:to-[#3DCBFF]/10 hover:shadow-lg"
                 style={{
                   transform:
                     hoveredTier === 'lifetime' ? 'translateY(-2px)' : 'none',
@@ -342,14 +319,46 @@ export default function PricingPage() {
           </motion.div>
         </div>
 
+        {/* Shared Features Section - Moved to Bottom */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="max-w-4xl mx-auto mb-8 bg-white/90 backdrop-blur-sm rounded-2xl border-2 border-slate-200 shadow-lg p-6 md:p-10"
+        >
+          <h2 className="text-xl md:text-2xl font-bold text-slate-900 mb-4 md:mb-6 text-center">
+            Every Plan Includes
+          </h2>
+          <div className="grid md:grid-cols-2 gap-x-8 gap-y-3 md:gap-y-4">
+            {SHARED_FEATURES.map((feature, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.4, delay: 0.3 + i * 0.05 }}
+                className="flex items-start gap-3"
+              >
+                <div className="mt-0.5 flex-shrink-0">
+                  <div className="w-5 h-5 rounded-full bg-gradient-to-r from-[#3E8BFF] to-[#3DCBFF] flex items-center justify-center">
+                    <Check className="w-3 h-3 text-white" />
+                  </div>
+                </div>
+                <span className="text-sm md:text-base text-slate-700 font-medium">
+                  {feature}
+                </span>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+
         {/* Reassurance Line */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.6, delay: 0.8 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
           className="text-center"
         >
-          <p className="text-slate-500 text-sm">
+          <p className="text-xs md:text-sm text-slate-500">
             All plans provide full access to every feature during your selected
             timeframe
           </p>
