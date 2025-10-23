@@ -4,10 +4,7 @@ import { createClient } from '@/lib/supabase-server';
 import { generateResearchSnapshot } from '@/lib/research';
 import { redirect } from 'next/navigation';
 import type { InterviewMode, PlanTier } from '@/lib/schema';
-import {
-  checkAvailableEntitlement,
-  consumeEntitlement,
-} from '@/lib/entitlements';
+import { isEntitled } from '@/lib/entitlements';
 
 interface CreateSessionParams {
   jobTitle: string;
@@ -37,20 +34,13 @@ export async function createSession(params: CreateSessionParams) {
       return { error: 'Unauthorized', sessionId: null };
     }
 
-    // T86: Check for available entitlement if user is requesting paid tier
-    let entitlementId: string | null = null;
-    if (params.planTier === 'paid') {
-      const availableEntitlement = await checkAvailableEntitlement(user.id);
-
-      if (!availableEntitlement) {
-        return {
-          error:
-            'No available interview package found. Please purchase a paid interview package to access paid features.',
-          sessionId: null,
-        };
-      }
-
-      entitlementId = availableEntitlement.id;
+    // Check for time-based entitlement
+    const hasAccess = await isEntitled(user.id);
+    if (!hasAccess) {
+      return {
+        error: 'No active access pass. Please purchase a pass to continue.',
+        sessionId: null,
+      };
     }
 
     // Fetch the most recent CV document
@@ -168,27 +158,7 @@ export async function createSession(params: CreateSessionParams) {
       };
     }
 
-    // T86/T135: Consume one interview credit after successful session creation
-    if (entitlementId) {
-      const consumeResult = await consumeEntitlement(
-        entitlementId,
-        user.id,
-        session.id // T135: Pass session ID for tracking
-      );
-      if (!consumeResult.success) {
-        // Log the error but don't fail the session creation
-        // The session is already created, we don't want to rollback
-        console.error('[T135] Failed to consume credit:', consumeResult.error);
-        console.warn(
-          '[T135] Session created but credit not consumed. Manual intervention may be required.'
-        );
-      } else {
-        console.log(
-          `[T135] Credit consumed for session ${session.id}. Remaining: ${consumeResult.remainingCredits}`
-        );
-      }
-    }
-
+    // Time-based passes don't consume credits - access is based on expiry
     console.log('Session created:', session.id);
 
     return { error: null, sessionId: session.id };

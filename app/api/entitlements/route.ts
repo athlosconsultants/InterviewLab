@@ -1,6 +1,5 @@
 /**
- * API route for checking user entitlements (T86)
- * Returns the user's available and consumed entitlements.
+ * API route for checking user entitlements - Time-based access passes
  */
 
 import { createClient } from '@/lib/supabase-server';
@@ -20,17 +19,12 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const entitlements = await getUserEntitlements(user.id);
-
-    // Count active entitlements
-    const activeCount = entitlements.filter(
-      (e) => e.status === 'active' && !e.consumed_at
-    ).length;
+    const entitlement = await getUserEntitlements(user.id);
 
     return NextResponse.json({
-      entitlements,
-      activeCount,
-      hasActive: activeCount > 0,
+      isActive: entitlement.isActive,
+      tier: entitlement.tier,
+      expiresAt: entitlement.expiresAt,
     });
   } catch (error) {
     console.error('Get entitlements error:', error);
