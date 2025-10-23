@@ -872,33 +872,8 @@ export async function submitAnswer(params: {
       .update({ status: 'feedback' })
       .eq('id', sessionId);
 
-    // T135: Consume interview credit on completion (only for paid interviews)
-    if (planTier === 'paid') {
-      const entitlementId = (session as any).entitlement_id;
-      if (entitlementId) {
-        const { consumeEntitlement } = await import('./entitlements');
-        const result = await consumeEntitlement(
-          entitlementId,
-          (session as any).user_id,
-          sessionId
-        );
-
-        if (result.success) {
-          console.log(
-            `[T135] Credit consumed for session ${sessionId}. Remaining: ${result.remainingCredits}`
-          );
-        } else {
-          console.error(
-            `[T135] Failed to consume credit for session ${sessionId}:`,
-            result.error
-          );
-        }
-      } else {
-        console.warn(
-          `[T135] Paid session ${sessionId} has no entitlement_id - credit not consumed`
-        );
-      }
-    }
+    // Time-based passes don't consume credits on completion
+    // Access is controlled by expiry timestamp only
 
     return {
       done: true,

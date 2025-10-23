@@ -137,7 +137,6 @@ export async function createSession(params: CreateSessionParams) {
         stages_planned: params.stagesPlanned,
         current_stage: 1,
         stage_targets: stageTargets, // T128: Per-stage question targets
-        entitlement_id: entitlementId, // T86: Link entitlement to session
         limits: {
           question_cap:
             params.planTier === 'free'
