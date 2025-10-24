@@ -174,3 +174,22 @@ export function trackTiming(
     duration_ms: duration,
   });
 }
+
+// A simple no-op analytics dispatcher.
+// In a real app, you'd wire this to PostHog, Segment, etc.
+
+type AnalyticsEvent = {
+  name: string;
+  payload?: Record<string, unknown>;
+};
+
+export function track(event: AnalyticsEvent) {
+  if (process.env.NODE_ENV === 'development') {
+    console.log('📈 Analytics event:', event);
+  }
+  // In production, you would add your analytics provider's tracking code here.
+  // For example:
+  // if (typeof window !== 'undefined' && window.posthog) {
+  //   window.posthog.capture(event.name, event.payload);
+  // }
+}

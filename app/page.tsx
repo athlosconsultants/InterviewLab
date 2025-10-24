@@ -106,7 +106,7 @@ export default async function Home() {
               {user && hasCredits ? (
                 // User has credits - show "Start Interview" button
                 <>
-                  <Link href="/setup">
+                  <Link href="/assessment/setup">
                     <Button
                       size="lg"
                       className="text-lg px-8 py-6 shadow-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700"
@@ -129,7 +129,7 @@ export default async function Home() {
               ) : (
                 // No credits or not logged in - show default CTAs
                 <>
-                  <Link href="/setup">
+                  <Link href="/assessment/setup">
                     <Button
                       size="lg"
                       className="text-lg px-8 py-6 shadow-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700"
@@ -467,7 +467,7 @@ export default async function Home() {
               skills and landed offers at top companies.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link href="/setup">
+              <Link href="/assessment/setup">
                 <Button
                   size="lg"
                   className="text-lg px-8 py-6 shadow-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700"

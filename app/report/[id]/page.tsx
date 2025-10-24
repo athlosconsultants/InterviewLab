@@ -29,10 +29,10 @@ export default async function ReportPage({
     redirect('/pricing');
   }
 
-  // Fetch session with turns
+  // Fetch session with turns (including plan_tier for T51)
   const { data: session, error: sessionError } = await supabase
     .from('sessions')
-    .select('*, research_snapshot')
+    .select('*, research_snapshot, plan_tier')
     .eq('id', sessionId)
     .eq('user_id', user.id)
     .single();
@@ -123,12 +123,16 @@ export default async function ReportPage({
     }
   }
 
+  // T51: Extract plan_tier for conditional upsell
+  const planTier = (session as any).plan_tier || 'free';
+
   return (
     <ReportView
       session={session}
       turns={turns}
       feedback={feedback}
       reportId={existingReport?.id}
+      planTier={planTier}
     />
   );
 }

@@ -18,6 +18,7 @@ interface ReportViewProps {
   turns: any[];
   feedback: InterviewFeedback;
   reportId?: string;
+  planTier?: string; // T51: For conditional upsell display
 }
 
 export function ReportView({
@@ -25,6 +26,7 @@ export function ReportView({
   turns,
   feedback,
   reportId,
+  planTier = 'free',
 }: ReportViewProps) {
   const jobTitle = session.job_spec?.role || 'Position';
   const company = session.company || 'Company';
@@ -54,6 +56,30 @@ export function ReportView({
   return (
     <main className="min-h-screen bg-gradient-to-b from-background to-muted/20">
       <div className="mx-auto max-w-5xl p-4 py-8 space-y-8">
+        {/* T51: Upsell Banner for free_trial users */}
+        {planTier === 'free_trial' && (
+          <div className="rounded-xl border-2 border-cyan-200 bg-gradient-to-br from-cyan-50 to-blue-50 dark:from-cyan-950/20 dark:to-blue-950/20 p-6 shadow-lg">
+            <div className="text-center space-y-4">
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">
+                Ready for More?
+              </h2>
+              <p className="text-base text-slate-700 dark:text-slate-300 max-w-2xl mx-auto">
+                You&apos;ve completed your complimentary assessment. Unlock
+                unlimited interviews, multi-stage sessions, voice mode, and
+                detailed performance tracking with a full access pass.
+              </p>
+              <div className="flex gap-4 justify-center pt-2">
+                <Button
+                  asChild
+                  className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 shadow-lg"
+                >
+                  <Link href="/pricing">View Plans</Link>
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Header */}
         <div className="text-center space-y-4">
           <h1 className="text-4xl font-bold">Interview Report</h1>

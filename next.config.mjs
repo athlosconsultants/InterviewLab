@@ -40,6 +40,17 @@ const nextConfig = {
   experimental: {
     optimizePackageImports: ['@supabase/supabase-js', 'framer-motion'],
   },
+
+  // T141: Exclude node_modules from file watching to prevent EMFILE errors
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.watchOptions = {
+        ...config.watchOptions,
+        ignored: /node_modules/,
+      };
+    }
+    return config;
+  },
 };
 
 export default nextConfig;

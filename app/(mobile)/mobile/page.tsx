@@ -35,7 +35,7 @@ export default function MobileLandingPage() {
     checkAuth();
   }, []);
 
-  const ctaHref = isAuthenticated ? '/setup' : '/sign-in';
+  const ctaHref = isAuthenticated ? '/assessment/setup' : '/sign-in';
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white via-cyan-50/30 to-blue-50/50 pb-24">

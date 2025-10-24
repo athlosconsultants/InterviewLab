@@ -1,506 +1,481 @@
-# InterviewLab — Full Architecture (Next.js + Supabase)
+# InterviewLab — Full Architecture (Next.js + Supabase) — **New Entry System Integrated**
 
-## Overview
-
-InterviewLab is a SaaS web app that simulates realistic, AI-driven interviews using the user’s own CV and job information. Users experience a chat-style interface with optional voice in/out; answers adapt the next question; a rubric-based report is produced at the end.
-
-- **Frontend:** Next.js (TypeScript, App Router, Tailwind, shadcn/ui)
-- **Backend:** Next.js API routes (server actions / route handlers)
-- **Auth & DB:** **Supabase** (Postgres + Auth; Row-Level Security)
-- **AI Services:** OpenAI (LLM for Q&A + feedback), Whisper (STT), TTS (OpenAI or ElevenLabs)
-- **Storage:** Supabase Storage (CVs, audio, reports)
-- **Payments:** Stripe Checkout for time-based access passes
+> **Scope:** This replaces/updates the previous `architecture.md` to include the **Complimentary Assessment Funnel** (“New Entry System”) while preserving the premium **Full Professional Simulation** flow. Any conflicting/obsolete parts of the older architecture are called out under **Deprecations & Replacements**.
 
 ---
 
-## High-Level Architecture
+## Executive Summary
+
+InterviewLab now has **two complementary flows**:
+
+1. **Complimentary Assessment Funnel (Free, no credit card)** — the default entry path for new users landing from social traffic. Delivers a believable 3‑question demo with **Q1 voice playback only**, hides transcript, and shows a **partial** results card that nudges users to **Access the Full Professional Simulation**.
+2. **Full Professional Simulation (Premium)** — the existing multi‑stage, fully adaptive interview with voice input/output and a comprehensive report, gated by **time‑based access passes** (Stripe + entitlements).
+
+Both flows share the same backend (Next.js server actions), Supabase (Auth/DB/Storage), and AI providers (OpenAI LLM, Whisper STT, TTS provider).
+
+---
+
+## Brand, UX & Visual System (Global)
+
+- **Background:** Soft gradient (light blue → cyan) reused across Landing, Pre‑Assessment, Assessment, and Results.
+- **Palette:** Logo gradient tokens for primary CTAs; white cards, 2xl rounded, soft shadow.
+- **Typography:** Inter/SF; headings medium; high‑legibility body.
+- **Motion:** Subtle 300–400ms fades; progress ring fills; no “gamey” effects.
+- **Tone:** Executive, calm, credible. “Access the full professional simulation” (avoid “buy/upgrade” language).
+- **Accessibility:** WCAG AA; keyboard navigable; captions/transcripts for TTS; mobile‑first.
+- **Performance:** First interaction < 10s. Q1 audio only when user initiates (autoplay rules).
+
+---
+
+## High‑Level Architecture
 
 ```
 [Browser/Next.js UI]
-   |  (Auth via Supabase)
+   |  (Supabase Auth; device fingerprint; Turnstile)
    v
 [Next.js Route Handlers / Server Actions]
-   |---> Supabase (Auth, Postgres, Storage)
-   |---> OpenAI (LLM, Whisper)
-   |---> TTS Provider (OpenAI/ElevenLabs)
-   '--- Stripe (Checkout, Webhooks)
+   |---> Supabase (Auth, Postgres, Storage, RLS)
+   |---> OpenAI (LLM, Whisper STT)
+   |---> TTS (OpenAI/ElevenLabs)  [Q1 playback in free funnel]
+   '--- Stripe (Checkout, Webhooks) [Premium]
 ```
 
-- The frontend only keeps ephemeral UI state; sensitive data flows through secure server routes.
-- Supabase Auth secures session; RLS protects per-user records in Postgres.
+- **Security:** All sensitive operations happen server‑side behind RLS; device fingerprint & bot‑check verified server‑side.
+- **State:** UI state is ephemeral; session/turn/result stored in Postgres; files in Supabase Storage with presigned URLs.
 
 ---
 
-## File & Folder Structure
+## File & Folder Structure (Monorepo Top‑Level)
 
 ```
 / (repo root)
 ├─ app/
 │  ├─ (marketing)/
-│  │  └─ page.tsx                  # Landing page
+│  │  └─ page.tsx                         # Landing — CTA starts Complimentary Assessment
+│  ├─ assessment/                         # NEW: Complimentary Assessment Funnel
+│  │  ├─ setup/
+│  │  │  ├─ page.tsx                      # Pre‑Assessment (3‑question preview briefing)
+│  │  │  └─ actions.ts                    # initFreeSession(), verifyTurnstile(), bindDevice()
+│  │  ├─ run/
+│  │  │  ├─ [sessionId]/
+│  │  │  │  ├─ page.tsx                   # One‑question‑at‑a‑time runner (no history)
+│  │  │  │  └─ actions.ts                 # askFree(), submitFree(), synthesizeQ1TTS()
+│  │  ├─ results/
+│  │  │  ├─ [sessionId]/
+│  │  │  │  └─ page.tsx                   # Partial results + locked metrics + CTA→/pricing
+│  │  └─ layout.tsx                       # Gradient background, providers
+│  ├─ pricing/
+│  │  └─ page.tsx                         # Plans & benefits. CTA→ Stripe session create
 │  ├─ setup/
-│  │  ├─ page.tsx                  # Intake form (job + uploads)
-│  │  └─ actions.ts                # Server actions (start research)
+│  │  ├─ page.tsx                         # PREMIUM: intake for full simulation (kept)
+│  │  └─ actions.ts                       # startPremiumSession(), presigned uploads, research
 │  ├─ interview/
 │  │  ├─ [sessionId]/
-│  │  │  ├─ page.tsx               # Chat/voice interface
-│  │  │  └─ actions.ts             # ask/submit/replay server actions
+│  │  │  ├─ page.tsx                      # PREMIUM: chat/voice interface
+│  │  │  └─ actions.ts                    # startInterview(), submitAnswer(), replayQuestion()
 │  ├─ report/
 │  │  ├─ [sessionId]/
-│  │  │  └─ page.tsx               # Scored feedback UI
-│  ├─ api/                         # Route handlers (if using REST style)
-│  │  ├─ research/route.ts         # POST research
-│  │  ├─ tts/route.ts              # POST TTS synth
-│  │  ├─ transcribe/route.ts       # POST Whisper STT
-│  │  └─ stripe-webhook/route.ts   # POST Stripe webhooks (optional)
-│  └─ layout.tsx                   # Root layout + providers
+│  │  │  └─ page.tsx                      # PREMIUM: full scored feedback
+│  ├─ api/
+│  │  ├─ tts/route.ts                     # synthesize TTS (Q1 in free; full in premium)
+│  │  ├─ transcribe/route.ts              # POST Whisper STT (premium only; disabled for free)
+│  │  ├─ stripe-webhook/route.ts          # Entitlement updates
+│  │  └─ turnstile-verify/route.ts        # Server verification for bot‑protection
+│  ├─ layout.tsx
+│  └─ middleware.ts                       # Optional: device detection, UTM capture
 │
 ├─ components/
-│  ├─ forms/
-│  │  ├─ IntakeForm.tsx
-│  │  └─ FileDrop.tsx
-│  ├─ interview/
+│  ├─ marketing/
+│  │  ├─ Hero.tsx                         # Headline + sub + CTA
+│  │  └─ MicroIdentity.tsx                # Inline “What should we call you?” prompt
+│  ├─ assessment/
+│  │  ├─ PreparingOverlay.tsx             # 2s “preparing environment…” overlay
+│  │  ├─ ProgressStrip.tsx                # “Warm‑Up • Q x of 3” + progress ring
+│  │  ├─ QuestionStage.tsx                # Single active question view
+│  │  ├─ AnswerComposerText.tsx           # Text input only (free trial)
+│  │  ├─ VoicePlayback.tsx                # Q1 playback only (guards tier)
+│  │  ├─ BridgeLine.tsx                   # Human‑like transition line between Qs
+│  │  ├─ ResultCardPartial.tsx            # Shows one metric; locks others
+│  │  └─ TrialPolicyNote.tsx              # “1 assessment / 7 days” copy
+│  ├─ premium/
 │  │  ├─ ChatThread.tsx
 │  │  ├─ QuestionBubble.tsx
-│  │  ├─ AnswerComposer.tsx        # Text input + mic record controls
+│  │  ├─ AnswerComposer.tsx               # Text + mic recording (premium)
 │  │  ├─ TimerRing.tsx
 │  │  └─ ReplayButton.tsx
-│  ├─ results/
-│  │  ├─ ScoreDial.tsx
-│  │  └─ CategoryBars.tsx
-│  └─ ui/…                         # shadcn/ui wrappers
+│  ├─ paywall/
+│  │  ├─ Paywall.tsx                      # Reusable gating component
+│  │  └─ PerkDisplay.tsx                  # Benefit matrix for plans
+│  ├─ ui/…                                # shadcn/ui wrappers
+│  └─ analytics/
+│     └─ Track.tsx                        # Simple event helper
 │
 ├─ lib/
-│  ├─ supabase-client.ts           # Browser-side client (limited, non-sensitive)
-│  ├─ supabase-server.ts           # Server-side client (service role via RLS-safe ops)
-│  ├─ openai.ts                    # Server-side LLM/STT/TTS helpers
-│  ├─ storage.ts                   # Supabase Storage helpers (presigned URLs)
-│  ├─ research.ts                  # Company/role research orchestration
-│  ├─ interview.ts                 # State machine, question generator
-│  ├─ scoring.ts                   # Rubric scoring + feedback formatter
-│  ├─ schema.ts                    # Types (DB rows, DTOs)
-│  └─ utils.ts                     # Validation, zod schemas, formatting
+│  ├─ supabase-client.ts                  # Browser supabase client (no service key)
+│  ├─ supabase-server.ts                  # Server supabase client (RLS‑safe ops)
+│  ├─ openai.ts                           # LLM, STT, TTS helpers
+│  ├─ storage.ts                          # Presigned URLs for Storage
+│  ├─ entitlements.ts                     # Time‑pass gating (premium)
+│  ├─ research.ts                         # PREMIUM: company/role snapshot
+│  ├─ interview.ts                        # PREMIUM: adaptive state machine
+│  ├─ assessment.ts                       # NEW: 3Q free runner (no context memory)
+│  ├─ scoring.ts                          # Premium rubric scoring
+│  ├─ results.ts                          # Assemble partial vs full results
+│  ├─ antiabuse/
+│  │  ├─ device.ts                        # Hash device fingerprint (client helper + server bind)
+│  │  ├─ trial.ts                         # 1 / 7 day allowance; seeded Q variability
+│  │  └─ turnstile.ts                     # Verify tokens server‑side
+│  ├─ variability.ts                      # Seeded randomization of warm‑up prompts
+│  ├─ schema.ts                           # Types for DB rows & DTOs
+│  ├─ analytics.ts                        # Event dispatcher (e.g., PostHog or custom)
+│  └─ utils.ts                            # Zod schemas, guards, formatting
 │
 ├─ db/
-│  ├─ migrations/                  # SQL migration files (if using SQL directly)
-│  └─ seed.ts                      # Seed default RoleKits, etc.
+│  ├─ migrations/                         # SQL migrations for new/changed tables
+│  └─ seed.ts                             # Seed warm‑up prompt bank
 │
-├─ styles/                         # Tailwind CSS, globals
-├─ public/                         # Logos, static assets
-├─ env.d.ts                        # Type-safe environment variables
+├─ styles/                                # Tailwind + gradient tokens
+├─ public/                                # Logos, audio chimes, static assets
+├─ env.d.ts                               # Typed env
 ├─ package.json
 └─ README.md
 ```
 
 ---
 
-## Time-Based Access Pass System
+## What Each Part Does (By Area)
 
-### Overview
+### 1) Marketing Landing `app/(marketing)/page.tsx`
 
-InterviewLab uses a **time-based access pass model** instead of per-interview credits. Users purchase passes that grant unlimited interview access for a specific duration.
+- Presents credibility and the primary CTA: **Start Complimentary Assessment**.
+- On click: shows **PreparingOverlay** for ≤2s, then inline **MicroIdentity** prompt (first name).
+- Creates/updates a lightweight user record (anonymous or authed) and routes to `/assessment/setup`.
 
-### Plans
+### 2) Complimentary Assessment — **Pre‑Assessment** `app/assessment/setup`
 
-- **Access Passes** (via Stripe Checkout):
-  - 48 hours
-  - 7 days
-  - 30 days
-  - Lifetime
-
-### Purchase Flow
-
-1. **Frontend** calls a server action to create a Stripe Checkout session with metadata (`user_id`, `pass_tier`, etc).
-2. **Stripe Checkout** completes → webhook triggers `/api/stripe-webhook/route.ts`.
-3. **Webhook Handler** validates event, reads metadata, and upserts an `entitlements` row with expiry timestamp.
-4. **Supabase** stores entitlements with:
-   - `user_id`, `tier`, `expires_at`, `stripe_session_id`, `created_at`
-5. **App access** is checked via `getUserEntitlements()` (in `lib/entitlements.ts`) during interview/report routes.
-6. **Frontend UX** reflects status ("X days left", "Upgrade Now", etc).
-
-### Key Files
-
-- `app/api/stripe-webhook/route.ts` → Verifies and records entitlements
-- `lib/entitlements.ts` → Gets current active entitlement
-- `lib/payments/timepasses.ts` → Product catalog, Stripe session creation
-- `components/Paywall.tsx` → Gating component
-- `components/PerkDisplay.tsx` → Benefits of each plan
-
-### Entitlements Schema
-
-```
-entitlements (
-  id uuid pk,
-  user_id uuid fk → auth.uid(),
-  tier text,
-  expires_at timestamptz,
-  stripe_session_id text,
-  created_at timestamptz default now()
-)
-```
-
-- Enforced by RLS: `user_id = auth.uid()`
-- Expiry checked before unlocking interview/session/report
-- Lifetime plan: `expires_at = NULL`
-
-### State Management
-
-#### Client
-
-- Auth session (via Supabase)
-- UI state (timers, playback, upload status)
-- Passive entitlement awareness (via SSR or hydration)
-
-#### Server
-
-- **Entitlements:** Authoritative source of user access
-- **Stripe session metadata** ties payments to Supabase updates
-- **Time gating** logic lives in `lib/entitlements.ts`
-
-### API & Utilities
-
-- `createCheckoutSession(tier)` → Returns Stripe URL
-- `getUserEntitlements(user)` → Returns `{ tier, expiresAt, isActive }`
-- `isEntitled(user, feature)` → Boolean guard for interviews, reports, etc
-- `renderPerkDisplay(tier)` → Perk marketing breakdown
-
-### Frontend Gating & UX
-
-- Entitlement is checked before:
-  - Starting interview
-  - Viewing report
-- If not entitled:
-  - Redirect to `/pricing`
-  - Prompt checkout via `Paywall.tsx`
-- Active users see remaining time banner ("3 days left")
-
-### Security
-
-- Stripe webhook validates event authenticity (signature + event type)
-- Entitlements RLS-enforced: no cross-user access
-- All entitlements updates happen via server (no client-side writes)
-- Expiry enforcement applies server-side only
-
-### Migration Notes
-
-- Legacy credit-based model removed
-- Stripe SKU model replaced with time-pass SKUs
-- All previous gating mechanisms now funnel through `getUserEntitlements()`
-
----
-
-# Mobile Web Support (Architecture Addendum)
-
-## 📱 Mobile Frontend Architecture
-
-### Overview
-
-To support a mobile-optimized experience alongside the desktop app, the app now serves **distinct UIs for mobile and desktop**:
-
-- Shared backend (Next.js server actions, Supabase, OpenAI, etc.)
-- Shared core interview logic, state machine, and data flow
-- Separate UI shells rendered based on device detection
-
-### Rendering Paths
-
-- **Desktop:** Default App Router paths (e.g., `/`, `/interview/[id]`, `/report/[id]`)
-- **Mobile:** New mobile-first route group: `(mobile)` → `/m`, `/m/interview/[id]`
-
-### Detection Logic
-
-- **SSR Middleware:** Uses user-agent to detect mobile → redirects `/` → `/m`
-- **Client Hook:** `useIsMobile()` via `matchMedia('(max-width: 768px)')` fallback
-
-### Code Sharing
-
-- Shared interview logic lives in `BaseInterviewUI.tsx`
-- Each UI (MobileTextUI, MobileVoiceUI, TextUI, VoiceUI) composes the base with responsive presentation
-- Avoids duplication of state, actions, and data fetching
-
----
-
-## 🔧 Mobile UI Stack
-
-- **Routing:** `(mobile)` route group in App Router
-- **Styling:** Tailwind CSS mobile-first layout system
-- **Components:**
-  - `MobileTextUI.tsx`
-  - `MobileVoiceUI.tsx`
-  - `MobileLanding.tsx` (Hormozi-style CTA funnel)
-
----
-
-## 🧠 UX Principles Applied
-
-### Landing Page (Mobile)
-
-- Hormozi Offer Stack: Dream outcome × proof ÷ time/effort
-- Sticky CTA to start free interview
-- Designed for TikTok/Instagram funnel visitors
-
-### Interview UX
-
-- One-screen, focused layout
-- Touch targets >48px
-- Stickied action buttons (submit, replay)
-- Adjusted font sizes and ring indicators
-
----
-
-## 📦 No Backend Changes
-
-- **Database schema:** Unchanged
-- **Server actions:** Reused
-- **TTS/STT/LLM flow:** Fully preserved
-
----
-
-## ✅ Benefits
-
-- Clear funnel segmentation (mobile vs desktop)
-- Fully mobile-optimized UX
-- Single backend, no duplication
-- App ready for production traffic from social sources
-
----
-
-## 🌐 Deployment Notes
-
-- SSR device detection: in `middleware.ts`
-- Mobile-specific routes start at `/m`
-- No additional hosting configuration required (Vercel-friendly)
-
----
-
-## What Each Part Does
-
-### `app/(marketing)/page.tsx`
-
-Landing page with product pitch, pricing, CTA → `/setup`. Public route.
-
-### `app/setup/page.tsx` + `actions.ts`
-
-- **Intake form**: Job Title, Company, Location, Job Spec (PDF/Image), CV (PDF/DOCX), optional extra context.
-- **Server action** kicks off **research**:
-  1. Extract text from uploads (server)
-  2. Summarise CV + job spec
-  3. Query public sources for company facts
-  4. Create a `Session` row + `ResearchSnapshot` row
-  5. Redirect to `/interview/[sessionId]`
-
-### `app/interview/[sessionId]/page.tsx` + `actions.ts`
-
-- **Chat UI** shows one question at a time (text + optional audio).
+- Frames the experience: “3 questions · Text‑only · Takes ~5 minutes”.
 - **Server actions**:
-  - `startInterview(sessionId)` → first question
-  - `submitAnswer(sessionId, {text|audioKey})` → Whisper → digest → next question
-  - `replayQuestion(sessionId)` → increments replay usage (affects score)
+  - `verifyTurnstile(token)` — bot protection.
+  - `bindDevice(fingerprint)` — hashes device ID and links it to the user (soft limit enforcement).
+  - `initFreeSession({ firstName, utm })` — creates **Session** with constraints:
+    ```json
+    {
+      "plan_tier": "free_trial",
+      "stages_planned": ["warmup"],
+      "questions_limit": 3,
+      "context_memory": false,
+      "voice_playback": "q1_only",
+      "voice_input": false
+    }
+    ```
+- Success → `/assessment/run/[sessionId]`.
 
-### `app/report/[sessionId]/page.tsx`
+### 3) Complimentary Assessment — **Runner** `app/assessment/run/[sessionId]`
 
-- Fetches final `Report` from DB.
-- Renders score dial, category bars, strengths, improvements, exemplar answers.
-- “Download PDF” via server function (optional).
+- One question on screen at a time; no prior history.
+- **Q1** plays TTS via `VoicePlayback` (guarded by tier check). Answers are **text only**.
+- **Q2–Q3** delivered with gentle time nudges and a short **BridgeLine** between questions.
+- Each turn is saved immediately; no live transcript.
+- On finish: “Analyzing your responses…” then redirect to results.
 
-### `lib/*`
+**Actions:**
 
-- **supabase-client.ts**: lightweight browser client (no service keys) to read user-safe data.
-- **supabase-server.ts**: server client for privileged ops **behind RLS policies**.
-- **openai.ts**: isolated server logic to call LLM, Whisper, TTS.
-- **storage.ts**: presigned upload/download helpers for Supabase Storage.
-- **research.ts**: takes CV + job spec → company/role snapshot.
-- **interview.ts**: interview **state machine** + question generator + answer digests.
-- **scoring.ts**: rubric scoring/feedback generation using LLM with strict JSON schema.
-- **schema.ts**: central TS types for DB entities and API payloads.
+- `askFree(sessionId)` — seeded prompt selection from `variability.ts`.
+- `synthesizeQ1TTS(sessionId, question)` — stores audio key; enforces playback‑only for Q1.
+- `submitFree(sessionId, { text })` — saves `turns` row; computes brief `answer_digest`; moves index.
+- `finalizeFree(sessionId)` — computes **partial** metrics and persists `results` (see Data Model).
+
+### 4) Complimentary Assessment — **Results** `app/assessment/results/[sessionId]`
+
+- **ResultCardPartial** shows e.g. **Communication Clarity** 74% and locks other metrics (blur/lock icon).
+- Clear CTA: **Access the Full Professional Simulation →** `/pricing`.
+- Secondary: **Replay Assessment** (1 / 7 days).
+- Optional email capture: “Send my full report when you upgrade.”
+- Tracks events: `cta_clicked_upgrade`, `trial_replay`, etc.
+
+### 5) Pricing `app/pricing/page.tsx`
+
+- Highlights premium benefits: multi‑stage, voice input, adaptive context, detailed report, time‑passes.
+- CTA triggers server action → Stripe Checkout → webhook updates **entitlements**.
+
+### 6) Premium — **Setup** `app/setup`
+
+- (Unchanged) Collects Job Title, Company, Location, CV, Job Description.
+- Kicks off **research** and creates a premium **Session** (different `limits`, enables voice input).
+
+### 7) Premium — **Interview** `app/interview/[sessionId]`
+
+- Full adaptive state machine with voice in/out, replays, timers.
+- Uses `interview.ts` (not `assessment.ts`).
+
+### 8) Premium — **Report** `app/report/[sessionId]`
+
+- Full rubric, dimensions, exemplars, optional PDF.
+
+### 9) API Routes
+
+- **`/api/tts`** — Synthesize TTS (both tiers). Free tier: only for Q1.
+- **`/api/transcribe`** — Whisper STT (premium only). Free tier disabled by guard.
+- **`/api/stripe-webhook`** — Entitlement updates on successful checkout.
+- **`/api/turnstile-verify`** — Server verification for bot‑check.
+
+### 10) Libraries
+
+- `lib/assessment.ts` — Free 3Q runner orchestration. No context memory; simple bridges; partial scoring.
+- `lib/antiabuse/*` — Device hash bind, 1/7‑day allowance checks, and Turnstile verification.
+- `lib/variability.ts` — Seeded randomization for warm‑up prompts.
+- `lib/results.ts` — Assembles **partial** vs **full** result DTOs for the UI.
 
 ---
 
 ## Data Model (Supabase Postgres)
 
-**Users (managed by Supabase Auth)**  
-Additional profile table (optional):
+### Users
 
-- `profiles(id uuid pk, user_id uuid unique, plan text, created_at)`
+Supabase Auth manages identities. Optional profile extension:
 
-**entitlements**
+```
+profiles (
+  id uuid pk,
+  user_id uuid unique,
+  first_name text,
+  created_at timestamptz default now()
+)
+```
 
-- `id uuid pk, user_id uuid fk → auth.uid()`
-- `tier text` (48h|7d|30d|lifetime)
-- `expires_at timestamptz` (nullable for lifetime)
-- `stripe_session_id text`
-- `created_at timestamptz`
+### Device Binding (NEW)
 
-**documents**
+```
+device_fingerprints (
+  id uuid pk,
+  user_id uuid fk → auth.uid(),
+  device_hash text,             -- hashed fingerprint
+  created_at timestamptz default now(),
+  unique(user_id, device_hash)
+)
+```
 
-- `id uuid pk, user_id uuid fk → auth.uid()`
-- `type text` (cv|jobspec|extra|audio|report)
-- `storage_key text` (Supabase Storage path)
-- `extracted_text text` (nullable)
-- `created_at timestamptz`
+> Used for gentle enforcement of the **1 complimentary assessment / 7 days** policy.
 
-**company_profiles**
+### Sessions (Updated)
 
-- `id uuid pk, user_id uuid fk`
-- `company text`
-- `facts jsonb`
-- `sources jsonb`
-- `updated_at timestamptz`
+```
+sessions (
+  id uuid pk,
+  user_id uuid fk → auth.uid(),
+  status text check (status in ('active','completed','expired','ready','running','feedback','intake','research')),
+  plan_tier text,               -- 'free_trial' | 'premium'
+  stages_planned jsonb,
+  questions_limit int,
+  context_memory boolean,
+  voice_playback text,          -- 'q1_only' | 'all'
+  voice_input boolean,          -- free=false, premium=true
+  job_title text, company text, location text,  -- mostly premium
+  research_snapshot jsonb,      -- premium
+  created_at timestamptz default now(),
+  completed_at timestamptz
+)
+```
 
-**role_kits**
+### Turns (Shared)
 
-- `id uuid pk, user_id uuid fk` (or global/shared)
-- `role text`
-- `competencies jsonb`
-- `archetypes jsonb`
-- `updated_at timestamptz`
+```
+turns (
+  id uuid pk,
+  session_id uuid fk,
+  user_id uuid fk,
+  index int,                            -- 0-based
+  turn_type text check (turn_type in ('question','bridge')),
+  question_text text,
+  tts_key text,                         -- Q1 audio in free; per question in premium
+  answer_text text,
+  answer_audio_key text,                -- premium
+  answer_digest jsonb,                  -- compact context memo
+  duration_sec int,
+  created_at timestamptz default now()
+)
+```
 
-**sessions**
+### Results (Updated to support partial/locked)
 
-- `id uuid pk, user_id uuid fk`
-- `status text` (intake|research|ready|running|feedback|complete)
-- `job_title text, company text, location text`
-- `research_snapshot jsonb`
-- `limits jsonb` (question cap, replay cap, timer sec)
-- `created_at, updated_at`
+```
+results (
+  id uuid pk,
+  session_id uuid fk,
+  user_id uuid fk,
+  communication_score int,              -- visible in free
+  locked_metrics jsonb,                 -- e.g., ["confidence","structure","analytical_depth"]
+  report_locked boolean default false,  -- true for free
+  overall int,                          -- premium only
+  dimensions jsonb,                     -- premium
+  tips jsonb,                           -- premium
+  exemplars jsonb,                      -- premium
+  created_at timestamptz default now()
+)
+```
 
-**turns**
+### Entitlements (Premium — unchanged)
 
-- `id uuid pk, session_id uuid fk, user_id uuid fk`
-- `question jsonb` (text, category, difficulty, time_limit)
-- `tts_key text` (audio path, nullable)
-- `answer_text text`
-- `answer_audio_key text`
-- `answer_digest jsonb` (short summary for context)
-- `timing jsonb` (durations, replay_count)
-- `created_at`
+```
+entitlements (
+  id uuid pk,
+  user_id uuid fk → auth.uid(),
+  tier text,                            -- 48h | 7d | 30d | lifetime
+  expires_at timestamptz,               -- null for lifetime
+  stripe_session_id text,
+  created_at timestamptz default now()
+)
+```
 
-**reports**
+### Events / Analytics (Optional but recommended)
 
-- `id uuid pk, session_id uuid fk, user_id uuid fk`
-- `overall integer`
-- `dimensions jsonb` (relevance/structure/depth/etc.)
-- `tips jsonb` (array of strings)
-- `exemplars jsonb` (before/after samples)
-- `pdf_key text` (optional)
-- `created_at`
+```
+events (
+  id uuid pk,
+  user_id uuid fk,
+  session_id uuid fk,
+  name text,                            -- 'funnel_start','assessment_started','assessment_completed','cta_clicked_upgrade','trial_replay','voice_playback_used_q1','timeout_returned'
+  payload jsonb,
+  created_at timestamptz default now()
+)
+```
 
-**RLS**: every table enforces `user_id = auth.uid()` for `select/insert/update/delete`.
+**RLS:** All tables enforce `user_id = auth.uid()` for CRUD. Server actions use service role only for controlled writes that remain user‑scoped.
 
 ---
 
 ## Where State Lives
 
-### Client State (ephemeral/UI only)
+### Client (Ephemeral)
 
-- Form input state, current mic permission, current timer countdown.
-- Chat scroll position, “recording” toggle.
-- **No sensitive data persisted in localStorage**.
+- Micro‑identity input; short‑lived preparing overlay flag.
+- Runner UI state: current question rendering, textbox value, progress ring animation.
+- **No** transcript/history displayed in free tier.
 
-### Server State (authoritative)
+### Server (Authoritative)
 
-- **Sessions/Turns/Reports** live in **Postgres**.
-- **Files** (CVs, audio, reports) live in **Supabase Storage** with **presigned URLs**.
-- **Interview progress** (status) is stored in `sessions.status`.
-- **Question/answer context** is compacted via `turns.answer_digest` to keep prompts small.
+- **Session** constraints (tier, limits, voice flags).
+- **Turns** written after every answer.
+- **Results** computed server‑side (partial for free, full for premium).
+- **Device binding** rows and last‑trial window to enforce 1/7 rule.
+- **Entitlements** for premium access.
+- **Files:** Supabase Storage (audio for Q1 in free; all audio & PDFs in premium).
 
 ---
 
 ## How Services Connect
 
-1. **Auth:**
-   - Supabase Auth session available in Next.js (server components & actions).
-   - RLS ensures users only see their own rows.
+1. **Auth & Micro‑Identity**
+   - Anonymous or email‑based Supabase sessions allowed.
+   - First name captured as lightweight profile field and tagged to session.
 
-2. **Uploads (CV/Job Spec/Audio):**
-   - Client requests presigned URL from server action.
-   - Browser uploads file directly to Supabase Storage.
-   - Server receives metadata → creates `documents` row.
+2. **Bot Protection & Device Binding**
+   - **Turnstile** token verified via `/api/turnstile-verify` → `lib/antiabuse/turnstile.ts`.
+   - `lib/antiabuse/device.ts` hashes a client fingerprint (no PII) and binds to `user_id`.
+   - `lib/antiabuse/trial.ts` checks rolling 7‑day window (per user + device).
 
-3. **Research:**
-   - Server action reads `documents.extracted_text` (or runs OCR/PDF parse server-side).
-   - Calls OpenAI for concise CV + job spec summaries; queries public facts if needed.
-   - Produces `research_snapshot` stored on `sessions`.
+3. **Free Runner**
+   - `lib/assessment.ts` selects warm‑up prompts via `lib/variability.ts` (seeded by session).
+   - `Q1` -> `api/tts` synthesizes playback; **voice input disabled**.
+   - `submitFree` saves turns + digest; on index==3 computes **partial** results via `lib/results.ts`.
+   - Redirect to `/assessment/results/[sessionId]`.
 
-4. **Interview Loop:**
-   - `startInterview` → LLM generates Q1 JSON.
-   - Optional TTS synthesized and stored at `tts_key`.
-   - User answers (text or audio) → server transcribes via Whisper.
-   - `turns` row created; `answer_digest` computed; next question generated.
-   - Repeat until limits reached.
+4. **Premium System**
+   - Unchanged interview loop: voice in/out, Whisper STT, adaptive questions, full scoring via `lib/scoring.ts`.
+   - **Stripe** creates time‑pass → webhook writes `entitlements` → routes gate via `lib/entitlements.ts`.
 
-5. **Feedback:**
-   - Server compiles full conversation + research snapshot.
-   - LLM returns rubric scores + tips + exemplars (JSON).
-   - Persist in `reports` and render UI; optional PDF render stored in Storage.
-
-6. **Payments:**
-   - Server creates Stripe Checkout session with metadata (`user_id`, `pass_tier`).
-   - Stripe Checkout completes → webhook `/api/stripe-webhook/route.ts` triggered.
-   - Webhook verifies signature and upserts `entitlements` row with expiry timestamp.
-   - All interview/report routes check entitlements via `getUserEntitlements()` before granting access.
+5. **Pricing Hand‑Off**
+   - Results page CTA leads to `/pricing`.
+   - Successful checkout returns user to premium setup/interview based on entitlement status.
 
 ---
 
-## API / Actions (Examples)
+## Deprecations & Replacements
 
-### Interview Flow
+- **Old Landing CTA (“Go to /setup”) → REPLACED.**  
+  The primary CTA on `/` now starts the **Complimentary Assessment** → `/assessment/setup`. The premium `/setup` route stays available but is no longer the default entry for new users.
 
-- `startInterview(sessionId)` → returns `{ question, ttsUrl, timeLimit, replaysLeft }`
-- `submitAnswer(sessionId, { text?, audioKey? })` → transcribe if audio → store turn → returns `{ nextQuestion | done }`
-- `replayQuestion(sessionId)` → increments replay count, returns `ttsUrl`
-- `finalizeFeedback(sessionId)` → returns `reportId`
-- `getPresignedUpload({ type })` → returns `{ url, fields }`
+- **Free Trial Voice Input → REMOVED.**  
+  The new free experience is **text‑only answers**, with **voice playback for Q1 only**.
 
-### Payment & Entitlements
+- **Transcript During Free Interview → REMOVED.**  
+  The free runner hides history; only one active question is visible.
 
-- `createCheckoutSession(tier)` → returns Stripe Checkout URL
-- `getUserEntitlements(user)` → returns `{ tier, expiresAt, isActive }`
-- `isEntitled(user, feature)` → Boolean guard for interviews, reports, etc
+- **Free Full Report → REMOVED.**  
+  Free tier shows **one visible metric** and locks others; the full detailed report is premium‑only.
 
-All **server actions** validate: user session, session ownership, entitlements, and rate limits.
-
----
-
-## Security & Compliance
-
-- **RLS everywhere**; reject unauthenticated access by default.
-- **CSP, HSTS, secure cookies**, CSRF for form routes if cookies used.
-- **Secrets** only on server; no keys in client bundle.
-- **Data deletion** endpoint wipes DB rows + Storage keys for a user.
-- PII minimized in logs; redact transcripts; structured logging only on server.
+- **Any credit‑based trial logic → REMOVED.**  
+  Free usage policy is **1 complimentary assessment / 7 days** via device+user checks.
 
 ---
 
-## Performance & Cost Controls
+## API / Server Actions (Key Signatures)
 
-- **Answer digests** (short summaries) to cap token growth.
-- Stream setup progress and question delivery for responsiveness.
-- Pre-generate TTS for the next question while the user is answering (opportunistic).
-- Reasonable time limits (e.g., 90s per question) and **replay caps**.
+```ts
+// assessment/setup/actions.ts
+export async function verifyTurnstile(token: string): Promise<{ ok: boolean }>;
+export async function bindDevice(fpHash: string): Promise<void>;
+export async function initFreeSession(args: {
+  firstName?: string;
+  utm?: Record<string, string>;
+}): Promise<{ sessionId: string }>;
+
+// assessment/run/[sessionId]/actions.ts
+export async function askFree(
+  sessionId: string
+): Promise<{ index: number; question: string; ttsUrl?: string }>;
+export async function synthesizeQ1TTS(
+  sessionId: string,
+  question: string
+): Promise<{ ttsUrl: string }>;
+export async function submitFree(
+  sessionId: string,
+  input: { text: string }
+): Promise<{ done: boolean }>;
+export async function finalizeFree(
+  sessionId: string
+): Promise<{ resultId: string }>;
+
+// pricing
+export async function createCheckoutSession(
+  tier: '48h' | '7d' | '30d' | 'lifetime'
+): Promise<{ url: string }>;
+```
+
+---
+
+## Security & Abuse Controls
+
+- RLS on all tables; server actions revalidate ownership and tier constraints.
+- Turnstile bot‑checks; device hash soft‑limits for free usage frequency.
+- Rate limits on server actions (per IP + per user).
+- No client‑side secrets; presigned URLs for Storage; CSP/HSTS enabled.
+- Idle timeout (5 min) in free runner auto‑completes and moves to results with a gentle message.
+
+---
+
+## Observability & KPIs
+
+- Track: `funnel_start`, `assessment_started`, `assessment_completed`, `cta_clicked_upgrade`, `trial_replay`, `voice_playback_used_q1`, `timeout_returned`.
+- Targets: Trial→Premium CTR ≥ **12%**, Time‑to‑first‑interaction **<10s**, Social bounce **<30%**.
+- Implement via `lib/analytics.ts` (PostHog/Segment or custom `events` table).
 
 ---
 
 ## Deployment Notes
 
-- **Vercel** for Next.js (front + route handlers).
-- **Supabase** for Postgres/Auth/Storage (managed).
-- ENV config per environment; **no** test keys in production.
-- Optional cron to purge old raw audio/CVs after X days.
+- Vercel for Next.js; Supabase managed; Stripe live/test per env.
+- Migrations: add `device_fingerprints`, update `sessions`, `results` schemas.
+- Seed a warm‑up prompt bank for variability.
+- Middleware: capture UTM; optional mobile redirect logic if desired.
 
 ---
 
-## Done-Definition (MVP)
+## Definition of Done (New Entry System)
 
-- Users can: sign in, upload CV/job spec, run a short adaptive interview, and receive a scored report.
-- Time-based access pass system fully integrated:
-  - Purchase passes via Stripe Checkout (48h, 7d, 30d, lifetime)
-  - Immediate access post-checkout via webhook
-  - Automatic blocking when pass expires
-  - Clear UX showing remaining time
-- All sensitive data goes through server; RLS enforced.
-- Entitlement gating centralized and RLS-compliant.
-- Clean Stripe ↔ Supabase integration; recoverable from webhook retry.
-- Basic analytics (page views, interview completions).
-- CI pipeline: typecheck, lint, unit tests; preview deployments on PR.
-
----
+- Users can start the complimentary assessment from `/` within **≤10s**.
+- The free runner shows **one question at a time**; **Q1 voice playback** only.
+- Results show **one visible metric**; other metrics **locked** with tasteful blur/lock.
+- CTA to **/pricing** is prominent; avoids “upgrade/buy” wording.
+- Abuse controls enforce **1 complimentary assessment per 7 days** (user+device).
+- Visuals match brand gradient and tone across all funnel screens.

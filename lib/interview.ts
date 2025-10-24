@@ -518,6 +518,7 @@ export async function startInterview(sessionId: string, supabaseClient?: any) {
   const hasAnyTurns = existingTurns && existingTurns.length > 0;
 
   // T106: Generate and create small talk turns for paid users (only if not already done)
+  // T50: free_trial does not get small talk
   if (planTier === 'paid' && !hasSmallTalk && !hasAnyTurns) {
     console.log('[T106] Generating small talk for paid user');
     const smallTalkQuestions = await generateSmallTalk(sessionId);
@@ -850,8 +851,12 @@ export async function submitAnswer(params: {
   );
 
   // T85: Enforce free tier restrictions (3 questions max)
-  if (planTier === 'free' && actualQuestions.length >= 3) {
-    // End interview for free tier
+  // T50: free_trial behaves the same as free (3 questions max)
+  if (
+    (planTier === 'free' || planTier === 'free_trial') &&
+    actualQuestions.length >= 3
+  ) {
+    // End interview for free/trial tier
     await supabase
       .from('sessions')
       .update({ status: 'feedback' })
@@ -990,6 +995,7 @@ export async function submitAnswer(params: {
 
   // T89: Generate bridge text referencing the previous answer (paid tier only)
   // T167: Pass stage transition information for enhanced bridges
+  // T50: free_trial does not get bridges
   let bridgeText: string | null = null;
   if (planTier === 'paid') {
     try {
@@ -1131,8 +1137,9 @@ export async function generateIntro(sessionId: string): Promise<string> {
   const mode = (session as any).mode || 'text'; // T109: Get interview mode
 
   // Only generate intros for paid tier
+  // T50: free_trial does not get intros
   if (planTier !== 'paid') {
-    return ''; // Free tier doesn't get intros
+    return ''; // Free/trial tier doesn't get intros
   }
 
   const role = researchSnapshot.job_spec_summary.role;
@@ -1235,8 +1242,9 @@ export async function generateSmallTalk(sessionId: string): Promise<string[]> {
   const planTier = (session as any).plan_tier as PlanTier;
 
   // Only generate small talk for paid tier
+  // T50: free_trial does not get small talk
   if (planTier !== 'paid') {
-    return []; // Free tier doesn't get small talk
+    return []; // Free/trial tier doesn't get small talk
   }
 
   const researchSnapshot = session.research_snapshot as ResearchSnapshot;
@@ -1338,8 +1346,9 @@ export async function generateBridge(
   const mode = (session as any).mode || 'text'; // T109: Get interview mode
 
   // Only generate bridges for paid tier
+  // T50: free_trial does not get bridges
   if (planTier !== 'paid') {
-    return ''; // Free tier doesn't get bridges
+    return ''; // Free/trial tier doesn't get bridges
   }
 
   // Get the last turn with the answer

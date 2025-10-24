@@ -8,6 +8,8 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { AlertCircle } from 'lucide-react';
 import Image from 'next/image';
+import { useDevice } from '@/hooks/useDevice';
+import { bindDevice } from '@/app/assessment/setup/actions';
 
 function SignInForm() {
   const [email, setEmail] = useState('');
@@ -20,6 +22,7 @@ function SignInForm() {
   const [emailSent, setEmailSent] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { fingerprint, isLoading: isFingerprintLoading } = useDevice();
 
   useEffect(() => {
     const inApp = isInAppBrowser();
@@ -114,6 +117,20 @@ function SignInForm() {
         setMessage(error.message);
         setLoading(false);
         return;
+      }
+
+      // T32: Bind device on sign-in
+      if (fingerprint) {
+        console.log('Binding device...');
+        try {
+          await bindDevice(fingerprint);
+          console.log('✅ Device bound successfully.');
+        } catch (bindError) {
+          console.error('Failed to bind device:', bindError);
+          // Don't block login if binding fails, just log it.
+        }
+      } else {
+        console.warn('No fingerprint available to bind.');
       }
 
       // Verify session was actually created
