@@ -8,7 +8,7 @@ import { generateResearchSnapshot } from '@/lib/research';
 import { nanoid } from 'nanoid';
 
 export async function bindDevice(fingerprint: string) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const {
     data: { user },
@@ -39,7 +39,7 @@ export async function startComplimentaryAssessment(
   jobTitle: string,
   jobDescription: string
 ): Promise<{ redirectUrl: string } | { error: string; retryAfter?: Date }> {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
