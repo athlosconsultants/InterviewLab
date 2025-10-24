@@ -175,15 +175,14 @@ export function trackTiming(
   });
 }
 
-// A simple no-op analytics dispatcher.
-// In a real app, you'd wire this to PostHog, Segment, etc.
-
-type AnalyticsEvent = {
+/**
+ * Simple analytics tracker for client-side events
+ * In a real app, you'd wire this to PostHog, Segment, etc.
+ */
+export function track(event: {
   name: string;
   payload?: Record<string, unknown>;
-};
-
-export function track(event: AnalyticsEvent) {
+}) {
   if (process.env.NODE_ENV === 'development') {
     console.log('📈 Analytics event:', event);
   }
