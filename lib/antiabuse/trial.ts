@@ -16,7 +16,7 @@ export async function checkTrialAllowance(): Promise<{
   reason: 'USER_RATE_LIMITED' | 'DEVICE_RATE_LIMITED' | 'OK';
   retryAfter?: Date;
 }> {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const {
     data: { user },
