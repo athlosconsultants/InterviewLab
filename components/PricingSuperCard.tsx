@@ -97,9 +97,12 @@ export default function PricingSuperCard() {
     <>
       {/* Mobile Layout */}
       <motion.section
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
+        transition={{
+          duration: 0.6,
+          ease: [0.22, 1, 0.36, 1], // Custom ease-out curve
+        }}
         className="flex flex-col gap-6 rounded-3xl border-2 border-slate-200 bg-white shadow-xl p-6 max-w-md mx-auto lg:hidden"
       >
         {/* Header */}
@@ -116,20 +119,34 @@ export default function PricingSuperCard() {
         <div className="rounded-2xl border-2 border-blue-100 bg-gradient-to-b from-blue-50/50 to-blue-50 p-5">
           {/* Most Popular Badge - Only show when 7d selected */}
           {selectedPlan === '7d' && (
-            <div className="flex justify-center mb-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: -10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: -10 }}
+              transition={{
+                duration: 0.3,
+                ease: [0.4, 0, 0.2, 1],
+              }}
+              className="flex justify-center mb-4"
+            >
               <span className="inline-block px-3 py-1 bg-gradient-to-r from-[#3E8BFF] to-[#3DCBFF] text-white text-xs font-semibold rounded-full shadow-md">
                 Most Popular
               </span>
-            </div>
+            </motion.div>
           )}
 
           {/* Inner Tab Pills */}
           <div className="flex gap-2 mb-5 bg-white/60 backdrop-blur-sm rounded-xl p-1.5 border border-blue-100">
             {TEMP_PLANS.map((plan) => (
-              <button
+              <motion.button
                 key={plan.id}
                 onClick={() => setSelectedPlan(plan.id)}
-                className={`flex-1 px-3 py-2.5 rounded-lg font-semibold text-xs transition-all duration-300 ${
+                whileTap={{ scale: 0.96 }}
+                transition={{
+                  duration: 0.2,
+                  ease: [0.4, 0, 0.2, 1],
+                }}
+                className={`flex-1 px-3 py-2.5 rounded-lg font-semibold text-xs transition-all duration-300 ease-out ${
                   selectedPlan === plan.id
                     ? 'bg-gradient-to-r from-[#3E8BFF] to-[#3DCBFF] text-white shadow-lg'
                     : 'bg-transparent text-slate-600 hover:bg-white/50'
@@ -141,16 +158,19 @@ export default function PricingSuperCard() {
                     {plan.price}
                   </div>
                 </div>
-              </button>
+              </motion.button>
             ))}
           </div>
 
           {/* Active Plan Content */}
           <motion.div
             key={selectedPlan}
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.2 }}
+            transition={{
+              duration: 0.4,
+              ease: [0.4, 0, 0.2, 1],
+            }}
           >
             {/* Duration */}
             <div className="flex items-center justify-center gap-2 mb-2 text-slate-600">
@@ -219,9 +239,23 @@ export default function PricingSuperCard() {
 
         {/* Lifetime Access */}
         <motion.div
-          whileHover={{ y: -4, scale: 1.02 }}
-          transition={{ duration: 0.2 }}
-          className="rounded-2xl border-2 border-blue-200 bg-gradient-to-b from-white to-blue-50/50 p-6 text-center shadow-md hover:shadow-lg transition-shadow duration-300"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{
+            duration: 0.6,
+            delay: 0.2,
+            ease: [0.22, 1, 0.36, 1],
+          }}
+          whileHover={{
+            y: -6,
+            scale: 1.02,
+            transition: {
+              duration: 0.3,
+              ease: [0.4, 0, 0.2, 1],
+            },
+          }}
+          whileTap={{ scale: 0.98 }}
+          className="rounded-2xl border-2 border-blue-200 bg-gradient-to-b from-white to-blue-50/50 p-6 text-center shadow-md hover:shadow-xl transition-shadow duration-300"
         >
           <div className="mb-3">
             <span className="inline-block px-3 py-1 bg-gradient-to-r from-[#3E8BFF] to-[#3DCBFF] text-white text-xs font-semibold rounded-full shadow-md">
@@ -272,9 +306,12 @@ export default function PricingSuperCard() {
 
       {/* Desktop Layout */}
       <motion.section
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
+        transition={{
+          duration: 0.7,
+          ease: [0.22, 1, 0.36, 1],
+        }}
         className="hidden lg:block max-w-6xl mx-auto"
       >
         {/* Header */}
@@ -293,10 +330,22 @@ export default function PricingSuperCard() {
           {TEMP_PLANS.map((plan, index) => (
             <motion.div
               key={plan.id}
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              whileHover={{ y: -8, scale: 1.03 }}
+              transition={{
+                duration: 0.6,
+                delay: 0.1 + index * 0.08,
+                ease: [0.22, 1, 0.36, 1],
+              }}
+              whileHover={{
+                y: -10,
+                scale: 1.03,
+                transition: {
+                  duration: 0.3,
+                  ease: [0.4, 0, 0.2, 1],
+                },
+              }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => setSelectedPlan(plan.id)}
               className={`relative rounded-2xl border-2 p-6 cursor-pointer transition-all duration-300 ${
                 selectedPlan === plan.id
@@ -361,10 +410,22 @@ export default function PricingSuperCard() {
 
           {/* Lifetime Plan */}
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            whileHover={{ y: -8, scale: 1.03 }}
+            transition={{
+              duration: 0.6,
+              delay: 0.34,
+              ease: [0.22, 1, 0.36, 1],
+            }}
+            whileHover={{
+              y: -10,
+              scale: 1.03,
+              transition: {
+                duration: 0.3,
+                ease: [0.4, 0, 0.2, 1],
+              },
+            }}
+            whileTap={{ scale: 0.98 }}
             className="relative rounded-2xl border-2 border-blue-200 bg-gradient-to-b from-white to-blue-50/50 p-6 shadow-xl hover:shadow-2xl transition-all duration-300"
           >
             {/* Badge */}
@@ -415,9 +476,13 @@ export default function PricingSuperCard() {
 
         {/* Features Section - Desktop */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.4 }}
+          transition={{
+            duration: 0.6,
+            delay: 0.5,
+            ease: [0.22, 1, 0.36, 1],
+          }}
           className="bg-white/90 backdrop-blur-sm rounded-2xl border-2 border-slate-200 shadow-lg p-10"
         >
           <h4 className="text-2xl font-bold text-slate-900 mb-6 text-center">
@@ -427,9 +492,13 @@ export default function PricingSuperCard() {
             {SHARED_FEATURES.map((item, i) => (
               <motion.div
                 key={i}
-                initial={{ opacity: 0, x: -20 }}
+                initial={{ opacity: 0, x: -15 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.4, delay: 0.5 + i * 0.05 }}
+                transition={{
+                  duration: 0.5,
+                  delay: 0.6 + i * 0.04,
+                  ease: [0.4, 0, 0.2, 1],
+                }}
                 className="flex items-start gap-3"
               >
                 <span className="mt-0.5 h-5 w-5 rounded-full bg-gradient-to-r from-[#3E8BFF] to-[#3DCBFF] flex items-center justify-center flex-shrink-0">
