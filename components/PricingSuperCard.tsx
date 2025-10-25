@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Check, Loader2, Clock } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
+import Link from 'next/link';
 
 type TempPlan = '48h' | '7d' | '30d';
 
@@ -302,6 +303,13 @@ export default function PricingSuperCard() {
         <p className="text-xs text-center text-slate-500 mt-2">
           All plans include full access to every feature
         </p>
+        <p className="text-xs text-center text-slate-400 mt-4">
+          By purchasing, you agree to our{' '}
+          <Link href="/terms" className="underline hover:text-slate-600">
+            Terms & Conditions
+          </Link>
+          .
+        </p>
       </motion.section>
 
       {/* Desktop Layout */}
@@ -513,6 +521,13 @@ export default function PricingSuperCard() {
         <p className="text-sm text-center text-slate-500 mt-8">
           All plans provide full access to every feature during your selected
           timeframe
+        </p>
+        <p className="text-xs text-center text-slate-400 mt-4">
+          By purchasing, you agree to our{' '}
+          <Link href="/terms" className="underline hover:text-slate-600">
+            Terms & Conditions
+          </Link>
+          .
         </p>
       </motion.section>
     </>
