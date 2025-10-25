@@ -81,3 +81,29 @@ export async function getFileUrl(
 
   return data.publicUrl;
 }
+
+/**
+ * T72: Get a signed (presigned) URL for a private file
+ * @param storageKey - The storage path of the file
+ * @param bucket - The bucket name
+ * @param expiresIn - Expiration time in seconds (default: 1 hour)
+ * @returns Signed URL that expires after the specified time
+ */
+export async function getSignedUrl(
+  storageKey: string,
+  bucket: 'uploads' | 'audio' | 'reports',
+  expiresIn: number = 3600
+): Promise<{ signedUrl: string | null; error?: string }> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase.storage
+    .from(bucket)
+    .createSignedUrl(storageKey, expiresIn);
+
+  if (error) {
+    console.error('Error creating signed URL:', error);
+    return { signedUrl: null, error: error.message };
+  }
+
+  return { signedUrl: data.signedUrl };
+}

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase-server';
 import { openai, MODELS } from '@/lib/openai';
+import { isEntitled } from '@/lib/entitlements';
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,6 +12,18 @@ export async function POST(request: NextRequest) {
 
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // T71: Voice transcription is premium-only
+    const hasAccess = await isEntitled(user.id);
+    if (!hasAccess) {
+      return NextResponse.json(
+        {
+          error:
+            'Voice mode requires a premium pass. Upgrade to unlock voice interviews.',
+        },
+        { status: 403 }
+      );
     }
 
     const formData = await request.formData();

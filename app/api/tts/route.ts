@@ -13,10 +13,50 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { text, turnId, type = 'question' } = await request.json();
+    const { text, turnId, sessionId, type = 'question' } = await request.json();
 
     if (!text || typeof text !== 'string') {
       return NextResponse.json({ error: 'Text is required' }, { status: 400 });
+    }
+
+    // T70: Check session tier and question number for free tier restrictions
+    if (sessionId) {
+      const { data: session, error: sessionError } = await supabase
+        .from('sessions')
+        .select('plan_tier')
+        .eq('id', sessionId)
+        .eq('user_id', user.id)
+        .single();
+
+      if (sessionError || !session) {
+        return NextResponse.json(
+          { error: 'Session not found' },
+          { status: 404 }
+        );
+      }
+
+      // T70: Free tier can only play Q1 audio
+      if (session.plan_tier === 'free' && turnId) {
+        // Check if this is Q1 by counting turns
+        const { data: turns, error: turnsError } = await supabase
+          .from('turns')
+          .select('id')
+          .eq('session_id', sessionId)
+          .order('created_at', { ascending: true });
+
+        if (!turnsError && turns) {
+          const questionNumber = turns.findIndex((t) => t.id === turnId) + 1;
+          if (questionNumber > 1) {
+            return NextResponse.json(
+              {
+                error:
+                  'Free tier only supports voice playback for the first question',
+              },
+              { status: 403 }
+            );
+          }
+        }
+      }
     }
 
     // T114: turnId is optional for intro/bridge audio
