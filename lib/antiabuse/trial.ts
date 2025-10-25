@@ -28,12 +28,12 @@ export async function checkTrialAllowance(): Promise<{
     return { allowed: true, reason: 'OK' }; // Placeholder for now
   }
 
-  // Check for recent trials by user_id
+  // Check for recent trials by user_id (free tier sessions)
   const { data: userTrials, error: userError } = await supabase
     .from('sessions')
     .select('created_at')
     .eq('user_id', user.id)
-    .eq('plan_tier', 'free_trial')
+    .eq('plan_tier', 'free')
     .order('created_at', { ascending: false })
     .limit(1);
 
