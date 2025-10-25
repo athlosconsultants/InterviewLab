@@ -41,30 +41,25 @@ export const metadata: Metadata = {
 };
 
 export default async function Home() {
-  // Check if user is logged in and has credits
+  // T102: Check if user is logged in and has active pass
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  let hasCredits = false;
-  let remainingInterviews = 0;
+  let hasActivePass = false;
+  let passType: string | null = null;
 
   if (user) {
-    // Fetch user's entitlements
-    const { data: entitlements } = await supabase
-      .from('entitlements')
-      .select('remaining_interviews')
-      .eq('user_id', user.id)
-      .eq('status', 'active')
-      .gt('remaining_interviews', 0);
-
-    if (entitlements && entitlements.length > 0) {
-      hasCredits = true;
-      remainingInterviews = entitlements.reduce(
-        (sum, e: any) => sum + (e.remaining_interviews || 0),
-        0
-      );
+    // Check for active time-based pass (not credit-based)
+    const { isEntitled, getUserEntitlements } = await import(
+      '@/lib/entitlements'
+    );
+    const entitled = await isEntitled(user.id);
+    if (entitled) {
+      const entitlement = await getUserEntitlements(user.id);
+      hasActivePass = true;
+      passType = entitlement.tier;
     }
   }
   return (
@@ -103,38 +98,37 @@ export default async function Home() {
 
             {/* CTAs */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-              {user && hasCredits ? (
-                // User has credits - show "Start Interview" button
+              {user && hasActivePass ? (
+                // User has active pass - show premium setup
                 <>
-                  <Link href="/assessment/setup">
+                  <Link href="/setup">
                     <Button
                       size="lg"
                       className="text-lg px-8 py-6 shadow-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700"
                     >
-                      Start Interview ({remainingInterviews}{' '}
-                      {remainingInterviews === 1 ? 'credit' : 'credits'})
+                      Start Premium Interview ({passType})
                       <ArrowRight className="ml-2 h-5 w-5" />
                     </Button>
                   </Link>
-                  <Link href="/pricing">
+                  <Link href="/assessment/setup">
                     <Button
                       size="lg"
                       variant="outline"
                       className="text-lg px-8 py-6 border-2"
                     >
-                      Buy More Interviews
+                      Try Free Assessment
                     </Button>
                   </Link>
                 </>
               ) : (
-                // No credits or not logged in - show default CTAs
+                // No active pass or not logged in - show free+upgrade CTAs
                 <>
                   <Link href="/assessment/setup">
                     <Button
                       size="lg"
                       className="text-lg px-8 py-6 shadow-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700"
                     >
-                      Start Interview Now
+                      Start Free Assessment
                       <ArrowRight className="ml-2 h-5 w-5" />
                     </Button>
                   </Link>
@@ -144,7 +138,7 @@ export default async function Home() {
                       variant="outline"
                       className="text-lg px-8 py-6 border-2"
                     >
-                      Explore Deep Immersion Interviews
+                      Explore Premium Plans
                     </Button>
                   </Link>
                 </>
