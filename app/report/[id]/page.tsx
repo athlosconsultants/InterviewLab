@@ -21,14 +21,6 @@ export default async function ReportPage({
     redirect('/sign-in');
   }
 
-  // Check entitlement
-  const { isEntitled } = await import('@/lib/entitlements');
-  const hasAccess = await isEntitled(user.id);
-
-  if (!hasAccess) {
-    redirect('/pricing');
-  }
-
   // Fetch session with turns (including plan_tier for T51)
   const { data: session, error: sessionError } = await supabase
     .from('sessions')
@@ -50,6 +42,20 @@ export default async function ReportPage({
       </main>
     );
   }
+
+  // T50: Check entitlement ONLY for paid tier sessions
+  const planTier = (session as any).plan_tier as 'free' | 'paid';
+
+  if (planTier === 'paid') {
+    const { isEntitled } = await import('@/lib/entitlements');
+    const hasAccess = await isEntitled(user.id);
+
+    if (!hasAccess) {
+      redirect('/pricing');
+    }
+  }
+
+  // Continue with free tier sessions without entitlement check
 
   // Fetch turns
   const { data: turns, error: turnsError } = await supabase
@@ -122,9 +128,6 @@ export default async function ReportPage({
       );
     }
   }
-
-  // T51: Extract plan_tier for conditional upsell
-  const planTier = (session as any).plan_tier || 'free';
 
   return (
     <ReportView
