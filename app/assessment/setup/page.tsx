@@ -5,14 +5,17 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { TurnstileWidget } from '@/components/Turnstile';
+import { FileDrop } from '@/components/forms/FileDrop';
 import { startComplimentaryAssessment } from './actions';
 import { useRouter } from 'next/navigation';
 import { track } from '@/lib/analytics';
 import { createClient } from '@/lib/supabase-client';
+import { uploadFile } from '@/lib/upload-client';
 
 export default function AssessmentSetupPage() {
   const [jobTitle, setJobTitle] = useState('');
   const [jobDescription, setJobDescription] = useState('');
+  const [cvFile, setCvFile] = useState<File | null>(null);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -46,6 +49,11 @@ export default function AssessmentSetupPage() {
     e.preventDefault();
     setError(null);
 
+    if (!cvFile) {
+      setError('Please upload your CV/Resume.');
+      return;
+    }
+
     if (!turnstileToken) {
       setError('Please complete the security check.');
       return;
@@ -67,10 +75,26 @@ export default function AssessmentSetupPage() {
 
       track({ name: 'assessment_setup_submitted', payload: { jobTitle } });
 
-      // Start the complimentary assessment
+      // Upload CV file
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+
+      const uploadResult = await uploadFile(cvFile, 'cv', user.id);
+      if (uploadResult.error) {
+        throw new Error(`Failed to upload CV: ${uploadResult.error}`);
+      }
+
+      // Start the complimentary assessment with CV
       const result = await startComplimentaryAssessment(
         jobTitle,
-        jobDescription
+        jobDescription,
+        uploadResult.storageKey
       );
 
       if ('error' in result) {
@@ -148,6 +172,39 @@ export default function AssessmentSetupPage() {
                 />
               </div>
 
+              {/* CV Upload */}
+              <div className="space-y-2 mb-6">
+                <Label className="text-base font-semibold">
+                  CV/Resume <span className="text-red-500">*</span>
+                </Label>
+                <FileDrop
+                  onFileSelect={setCvFile}
+                  currentFile={cvFile}
+                  label="Drop your CV/Resume here"
+                  acceptedTypes={[
+                    'application/pdf',
+                    'image/png',
+                    'image/jpeg',
+                    'image/jpg',
+                    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                    'application/msword',
+                  ]}
+                  acceptedExtensions={[
+                    '.pdf',
+                    '.png',
+                    '.jpg',
+                    '.jpeg',
+                    '.docx',
+                    '.doc',
+                  ]}
+                  maxSizeMB={10}
+                />
+                <p className="text-sm text-slate-500 dark:text-slate-400">
+                  Your CV helps us create a personalized interview experience
+                  tailored to your background.
+                </p>
+              </div>
+
               {/* Job Description */}
               <div className="space-y-2 mb-6">
                 <Label
@@ -200,16 +257,20 @@ export default function AssessmentSetupPage() {
               {/* Submit Button */}
               <Button
                 type="submit"
-                disabled={isSubmitting || !turnstileToken}
+                disabled={isSubmitting || !turnstileToken || !cvFile}
                 className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSubmitting
                   ? 'Starting Your Interview...'
                   : 'Start Free Assessment'}
               </Button>
-              {!turnstileToken && (
+              {(!turnstileToken || !cvFile) && (
                 <p className="text-sm text-center text-amber-600 dark:text-amber-400 mt-2">
-                  Complete the security check above to enable this button
+                  {!cvFile && !turnstileToken
+                    ? 'Please upload your CV and complete the security check'
+                    : !cvFile
+                      ? 'Please upload your CV to continue'
+                      : 'Complete the security check above to enable this button'}
                 </p>
               )}
 

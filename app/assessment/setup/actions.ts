@@ -5,7 +5,7 @@ import { hashDevice } from '@/lib/antiabuse/device';
 import { revalidatePath } from 'next/cache';
 import { checkTrialAllowance } from '@/lib/antiabuse/trial';
 import { generateResearchSnapshot } from '@/lib/research';
-import { nanoid } from 'nanoid';
+import { randomUUID } from 'crypto';
 
 export async function bindDevice(fingerprint: string) {
   const supabase = await createClient();
@@ -37,7 +37,8 @@ export async function bindDevice(fingerprint: string) {
 
 export async function startComplimentaryAssessment(
   jobTitle: string,
-  jobDescription: string
+  jobDescription: string,
+  cvStorageKey: string
 ): Promise<{ redirectUrl: string } | { error: string; retryAfter?: Date }> {
   const supabase = await createClient();
   const {
@@ -61,21 +62,32 @@ export async function startComplimentaryAssessment(
     console.log('[Assessment] Starting complimentary assessment for:', {
       jobTitle,
       userId: user.id,
+      cvStorageKey,
     });
 
-    // Generate research snapshot with minimal info (no CV/JD documents)
+    // Extract text from CV for research snapshot
+    console.log('[Assessment] Extracting text from CV...');
+    const { extractTextFromStorage } = await import('@/lib/extract');
+    const cvText = await extractTextFromStorage(
+      cvStorageKey,
+      'uploads',
+      supabase
+    );
+    console.log('[Assessment] CV text extracted, length:', cvText.length);
+
+    // Generate research snapshot with CV and job description
     console.log('[Assessment] Generating research snapshot...');
     const researchSnapshot = await generateResearchSnapshot({
-      cvText: '', // No CV for free trial
-      jobDescriptionText: jobDescription || `${jobTitle} position`, // Use provided or generate minimal JD
+      cvText,
+      jobDescriptionText: jobDescription || `${jobTitle} position`,
       jobTitle,
-      company: 'Company', // Generic company name
-      location: 'Remote', // Default location
+      company: 'Company', // Generic company name for free trial
+      location: 'Remote', // Default location for free trial
     });
     console.log('[Assessment] Research snapshot generated successfully');
 
-    // Create the session with free_trial plan tier
-    const sessionId = nanoid();
+    // Create the session with free_trial plan tier (use UUID for database compatibility)
+    const sessionId = randomUUID();
     console.log('[Assessment] Creating session with ID:', sessionId);
 
     const { data: session, error: sessionError } = await supabase
