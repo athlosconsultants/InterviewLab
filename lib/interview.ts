@@ -465,20 +465,23 @@ export async function startInterview(sessionId: string, supabaseClient?: any) {
     );
   }
 
-  // Check entitlement before starting interview
-  const { isEntitled } = await import('@/lib/entitlements');
-  const hasAccess = await isEntitled(session.user_id);
+  // Get plan tier to determine if entitlement check is needed
+  const planTier = (session as any).plan_tier as PlanTier;
 
-  if (!hasAccess) {
-    throw new Error('ENTITLEMENT_REQUIRED');
+  // Check entitlement only for paid tier (free tier doesn't require entitlement)
+  if (planTier === 'paid') {
+    const { isEntitled } = await import('@/lib/entitlements');
+    const hasAccess = await isEntitled(session.user_id);
+
+    if (!hasAccess) {
+      throw new Error('ENTITLEMENT_REQUIRED');
+    }
   }
 
   // Check if session is in correct state
   if (session.status !== 'ready' && session.status !== 'running') {
     throw new Error(`Cannot start interview in ${session.status} state`);
   }
-
-  const planTier = (session as any).plan_tier as PlanTier;
   const currentStage = (session as any).current_stage || 1;
   const stagesPlanned = (session as any).stages_planned || 1;
   const researchSnapshot = session.research_snapshot as ResearchSnapshot;
