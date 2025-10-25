@@ -105,7 +105,7 @@ export async function startComplimentaryAssessment(
         company: 'Company', // Generic company for free trial
         location: 'Remote', // Default location for free trial
         research_snapshot: researchSnapshot,
-        plan_tier: 'free_trial',
+        plan_tier: 'free',
         mode: 'text', // Free trial is text-only
         stages_planned: 1, // Single stage
         current_stage: 1,
