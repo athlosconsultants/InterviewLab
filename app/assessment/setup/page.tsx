@@ -76,18 +76,11 @@ export default function AssessmentSetupPage() {
       track({ name: 'assessment_setup_submitted', payload: { jobTitle } });
 
       // Upload CV file
-      const supabase = createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (!user) {
-        throw new Error('User not authenticated');
-      }
-
-      const uploadResult = await uploadFile(cvFile, 'cv', user.id);
-      if (uploadResult.error) {
-        throw new Error(`Failed to upload CV: ${uploadResult.error}`);
+      const uploadResult = await uploadFile(cvFile, 'cv');
+      if (!uploadResult.success || !uploadResult.storageKey) {
+        throw new Error(
+          uploadResult.error || 'Failed to upload CV. Please try again.'
+        );
       }
 
       // Start the complimentary assessment with CV
