@@ -92,9 +92,9 @@ export async function startComplimentaryAssessment(
         limits: {
           question_cap: 3, // 3 questions for free trial
         },
-        job_spec: {
-          role: jobTitle,
-        },
+        job_title: jobTitle,
+        company: 'Company', // Generic company for free trial
+        location: 'Remote', // Default location for free trial
       })
       .select()
       .single();
