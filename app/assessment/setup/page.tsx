@@ -173,7 +173,21 @@ export default function AssessmentSetupPage() {
 
               {/* Turnstile Widget */}
               <div className="mb-6">
+                <Label className="text-base font-semibold mb-2 block">
+                  Security Verification
+                </Label>
                 <TurnstileWidget onVerify={handleTurnstileVerify} />
+                {!turnstileToken && (
+                  <p className="text-sm text-slate-600 dark:text-slate-400 mt-2">
+                    Please complete the security check above to enable the
+                    submit button.
+                  </p>
+                )}
+                {turnstileToken && (
+                  <p className="text-sm text-green-600 dark:text-green-400 mt-2">
+                    ✓ Security verification complete
+                  </p>
+                )}
               </div>
 
               {/* Error Message */}
@@ -187,12 +201,17 @@ export default function AssessmentSetupPage() {
               <Button
                 type="submit"
                 disabled={isSubmitting || !turnstileToken}
-                className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 shadow-lg"
+                className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSubmitting
                   ? 'Starting Your Interview...'
                   : 'Start Free Assessment'}
               </Button>
+              {!turnstileToken && (
+                <p className="text-sm text-center text-amber-600 dark:text-amber-400 mt-2">
+                  Complete the security check above to enable this button
+                </p>
+              )}
 
               <p className="text-xs text-center text-slate-500 dark:text-slate-400 mt-4">
                 One complimentary assessment per week. No credit card required.

@@ -87,7 +87,7 @@ export async function middleware(request: NextRequest) {
     // Content Security Policy (CSP)
     const cspHeader = [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://va.vercel-scripts.com",
+      "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://va.vercel-scripts.com https://challenges.cloudflare.com",
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' blob: data: https:",
       "font-src 'self' data:",
@@ -96,8 +96,9 @@ export async function middleware(request: NextRequest) {
       "form-action 'self'",
       "frame-ancestors 'none'",
       'upgrade-insecure-requests',
-      `connect-src 'self' ${supabaseUrl} https://api.openai.com https://api.stripe.com`,
+      `connect-src 'self' ${supabaseUrl} https://api.openai.com https://api.stripe.com https://challenges.cloudflare.com`,
       `media-src 'self' blob: ${supabaseUrl}`,
+      'frame-src https://challenges.cloudflare.com',
     ].join('; ');
 
     response.headers.set('Content-Security-Policy', cspHeader);
