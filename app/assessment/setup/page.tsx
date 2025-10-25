@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { TurnstileWidget } from '@/components/Turnstile';
 import { FileDrop } from '@/components/forms/FileDrop';
+import { PreparingOverlay } from '@/components/assessment/PreparingOverlay';
 import { startComplimentaryAssessment } from './actions';
 import { useRouter } from 'next/navigation';
 import { track } from '@/lib/analytics';
@@ -18,6 +19,8 @@ export default function AssessmentSetupPage() {
   const [cvFile, setCvFile] = useState<File | null>(null);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPreparing, setShowPreparing] = useState(false);
+  const [pendingRedirect, setPendingRedirect] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const router = useRouter();
@@ -96,9 +99,12 @@ export default function AssessmentSetupPage() {
           name: 'assessment_setup_failed',
           payload: { reason: result.error },
         });
+        setIsSubmitting(false);
       } else {
         track({ name: 'assessment_started', payload: { jobTitle } });
-        router.push(result.redirectUrl);
+        // Show preparing overlay before redirecting
+        setPendingRedirect(result.redirectUrl);
+        setShowPreparing(true);
       }
     } catch (err: any) {
       console.error('Error starting assessment:', err);
@@ -107,8 +113,15 @@ export default function AssessmentSetupPage() {
         name: 'assessment_setup_error',
         payload: { error: err.message },
       });
-    } finally {
       setIsSubmitting(false);
+    }
+    // Note: isSubmitting is reset in the error case, or when overlay completes
+  };
+
+  // Handle overlay completion and redirect
+  const handlePreparingComplete = () => {
+    if (pendingRedirect) {
+      router.push(pendingRedirect);
     }
   };
 
@@ -125,155 +138,165 @@ export default function AssessmentSetupPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-white via-slate-50 to-white relative overflow-hidden">
-      {/* Background gradient orbs */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 right-1/4 w-96 h-96 bg-gradient-to-br from-cyan-400/20 to-blue-500/20 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 left-1/4 w-96 h-96 bg-gradient-to-br from-blue-500/20 to-cyan-400/20 rounded-full blur-3xl" />
-      </div>
+    <>
+      {/* T31: Preparing Overlay */}
+      <PreparingOverlay
+        show={showPreparing}
+        onComplete={handlePreparingComplete}
+        duration={2000}
+      />
 
-      <div className="container mx-auto px-4 py-12 md:py-20 relative z-10">
-        <div className="max-w-2xl mx-auto">
-          {/* Header */}
-          <div className="text-center mb-12">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">
-              Complimentary Interview Assessment
-            </h1>
-            <p className="text-lg text-slate-600 dark:text-slate-400">
-              Experience a personalized mock interview tailored to your role. No
-              credit card required.
-            </p>
-          </div>
+      <main className="min-h-screen bg-gradient-to-b from-white via-slate-50 to-white relative overflow-hidden">
+        {/* Background gradient orbs */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-0 right-1/4 w-96 h-96 bg-gradient-to-br from-cyan-400/20 to-blue-500/20 rounded-full blur-3xl" />
+          <div className="absolute bottom-1/4 left-1/4 w-96 h-96 bg-gradient-to-br from-blue-500/20 to-cyan-400/20 rounded-full blur-3xl" />
+        </div>
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-2xl p-8 shadow-xl border border-slate-200 dark:border-slate-800">
-              {/* Job Title */}
-              <div className="space-y-2 mb-6">
-                <Label htmlFor="jobTitle" className="text-base font-semibold">
-                  Job Title
-                </Label>
-                <Input
-                  id="jobTitle"
-                  type="text"
-                  placeholder="e.g. Senior Product Manager"
-                  value={jobTitle}
-                  onChange={(e) => setJobTitle(e.target.value)}
-                  required
-                  disabled={isSubmitting}
-                  className="h-12 text-base"
-                />
-              </div>
-
-              {/* CV Upload */}
-              <div className="space-y-2 mb-6">
-                <Label className="text-base font-semibold">
-                  CV/Resume <span className="text-red-500">*</span>
-                </Label>
-                <FileDrop
-                  onFileSelect={setCvFile}
-                  currentFile={cvFile}
-                  label="Drop your CV/Resume here"
-                  acceptedTypes={[
-                    'application/pdf',
-                    'image/png',
-                    'image/jpeg',
-                    'image/jpg',
-                    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-                    'application/msword',
-                  ]}
-                  acceptedExtensions={[
-                    '.pdf',
-                    '.png',
-                    '.jpg',
-                    '.jpeg',
-                    '.docx',
-                    '.doc',
-                  ]}
-                  maxSizeMB={10}
-                />
-                <p className="text-sm text-slate-500 dark:text-slate-400">
-                  Your CV helps us create a personalized interview experience
-                  tailored to your background.
-                </p>
-              </div>
-
-              {/* Job Description */}
-              <div className="space-y-2 mb-6">
-                <Label
-                  htmlFor="jobDescription"
-                  className="text-base font-semibold"
-                >
-                  Job Description (Optional)
-                </Label>
-                <textarea
-                  id="jobDescription"
-                  placeholder="Paste the job description or key responsibilities here..."
-                  value={jobDescription}
-                  onChange={(e) => setJobDescription(e.target.value)}
-                  disabled={isSubmitting}
-                  rows={6}
-                  className="w-full px-3 py-2 text-base border rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500 dark:bg-gray-800 dark:border-gray-700"
-                />
-                <p className="text-sm text-slate-500 dark:text-slate-400">
-                  Providing details helps us create a more accurate interview
-                  simulation.
-                </p>
-              </div>
-
-              {/* Turnstile Widget */}
-              <div className="mb-6">
-                <Label className="text-base font-semibold mb-2 block">
-                  Security Verification
-                </Label>
-                <TurnstileWidget onVerify={handleTurnstileVerify} />
-                {!turnstileToken && (
-                  <p className="text-sm text-slate-600 dark:text-slate-400 mt-2">
-                    Please complete the security check above to enable the
-                    submit button.
-                  </p>
-                )}
-                {turnstileToken && (
-                  <p className="text-sm text-green-600 dark:text-green-400 mt-2">
-                    ✓ Security verification complete
-                  </p>
-                )}
-              </div>
-
-              {/* Error Message */}
-              {error && (
-                <div className="mb-6 p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-900 dark:text-red-100">
-                  <p className="text-sm font-medium">{error}</p>
-                </div>
-              )}
-
-              {/* Submit Button */}
-              <Button
-                type="submit"
-                disabled={isSubmitting || !turnstileToken || !cvFile}
-                className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isSubmitting
-                  ? 'Starting Your Interview...'
-                  : 'Start Free Assessment'}
-              </Button>
-              {(!turnstileToken || !cvFile) && (
-                <p className="text-sm text-center text-amber-600 dark:text-amber-400 mt-2">
-                  {!cvFile && !turnstileToken
-                    ? 'Please upload your CV and complete the security check'
-                    : !cvFile
-                      ? 'Please upload your CV to continue'
-                      : 'Complete the security check above to enable this button'}
-                </p>
-              )}
-
-              <p className="text-xs text-center text-slate-500 dark:text-slate-400 mt-4">
-                One complimentary assessment per week. No credit card required.
+        <div className="container mx-auto px-4 py-12 md:py-20 relative z-10">
+          <div className="max-w-2xl mx-auto">
+            {/* Header */}
+            <div className="text-center mb-12">
+              <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">
+                Complimentary Interview Assessment
+              </h1>
+              <p className="text-lg text-slate-600 dark:text-slate-400">
+                Experience a personalized mock interview tailored to your role.
+                No credit card required.
               </p>
             </div>
-          </form>
+
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-2xl p-8 shadow-xl border border-slate-200 dark:border-slate-800">
+                {/* Job Title */}
+                <div className="space-y-2 mb-6">
+                  <Label htmlFor="jobTitle" className="text-base font-semibold">
+                    Job Title
+                  </Label>
+                  <Input
+                    id="jobTitle"
+                    type="text"
+                    placeholder="e.g. Senior Product Manager"
+                    value={jobTitle}
+                    onChange={(e) => setJobTitle(e.target.value)}
+                    required
+                    disabled={isSubmitting}
+                    className="h-12 text-base"
+                  />
+                </div>
+
+                {/* CV Upload */}
+                <div className="space-y-2 mb-6">
+                  <Label className="text-base font-semibold">
+                    CV/Resume <span className="text-red-500">*</span>
+                  </Label>
+                  <FileDrop
+                    onFileSelect={setCvFile}
+                    currentFile={cvFile}
+                    label="Drop your CV/Resume here"
+                    acceptedTypes={[
+                      'application/pdf',
+                      'image/png',
+                      'image/jpeg',
+                      'image/jpg',
+                      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                      'application/msword',
+                    ]}
+                    acceptedExtensions={[
+                      '.pdf',
+                      '.png',
+                      '.jpg',
+                      '.jpeg',
+                      '.docx',
+                      '.doc',
+                    ]}
+                    maxSizeMB={10}
+                  />
+                  <p className="text-sm text-slate-500 dark:text-slate-400">
+                    Your CV helps us create a personalized interview experience
+                    tailored to your background.
+                  </p>
+                </div>
+
+                {/* Job Description */}
+                <div className="space-y-2 mb-6">
+                  <Label
+                    htmlFor="jobDescription"
+                    className="text-base font-semibold"
+                  >
+                    Job Description (Optional)
+                  </Label>
+                  <textarea
+                    id="jobDescription"
+                    placeholder="Paste the job description or key responsibilities here..."
+                    value={jobDescription}
+                    onChange={(e) => setJobDescription(e.target.value)}
+                    disabled={isSubmitting}
+                    rows={6}
+                    className="w-full px-3 py-2 text-base border rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500 dark:bg-gray-800 dark:border-gray-700"
+                  />
+                  <p className="text-sm text-slate-500 dark:text-slate-400">
+                    Providing details helps us create a more accurate interview
+                    simulation.
+                  </p>
+                </div>
+
+                {/* Turnstile Widget */}
+                <div className="mb-6">
+                  <Label className="text-base font-semibold mb-2 block">
+                    Security Verification
+                  </Label>
+                  <TurnstileWidget onVerify={handleTurnstileVerify} />
+                  {!turnstileToken && (
+                    <p className="text-sm text-slate-600 dark:text-slate-400 mt-2">
+                      Please complete the security check above to enable the
+                      submit button.
+                    </p>
+                  )}
+                  {turnstileToken && (
+                    <p className="text-sm text-green-600 dark:text-green-400 mt-2">
+                      ✓ Security verification complete
+                    </p>
+                  )}
+                </div>
+
+                {/* Error Message */}
+                {error && (
+                  <div className="mb-6 p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-900 dark:text-red-100">
+                    <p className="text-sm font-medium">{error}</p>
+                  </div>
+                )}
+
+                {/* Submit Button */}
+                <Button
+                  type="submit"
+                  disabled={isSubmitting || !turnstileToken || !cvFile}
+                  className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isSubmitting
+                    ? 'Starting Your Interview...'
+                    : 'Start Free Assessment'}
+                </Button>
+                {(!turnstileToken || !cvFile) && (
+                  <p className="text-sm text-center text-amber-600 dark:text-amber-400 mt-2">
+                    {!cvFile && !turnstileToken
+                      ? 'Please upload your CV and complete the security check'
+                      : !cvFile
+                        ? 'Please upload your CV to continue'
+                        : 'Complete the security check above to enable this button'}
+                  </p>
+                )}
+
+                <p className="text-xs text-center text-slate-500 dark:text-slate-400 mt-4">
+                  One complimentary assessment per week. No credit card
+                  required.
+                </p>
+              </div>
+            </form>
+          </div>
         </div>
-      </div>
-    </main>
+      </main>
+    </>
   );
 }
