@@ -58,7 +58,13 @@ export async function startComplimentaryAssessment(
   }
 
   try {
+    console.log('[Assessment] Starting complimentary assessment for:', {
+      jobTitle,
+      userId: user.id,
+    });
+
     // Generate research snapshot with minimal info (no CV/JD documents)
+    console.log('[Assessment] Generating research snapshot...');
     const researchSnapshot = await generateResearchSnapshot({
       cvText: '', // No CV for free trial
       jobDescriptionText: jobDescription || `${jobTitle} position`, // Use provided or generate minimal JD
@@ -66,9 +72,12 @@ export async function startComplimentaryAssessment(
       company: 'Company', // Generic company name
       location: 'Remote', // Default location
     });
+    console.log('[Assessment] Research snapshot generated successfully');
 
     // Create the session with free_trial plan tier
     const sessionId = nanoid();
+    console.log('[Assessment] Creating session with ID:', sessionId);
+
     const { data: session, error: sessionError } = await supabase
       .from('sessions')
       .insert({
@@ -91,13 +100,24 @@ export async function startComplimentaryAssessment(
       .single();
 
     if (sessionError) {
-      console.error('Failed to create session:', sessionError);
+      console.error('[Assessment] Failed to create session:', {
+        error: sessionError,
+        code: sessionError.code,
+        message: sessionError.message,
+        details: sessionError.details,
+        hint: sessionError.hint,
+      });
       return { error: 'Failed to create interview session. Please try again.' };
     }
 
+    console.log('[Assessment] Session created successfully:', sessionId);
     return { redirectUrl: `/interview/${sessionId}` };
-  } catch (error) {
-    console.error('Error in startComplimentaryAssessment:', error);
+  } catch (error: any) {
+    console.error('[Assessment] Error in startComplimentaryAssessment:', {
+      error,
+      message: error?.message,
+      stack: error?.stack,
+    });
     return { error: 'An unexpected error occurred. Please try again.' };
   }
 }
