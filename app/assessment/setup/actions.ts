@@ -86,6 +86,11 @@ export async function startComplimentaryAssessment(
     });
     console.log('[Assessment] Research snapshot generated successfully');
 
+    // Generate stage targets (matching existing system)
+    const stageTargets: Array<{ target_questions: number }> = [
+      { target_questions: 3 }, // Free trial: always 3 questions
+    ];
+
     // Create the session with free_trial plan tier (use UUID for database compatibility)
     const sessionId = randomUUID();
     console.log('[Assessment] Creating session with ID:', sessionId);
@@ -96,17 +101,20 @@ export async function startComplimentaryAssessment(
         id: sessionId,
         user_id: user.id,
         status: 'ready',
+        job_title: jobTitle,
+        company: 'Company', // Generic company for free trial
+        location: 'Remote', // Default location for free trial
         research_snapshot: researchSnapshot,
         plan_tier: 'free_trial',
         mode: 'text', // Free trial is text-only
         stages_planned: 1, // Single stage
         current_stage: 1,
+        stage_targets: stageTargets, // Per-stage question targets
         limits: {
           question_cap: 3, // 3 questions for free trial
+          replay_cap: 2,
+          timer_sec: 90,
         },
-        job_title: jobTitle,
-        company: 'Company', // Generic company for free trial
-        location: 'Remote', // Default location for free trial
       })
       .select()
       .single();
