@@ -22,34 +22,43 @@ const TEMP_PLANS: PlanConfig[] = [
   {
     id: '48h',
     label: '2 Days',
-    name: '48-Hour Intensive',
+    name: 'The Weekend Warrior',
     price: 'A$29.99',
-    cta: 'Start Intensive',
+    cta: 'Get Interview-Ready',
   },
   {
     id: '7d',
     label: '7 Days',
-    name: '7-Day Accelerator',
+    name: 'The Standard Prep',
     price: 'A$59.99',
-    cta: 'Begin Accelerator',
+    cta: 'Start Practicing',
     badge: 'Most Popular',
   },
   {
     id: '30d',
     label: '30 Days',
-    name: '30-Day Development',
+    name: 'The Career Investment',
     price: 'A$99.99',
-    cta: 'Start Development',
+    cta: 'Begin Training',
   },
 ];
 
 const SHARED_FEATURES = [
-  'Unlimited interview sessions',
-  'Comprehensive AI feedback reports',
-  'Voice & text interaction modes',
-  'Adaptive difficulty across all stages',
-  'Multi-industry role coverage',
-  'Performance tracking & analytics',
+  'Practice until natural - unlimited sessions',
+  'AI trained on 10k+ S&P 500 interviews tells you exactly what to fix',
+  'Voice or text - feels like the real thing',
+  'Gets harder as you improve',
+  'Tech, finance, consulting, marketing, healthcare - all covered',
+  'Track improvement in real-time',
+];
+
+const SHARED_FEATURES_DESKTOP = [
+  'Practice until it feels natural - no limits, no counting',
+  'AI trained on 10,000+ real S&P 500 interviews identifies exactly what to fix',
+  'Realistic voice interviews (or text if you prefer) - feels like the real thing',
+  'Questions that match your skill level - gets harder as you improve',
+  'Tech, finance, consulting, marketing, healthcare - every industry covered',
+  'Track your improvement in real-time - see your confidence score rising',
 ];
 
 export default function PricingSuperCard() {
@@ -108,11 +117,15 @@ export default function PricingSuperCard() {
       >
         {/* Header */}
         <div className="text-center">
+          {/* Social Proof */}
+          <p className="text-xs text-slate-500 mb-2 italic">
+            2,847 people practiced this week
+          </p>
           <h2 className="text-2xl font-bold bg-gradient-to-r from-[#3E8BFF] to-[#3DCBFF] bg-clip-text text-transparent mb-2">
-            Choose Your Access
+            Get Interview-Ready Fast
           </h2>
           <p className="text-sm text-slate-600">
-            One-time payment · Immediate access
+            One payment. No subscription. Start in 60 sec.
           </p>
         </div>
 
@@ -182,17 +195,47 @@ export default function PricingSuperCard() {
             </div>
 
             {/* Plan Name */}
-            <h3 className="text-xl font-bold text-slate-900 mb-3 text-center">
+            <h3 className="text-xl font-bold text-slate-900 mb-2 text-center">
               {currentPlan.name}
             </h3>
 
+            {/* Plan-specific headline */}
+            <p className="text-sm font-semibold text-slate-700 mb-2 text-center">
+              {selectedPlan === '48h' && "Interview in 48hrs? We've got you."}
+              {selectedPlan === '7d' &&
+                'The proven path to interview confidence'}
+              {selectedPlan === '30d' && 'Transform from nervous to natural'}
+            </p>
+
+            {/* Plan-specific subhead */}
+            <p className="text-xs text-slate-600 mb-3 text-center leading-relaxed">
+              {selectedPlan === '48h' &&
+                'Unlimited practice with AI trained on real S&P 500 interviews'}
+              {selectedPlan === '7d' &&
+                "One week unlimited. Master answers, eliminate 'ums', nail tough questions."}
+              {selectedPlan === '30d' &&
+                'Full month to practice every question type, industry, scenario. Track progress.'}
+            </p>
+
             {/* Price */}
-            <div className="mb-4 text-center">
+            <div className="mb-3 text-center">
               <span className="text-5xl font-extrabold text-slate-900">
                 {currentPlan.price}
               </span>
-              <span className="text-sm text-slate-500 ml-2">one-time</span>
+              <div className="text-xs text-slate-500 mt-1">
+                {selectedPlan === '48h' && '48 hours access'}
+                {selectedPlan === '7d' && '7 days access | A$8.57/day'}
+                {selectedPlan === '30d' && '30 days unlimited | A$3.33/day'}
+              </div>
             </div>
+
+            {/* Usage stats */}
+            <p className="text-xs text-center text-slate-600 mb-3 font-medium">
+              {selectedPlan === '48h' && '4-6 sessions = confident'}
+              {selectedPlan === '7d' && 'Avg: 8 practice interviews'}
+              {selectedPlan === '30d' &&
+                'Best for career changes & senior roles'}
+            </p>
 
             {/* CTA */}
             <Button
@@ -271,17 +314,28 @@ export default function PricingSuperCard() {
             </p>
           </div>
 
-          <h3 className="text-2xl font-bold bg-gradient-to-r from-[#3E8BFF] to-[#3DCBFF] bg-clip-text text-transparent mb-3">
+          <h3 className="text-2xl font-bold bg-gradient-to-r from-[#3E8BFF] to-[#3DCBFF] bg-clip-text text-transparent mb-2">
             Lifetime Access
           </h3>
+
+          <p className="text-sm font-semibold text-slate-700 mb-2">
+            Never pay for interview prep again
+          </p>
+
+          <p className="text-xs text-slate-600 mb-3 leading-relaxed">
+            Unlimited forever. Every promotion, job change, career pivot.
+          </p>
 
           <div className="mb-2">
             <span className="text-5xl font-extrabold text-slate-900">
               A$199.99
             </span>
           </div>
-          <p className="text-sm text-slate-500 mb-4">
-            One-time payment · Never expires
+          <p className="text-xs text-slate-500 mb-1">
+            unlimited forever | Save A$60
+          </p>
+          <p className="text-xs text-slate-600 mb-4 font-medium">
+            50+ industries covered
           </p>
 
           <Button
@@ -295,12 +349,60 @@ export default function PricingSuperCard() {
                 Processing...
               </>
             ) : (
-              'Unlock Lifetime'
+              'Buy Once, Forever'
             )}
           </Button>
         </motion.div>
 
-        <p className="text-xs text-center text-slate-500 mt-2">
+        {/* Testimonial - Mobile */}
+        <div className="rounded-lg border bg-slate-100 p-4 shadow-sm mt-4">
+          <p className="text-sm italic text-slate-700 leading-relaxed mb-2 text-center">
+            &ldquo;Rambling → confident in 3 days. Got 2/3 offers.&rdquo;
+          </p>
+          <p className="text-xs font-semibold text-slate-800 text-center">
+            - Marcus T., SWE at Atlassian
+          </p>
+        </div>
+
+        {/* FAQ - Mobile */}
+        <div className="mt-6 space-y-4">
+          <h3 className="text-lg font-bold text-slate-900 text-center mb-4">
+            Common Questions
+          </h3>
+
+          <div className="space-y-3">
+            <div className="bg-slate-50 rounded-lg p-3">
+              <p className="text-xs font-semibold text-slate-900 mb-1">
+                Q: Can&apos;t I just practice with friends?
+              </p>
+              <p className="text-xs text-slate-700 leading-relaxed">
+                A: Will they catch your STAR format mistakes? Ask real company
+                questions? Track your &apos;um&apos; count? Probably not.
+              </p>
+            </div>
+
+            <div className="bg-slate-50 rounded-lg p-3">
+              <p className="text-xs font-semibold text-slate-900 mb-1">
+                Q: Is AI as good as human feedback?
+              </p>
+              <p className="text-xs text-slate-700 leading-relaxed">
+                A: Our AI trained on Google, Microsoft, Goldman, McKinsey
+                interviews. It&apos;s seen more than any human coach.
+              </p>
+            </div>
+
+            <div className="bg-slate-50 rounded-lg p-3">
+              <p className="text-xs font-semibold text-slate-900 mb-1">
+                Q: What if it doesn&apos;t work?
+              </p>
+              <p className="text-xs text-slate-700 leading-relaxed">
+                A: Not confident after 3 sessions? Email for refund.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <p className="text-xs text-center text-slate-500 mt-6">
           All plans include full access to every feature
         </p>
         <p className="text-xs text-center text-slate-400 mt-4">
@@ -324,11 +426,14 @@ export default function PricingSuperCard() {
       >
         {/* Header */}
         <div className="text-center mb-12">
+          <p className="text-sm text-slate-500 mb-2 italic">
+            Join 2,847 job seekers who practiced this week
+          </p>
           <h2 className="text-4xl font-bold bg-gradient-to-r from-[#3E8BFF] to-[#3DCBFF] bg-clip-text text-transparent mb-3">
-            Choose Your Access
+            Get Interview-Ready Fast
           </h2>
           <p className="text-lg text-slate-600">
-            One-time payment · Immediate access
+            One payment. No subscription. Start practicing in 60 seconds.
           </p>
         </div>
 
@@ -379,16 +484,47 @@ export default function PricingSuperCard() {
               </div>
 
               {/* Plan Name */}
-              <h3 className="text-xl font-bold text-center mb-4 text-slate-900">
+              <h3 className="text-xl font-bold text-center mb-2 text-slate-900">
                 {plan.name}
               </h3>
 
+              {/* Plan-specific headline - Desktop */}
+              <p className="text-sm font-semibold text-slate-700 mb-2 text-center">
+                {plan.id === '48h' && "Interview in 48 hours? We've got you."}
+                {plan.id === '7d' && 'The proven path to interview confidence'}
+                {plan.id === '30d' && 'Transform from nervous to natural'}
+              </p>
+
+              {/* Plan-specific subhead - Desktop */}
+              <p className="text-xs text-slate-600 mb-3 text-center leading-relaxed min-h-[48px]">
+                {plan.id === '48h' &&
+                  'Unlimited practice sessions with AI trained on real S&P 500 interviews'}
+                {plan.id === '7d' &&
+                  "One week of unlimited practice. Master your answers, eliminate your 'ums', nail the tough questions."}
+                {plan.id === '30d' &&
+                  'A full month to practice every question type, every industry, every scenario. Track your progress. Watch yourself improve.'}
+              </p>
+
               {/* Price */}
-              <div className="text-center mb-6">
+              <div className="text-center mb-3">
                 <div className="text-4xl font-bold text-slate-900 mb-1">
                   {plan.price}
                 </div>
-                <p className="text-xs text-slate-500">one-time</p>
+                <p className="text-xs text-slate-500 mb-1">
+                  {plan.id === '48h' && '48 hours of full access'}
+                  {plan.id === '7d' &&
+                    "7 days of full access | That's A$8.57/day - less than two coffees"}
+                  {plan.id === '30d' &&
+                    '30 days unlimited | Just A$3.33/day for a month'}
+                </p>
+                <p className="text-xs text-slate-600 font-medium">
+                  {plan.id === '48h' &&
+                    'Most users practice 4-6 times and feel confident'}
+                  {plan.id === '7d' &&
+                    'Average user completes 8 practice interviews'}
+                  {plan.id === '30d' &&
+                    'Best for career changers and senior roles'}
+                </p>
               </div>
 
               {/* CTA */}
@@ -452,16 +588,30 @@ export default function PricingSuperCard() {
             </div>
 
             {/* Plan Name */}
-            <h3 className="text-xl font-bold text-center mb-4 bg-gradient-to-r from-[#3E8BFF] to-[#3DCBFF] bg-clip-text text-transparent">
+            <h3 className="text-xl font-bold text-center mb-2 bg-gradient-to-r from-[#3E8BFF] to-[#3DCBFF] bg-clip-text text-transparent">
               Lifetime Access
             </h3>
 
+            <p className="text-sm font-semibold text-slate-700 mb-2 text-center">
+              Never pay for interview prep again
+            </p>
+
+            <p className="text-xs text-slate-600 mb-3 text-center leading-relaxed min-h-[48px]">
+              Unlimited practice forever. Every promotion, every job change,
+              every career pivot - you&apos;re covered.
+            </p>
+
             {/* Price */}
-            <div className="text-center mb-6">
+            <div className="text-center mb-3">
               <div className="text-4xl font-bold text-slate-900 mb-1">
                 A$199.99
               </div>
-              <p className="text-xs text-slate-500">one-time</p>
+              <p className="text-xs text-slate-500 mb-1">
+                unlimited forever | Save A$60 vs. buying 30-day passes twice
+              </p>
+              <p className="text-xs text-slate-600 font-medium">
+                Used by professionals across 50+ industries
+              </p>
             </div>
 
             {/* CTA */}
@@ -476,11 +626,33 @@ export default function PricingSuperCard() {
                   Processing...
                 </>
               ) : (
-                'Unlock Lifetime'
+                'Buy Once, Practice Forever'
               )}
             </Button>
           </motion.div>
         </div>
+
+        {/* Testimonial - Desktop */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{
+            duration: 0.6,
+            delay: 0.4,
+            ease: [0.22, 1, 0.36, 1],
+          }}
+          className="bg-slate-100 rounded-2xl border border-slate-200 shadow-md p-8 mb-12"
+        >
+          <div className="text-center max-w-3xl mx-auto space-y-3">
+            <p className="text-xl italic text-slate-700 leading-relaxed">
+              &ldquo;I went from rambling messes to confident 2-minute answers
+              in 3 days. Got offers from 2 out of 3 companies.&rdquo;
+            </p>
+            <p className="text-base font-semibold text-slate-800">
+              - Marcus T., Software Engineer, now at Atlassian
+            </p>
+          </div>
+        </motion.div>
 
         {/* Features Section - Desktop */}
         <motion.div
@@ -497,7 +669,7 @@ export default function PricingSuperCard() {
             Every Plan Includes
           </h4>
           <div className="grid grid-cols-3 gap-x-8 gap-y-4">
-            {SHARED_FEATURES.map((item, i) => (
+            {SHARED_FEATURES_DESKTOP.map((item, i) => (
               <motion.div
                 key={i}
                 initial={{ opacity: 0, x: -15 }}
@@ -518,7 +690,58 @@ export default function PricingSuperCard() {
           </div>
         </motion.div>
 
-        <p className="text-sm text-center text-slate-500 mt-8">
+        {/* FAQ - Desktop */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{
+            duration: 0.6,
+            delay: 0.6,
+            ease: [0.22, 1, 0.36, 1],
+          }}
+          className="mt-12 max-w-4xl mx-auto"
+        >
+          <h3 className="text-2xl font-bold text-slate-900 text-center mb-8">
+            Common Questions
+          </h3>
+
+          <div className="space-y-6">
+            <div className="bg-slate-50 rounded-lg p-6">
+              <p className="text-base font-semibold text-slate-900 mb-2">
+                Q: &quot;But I can practice with friends for free?&quot;
+              </p>
+              <p className="text-sm text-slate-700 leading-relaxed">
+                A: Sure. But will they tell you exactly why your answer to
+                &apos;Tell me about a time you failed&apos; isn&apos;t STAR
+                format? Will they ask you questions that ACTUAL companies ask?
+                Will they track your &apos;um&apos; count?
+              </p>
+            </div>
+
+            <div className="bg-slate-50 rounded-lg p-6">
+              <p className="text-base font-semibold text-slate-900 mb-2">
+                Q: &quot;Is AI feedback as good as human feedback?&quot;
+              </p>
+              <p className="text-sm text-slate-700 leading-relaxed">
+                A: Our AI is trained on interview data from Google, Microsoft,
+                Goldman Sachs, McKinsey and 496 other top companies. It&apos;s
+                seen more interviews than any human coach ever will.
+              </p>
+            </div>
+
+            <div className="bg-slate-50 rounded-lg p-6">
+              <p className="text-base font-semibold text-slate-900 mb-2">
+                Q: &quot;What if it doesn&apos;t work for me?&quot;
+              </p>
+              <p className="text-sm text-slate-700 leading-relaxed">
+                A: If you&apos;re not more confident after your first 3 practice
+                interviews, email us and we&apos;ll refund you. Simple.
+              </p>
+            </div>
+          </div>
+        </motion.div>
+
+        <p className="text-sm text-center text-slate-500 mt-12">
           All plans provide full access to every feature during your selected
           timeframe
         </p>
