@@ -4,10 +4,20 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import { Zap, Target, Award, TrendingUp, ArrowRight } from 'lucide-react';
+import {
+  Zap,
+  Target,
+  Award,
+  TrendingUp,
+  ArrowRight,
+  CheckCircle2,
+  Users,
+  Briefcase,
+} from 'lucide-react';
 import { MobileCTA } from '@/components/marketing/MobileCTA';
 import { Footer } from '@/components/Footer';
 import { createClient } from '@/lib/supabase-client';
+import { QuickTryWidget } from '@/components/landing/QuickTryWidget';
 
 /**
  * Mobile Landing Page (Hormozi Offer Stack)
@@ -39,29 +49,48 @@ export default function MobileLandingPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white via-cyan-50/30 to-blue-50/50 pb-24">
-      {/* Hero Section - Pain + Dream Outcome */}
-      <section className="px-6 pt-12 pb-8 text-center">
-        <div className="mb-3">
-          <span className="inline-block px-4 py-1.5 bg-blue-50 text-blue-700 rounded-full text-sm font-medium">
-            For Job Seekers
-          </span>
+      {/* Hero Section with QuickTryWidget */}
+      <section className="px-6 pt-12 pb-8">
+        {/* Headline */}
+        <div className="text-center mb-6">
+          <h1 className="text-3xl font-bold leading-tight mb-3">
+            Try a Real Interview Question{' '}
+            <span className="bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
+              Now
+            </span>
+          </h1>
+          <p className="text-base text-gray-600">
+            No signup required. Instant feedback.
+          </p>
         </div>
 
-        <h1 className="text-4xl font-bold leading-tight mb-4">
-          Job Interview Practice —{' '}
-          <span className="bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
-            That Feels Like The Real Thing
-          </span>
-        </h1>
+        {/* Trust badges */}
+        <div className="flex flex-wrap items-center justify-center gap-3 mb-6 text-xs text-gray-600">
+          <div className="flex items-center gap-1">
+            <CheckCircle2 className="w-3 h-3 text-primary" />
+            <span>10,000+ real interviews</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <Users className="w-3 h-3 text-primary" />
+            <span>2,847 this week</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <Briefcase className="w-3 h-3 text-primary" />
+            <span>50+ industries</span>
+          </div>
+        </div>
 
-        <p className="text-lg text-gray-600 mb-8 leading-relaxed">
-          Practice real-world interviews with AI built from real hiring data
-          used by top global companies — and get instant feedback that helps you
-          improve fast.
-        </p>
+        {/* QuickTry Widget */}
+        <div className="mb-8">
+          <QuickTryWidget />
+        </div>
 
-        {/* Main CTA Button */}
-        <div className="px-6 mb-3">
+        {/* CTA Below Widget */}
+        <div className="text-center">
+          <h2 className="text-xl font-bold mb-2">Want the full experience?</h2>
+          <p className="text-sm text-gray-600 mb-4">
+            Get your complete 3-question assessment with detailed feedback
+          </p>
           <Button
             asChild
             size="lg"
@@ -72,14 +101,13 @@ export default function MobileLandingPage() {
               href={ctaHref}
               className="flex items-center justify-center gap-2"
             >
-              {isLoading ? 'Loading...' : 'Start Free Interview'}
+              {isLoading
+                ? 'Loading...'
+                : 'Start My Free 3-Question Assessment →'}
               {!isLoading && <ArrowRight className="w-5 h-5" />}
             </Link>
           </Button>
         </div>
-        <p className="text-xs text-gray-500 text-center mb-6">
-          3 questions • Text-based only • No credit card needed
-        </p>
       </section>
 
       {/* Features */}
