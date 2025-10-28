@@ -43,6 +43,28 @@ export default function AssessmentSetupPage() {
     checkAuth();
   }, [router]);
 
+  // T30: Read from sessionStorage and prefill job title
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const stored = sessionStorage.getItem('quicktry');
+      if (stored) {
+        try {
+          const data = JSON.parse(stored);
+          if (data.role) {
+            setJobTitle(data.role);
+            // T32: Track that user came from preview widget
+            track({
+              name: 'preview_to_assessment_start',
+              payload: { role: data.role },
+            });
+          }
+        } catch (e) {
+          console.error('Failed to parse quicktry data:', e);
+        }
+      }
+    }
+  }, []);
+
   const handleTurnstileVerify = (token: string) => {
     setTurnstileToken(token);
     track({ name: 'turnstile_verified' });
@@ -102,6 +124,10 @@ export default function AssessmentSetupPage() {
         setIsSubmitting(false);
       } else {
         track({ name: 'assessment_started', payload: { jobTitle } });
+        // T31: Clear sessionStorage after successful setup
+        if (typeof window !== 'undefined') {
+          sessionStorage.removeItem('quicktry');
+        }
         // Show preparing overlay before redirecting
         setPendingRedirect(result.redirectUrl);
         setShowPreparing(true);

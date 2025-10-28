@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { previewQuestions } from '@/lib/previewQuestions';
 import { analyzeAnswer, type FeedbackPoint } from '@/lib/preview-feedback';
@@ -153,9 +154,11 @@ export function QuickTryWidget() {
           Get Instant Feedback
         </Button>
       ) : (
-        <Button className="w-full min-h-[44px] text-base" size="lg">
-          Get Your Full 3-Question Assessment →
-        </Button>
+        <Link href="/assessment/setup?source=quicktry" className="block">
+          <Button className="w-full min-h-[44px] text-base" size="lg">
+            Get Your Full 3-Question Assessment →
+          </Button>
+        </Link>
       )}
     </div>
   );
