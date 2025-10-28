@@ -15,9 +15,13 @@ import {
   Target,
   Brain,
   BarChart3,
+  CheckCircle2,
+  Users,
+  Briefcase,
 } from 'lucide-react';
 import { Metadata } from 'next';
 import { createClient } from '@/lib/supabase-server';
+import { QuickTryWidget } from '@/components/landing/QuickTryWidget';
 
 export const metadata: Metadata = {
   title:
@@ -74,32 +78,55 @@ export default async function Home() {
 
         <div className="relative container mx-auto px-6 pt-32 pb-24">
           <div className="max-w-4xl mx-auto text-center space-y-8">
-            {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium">
-              <Zap className="w-4 h-4" />
-              <span>Powered by GPT-4 & Real Company Data</span>
-            </div>
-
             {/* Headline */}
-            <h1 className="text-5xl sm:text-6xl md:text-7xl font-bold tracking-tight">
-              Prepare for real interviews with{' '}
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight">
+              Try a Real Interview Question{' '}
               <span className="bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
-                AI trained on S&P 500 companies
+                Now
               </span>
             </h1>
 
             {/* Subheadline */}
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Experience an adaptive, conversational AI interview that mirrors
-              real hiring panels. Each question evolves based on your responses,
-              following proven industry interview frameworks used by the
-              world&apos;s top companies.
+            <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto">
+              No signup required. Instant feedback.
             </p>
 
+            {/* Trust badges */}
+            <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-sm text-muted-foreground">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-primary" />
+                <span>10,000+ real interviews</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Users className="w-4 h-4 text-primary" />
+                <span>2,847 practiced this week</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Briefcase className="w-4 h-4 text-primary" />
+                <span>50+ industries</span>
+              </div>
+            </div>
+          </div>
+
+          {/* QuickTry Widget */}
+          <div className="mt-12">
+            <QuickTryWidget />
+          </div>
+
+          {/* Social Proof / Benefits Below Widget */}
+          <div className="mt-16 max-w-4xl mx-auto">
+            <div className="text-center mb-8">
+              <h2 className="text-2xl sm:text-3xl font-bold mb-4">
+                Want the full experience?
+              </h2>
+              <p className="text-muted-foreground">
+                Get your complete 3-question assessment with detailed feedback
+              </p>
+            </div>
+
             {/* CTAs */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               {user && hasActivePass ? (
-                // User has active pass - show premium setup
                 <>
                   <Link href="/setup">
                     <Button
@@ -121,15 +148,13 @@ export default async function Home() {
                   </Link>
                 </>
               ) : (
-                // No active pass or not logged in - show free+upgrade CTAs
                 <>
                   <Link href="/assessment/setup">
                     <Button
                       size="lg"
                       className="text-lg px-8 py-6 shadow-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700"
                     >
-                      Start Free Assessment
-                      <ArrowRight className="ml-2 h-5 w-5" />
+                      Start My Free 3-Question Assessment →
                     </Button>
                   </Link>
                   <Link href="/pricing">
@@ -144,12 +169,6 @@ export default async function Home() {
                 </>
               )}
             </div>
-
-            {/* Social proof */}
-            <p className="text-sm text-muted-foreground">
-              Trusted by candidates interviewing at Google, Amazon, Meta, and
-              more
-            </p>
           </div>
         </div>
       </section>

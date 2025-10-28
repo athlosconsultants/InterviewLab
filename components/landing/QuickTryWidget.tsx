@@ -52,7 +52,7 @@ export function QuickTryWidget() {
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto bg-white rounded-2xl shadow-lg p-6">
+    <div className="w-full max-w-2xl mx-auto bg-white rounded-2xl shadow-lg p-4 sm:p-6">
       {/* Role Dropdown */}
       <div className="mb-4">
         <label
@@ -65,7 +65,7 @@ export function QuickTryWidget() {
           id="role-select"
           value={selectedRole}
           onChange={(e) => setSelectedRole(e.target.value)}
-          className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          className="w-full rounded-md border border-input bg-transparent px-3 py-3 sm:py-2 text-base shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring min-h-[44px]"
         >
           <option value="">Choose a role...</option>
           {ROLES.map((role) => (
@@ -148,12 +148,12 @@ export function QuickTryWidget() {
         <Button
           disabled={!isAnswerValid}
           onClick={handleSubmit}
-          className="w-full"
+          className="w-full min-h-[44px] text-base"
         >
           Get Instant Feedback
         </Button>
       ) : (
-        <Button className="w-full" size="lg">
+        <Button className="w-full min-h-[44px] text-base" size="lg">
           Get Your Full 3-Question Assessment →
         </Button>
       )}
