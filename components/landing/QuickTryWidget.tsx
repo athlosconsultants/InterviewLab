@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { previewQuestions } from '@/lib/previewQuestions';
 import { analyzeAnswer, type FeedbackPoint } from '@/lib/preview-feedback';
+import { track } from '@/lib/analytics';
 
 const ROLES = [
   'Software Engineer',
@@ -25,9 +26,38 @@ export function QuickTryWidget() {
   const minChars = 200;
   const isAnswerValid = charCount >= minChars;
 
+  // T40: Track widget load
+  React.useEffect(() => {
+    track({ name: 'preview_widget_load' });
+  }, []);
+
+  // T40: Track role selection
+  const handleRoleChange = (role: string) => {
+    setSelectedRole(role);
+    if (role) {
+      track({ name: 'preview_role_selected', payload: { role } });
+    }
+  };
+
+  // T40: Track answer typed (>200 chars)
+  React.useEffect(() => {
+    if (charCount >= minChars && !feedback) {
+      track({ name: 'preview_answer_typed', payload: { charCount } });
+    }
+  }, [charCount, minChars, feedback]);
+
   const handleSubmit = () => {
+    // T40: Track submit clicked
+    track({ name: 'preview_submit_clicked', payload: { role: selectedRole } });
+
     const result = analyzeAnswer(answer);
     setFeedback(result);
+
+    // T40: Track feedback shown
+    track({
+      name: 'preview_feedback_shown',
+      payload: { role: selectedRole, feedbackCount: result.length },
+    });
 
     // Store to sessionStorage for carryover to assessment
     if (typeof window !== 'undefined') {
@@ -65,7 +95,7 @@ export function QuickTryWidget() {
         <select
           id="role-select"
           value={selectedRole}
-          onChange={(e) => setSelectedRole(e.target.value)}
+          onChange={(e) => handleRoleChange(e.target.value)}
           className="w-full rounded-md border border-input bg-transparent px-3 py-3 sm:py-2 text-base shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring min-h-[44px]"
         >
           <option value="">Choose a role...</option>
@@ -154,7 +184,17 @@ export function QuickTryWidget() {
           Get Instant Feedback
         </Button>
       ) : (
-        <Link href="/assessment/setup?source=quicktry" className="block">
+        <Link
+          href="/assessment/setup?source=quicktry"
+          className="block"
+          onClick={() => {
+            // T40: Track CTA clicked
+            track({
+              name: 'preview_cta_clicked',
+              payload: { role: selectedRole },
+            });
+          }}
+        >
           <Button className="w-full min-h-[44px] text-base" size="lg">
             Get Your Full 3-Question Assessment →
           </Button>
