@@ -26,6 +26,15 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 OPENAI_API_KEY=sk-your-openai-api-key-here
 ```
 
+### Admin Dashboard Authentication
+
+```bash
+ADMIN_USERNAME=your-admin-username
+ADMIN_PASSWORD=your-secure-password
+```
+
+**Important:** Choose a strong password for production. The admin dashboard at `/admin/*` is protected by these credentials.
+
 ## How to Get API Keys
 
 ### Supabase
