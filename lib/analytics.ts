@@ -177,18 +177,35 @@ export function trackTiming(
 
 /**
  * Simple analytics tracker for client-side events
- * In a real app, you'd wire this to PostHog, Segment, etc.
+ * Sends events to database via API endpoint
  */
 export function track(event: {
   name: string;
   payload?: Record<string, unknown>;
 }) {
+  // Always log in development
   if (process.env.NODE_ENV === 'development') {
     console.log('📈 Analytics event:', event);
   }
-  // In production, you would add your analytics provider's tracking code here.
-  // For example:
-  // if (typeof window !== 'undefined' && window.posthog) {
-  //   window.posthog.capture(event.name, event.payload);
-  // }
+
+  // Send to server (non-blocking)
+  if (typeof window !== 'undefined') {
+    // Fire and forget - don't await to avoid blocking UI
+    fetch('/api/analytics/track', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        event_name: event.name,
+        payload: event.payload || {},
+        user_agent: navigator.userAgent,
+      }),
+      // Use keepalive to ensure event sends even if user navigates away
+      keepalive: true,
+    }).catch((error) => {
+      // Silently fail - analytics shouldn't break the app
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Failed to track event:', error);
+      }
+    });
+  }
 }

@@ -1,50 +1,89 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getStoredEvents, clearStoredEvents } from '@/lib/analytics';
 import { Button } from '@/components/ui/button';
 
+interface AnalyticsEvent {
+  id: string;
+  event_name: string;
+  user_id: string | null;
+  payload: Record<string, any>;
+  user_agent: string | null;
+  ip_address: string | null;
+  created_at: string;
+}
+
 export default function AnalyticsDebugPage() {
-  const [events, setEvents] = useState<any[]>([]);
+  const [events, setEvents] = useState<AnalyticsEvent[]>([]);
   const [filter, setFilter] = useState<string>('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [total, setTotal] = useState(0);
 
   useEffect(() => {
     loadEvents();
   }, []);
 
-  const loadEvents = () => {
-    const stored = getStoredEvents();
-    setEvents(stored);
-  };
-
-  const handleClear = () => {
-    if (confirm('Clear all analytics events?')) {
-      clearStoredEvents();
-      setEvents([]);
+  const loadEvents = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await fetch('/api/analytics/events?limit=500');
+      if (!response.ok) {
+        throw new Error('Failed to fetch events');
+      }
+      const data = await response.json();
+      setEvents(data.events || []);
+      setTotal(data.total || 0);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load events');
+      console.error('Failed to load analytics:', err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const filteredEvents = filter
-    ? events.filter((e) => e.name?.toLowerCase().includes(filter.toLowerCase()))
+    ? events.filter((e) =>
+        e.event_name?.toLowerCase().includes(filter.toLowerCase())
+      )
     : events;
 
   // Group by event name for summary
   const eventCounts = events.reduce(
     (acc, e) => {
-      acc[e.name] = (acc[e.name] || 0) + 1;
+      acc[e.event_name] = (acc[e.event_name] || 0) + 1;
       return acc;
     },
     {} as Record<string, number>
   );
 
+  if (isLoading) {
+    return (
+      <main className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-600 mx-auto mb-4"></div>
+          <p className="text-slate-600">Loading analytics...</p>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="min-h-screen bg-slate-50 p-8">
       <div className="max-w-6xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Analytics Debug Dashboard</h1>
+          <h1 className="text-3xl font-bold mb-2">
+            Analytics Dashboard (Production)
+          </h1>
           <p className="text-slate-600">
-            Viewing {events.length} events from localStorage
+            Viewing {events.length} of {total} total events from database
           </p>
+          {error && (
+            <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg text-red-900 text-sm">
+              {error}
+            </div>
+          )}
         </div>
 
         {/* Summary Cards */}
@@ -100,11 +139,8 @@ export default function AnalyticsDebugPage() {
             onChange={(e) => setFilter(e.target.value)}
             className="flex-1 px-4 py-2 border rounded-lg"
           />
-          <Button onClick={loadEvents} variant="outline">
-            Refresh
-          </Button>
-          <Button onClick={handleClear} variant="destructive">
-            Clear All
+          <Button onClick={loadEvents} variant="outline" disabled={isLoading}>
+            {isLoading ? 'Loading...' : 'Refresh'}
           </Button>
         </div>
 
@@ -131,13 +167,13 @@ export default function AnalyticsDebugPage() {
                     .slice()
                     .reverse()
                     .map((event, idx) => (
-                      <tr key={idx} className="border-b hover:bg-slate-50">
+                      <tr key={event.id} className="border-b hover:bg-slate-50">
                         <td className="p-4 text-sm text-slate-600">
-                          {new Date(event.timestamp).toLocaleString()}
+                          {new Date(event.created_at).toLocaleString()}
                         </td>
                         <td className="p-4">
                           <code className="text-sm bg-slate-100 px-2 py-1 rounded">
-                            {event.name}
+                            {event.event_name}
                           </code>
                         </td>
                         <td className="p-4">
