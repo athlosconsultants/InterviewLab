@@ -109,7 +109,7 @@ export function QuickTryWidget() {
 
       {/* Question Display */}
       {question && (
-        <div className="mb-6 p-4 bg-slate-50 rounded-lg border border-slate-200">
+        <div className="mb-6 p-4 bg-slate-50 rounded-lg border border-slate-200 animate-in fade-in slide-in-from-top-2 duration-300">
           <p className="text-sm font-medium text-slate-900 leading-relaxed">
             {question}
           </p>
@@ -152,7 +152,7 @@ export function QuickTryWidget() {
 
       {/* Feedback Section */}
       {feedback && (
-        <div className="mb-6 space-y-3">
+        <div className="mb-6 space-y-3 animate-in fade-in slide-in-from-bottom-4 duration-500">
           <h3 className="text-lg font-semibold text-slate-900">
             Your Feedback
           </h3>
@@ -160,7 +160,8 @@ export function QuickTryWidget() {
             {feedback.map((point, index) => (
               <li
                 key={index}
-                className="flex items-start gap-3 p-3 rounded-lg bg-slate-50 border border-slate-200"
+                className="flex items-start gap-3 p-3 rounded-lg bg-slate-50 border border-slate-200 animate-in fade-in slide-in-from-left-2 duration-300"
+                style={{ animationDelay: `${index * 100}ms` }}
               >
                 <span className="text-lg flex-shrink-0">
                   {getIcon(point.type)}
@@ -179,14 +180,15 @@ export function QuickTryWidget() {
         <Button
           disabled={!isAnswerValid}
           onClick={handleSubmit}
-          className="w-full min-h-[44px] text-base"
+          className="w-full min-h-[44px] text-base transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
         >
           Get Instant Feedback
         </Button>
       ) : (
         <Link
           href="/assessment/setup?source=quicktry"
-          className="block"
+          className="block animate-in fade-in zoom-in-95 duration-300"
+          style={{ animationDelay: `${feedback.length * 100 + 200}ms` }}
           onClick={() => {
             // T40: Track CTA clicked
             track({
@@ -195,7 +197,7 @@ export function QuickTryWidget() {
             });
           }}
         >
-          <Button className="w-full min-h-[44px] text-base" size="lg">
+          <Button className="w-full min-h-[44px] text-base transition-all duration-200 hover:scale-[1.02] hover:shadow-lg active:scale-[0.98]">
             Get Your Full 3-Question Assessment →
           </Button>
         </Link>
