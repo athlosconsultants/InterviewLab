@@ -35,6 +35,21 @@ ADMIN_PASSWORD=your-secure-password
 
 **Important:** Choose a strong password for production. The admin dashboard at `/admin/*` is protected by these credentials.
 
+### Cron Job Security
+
+```bash
+CRON_SECRET=your-random-secret-string-here
+```
+
+**Important:** Generate a random secret for production. This protects the `/api/regenerate-preview-questions` endpoint from unauthorized access. Only Vercel Cron jobs with this secret can trigger question regeneration.
+
+**Generating a secure secret:**
+
+```bash
+openssl rand -base64 32
+# Or use: node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
+```
+
 ## How to Get API Keys
 
 ### Supabase

@@ -1,8 +1,40 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase-server';
 
+/**
+ * Verify admin access for analytics endpoint
+ */
+function isAdminAuthorized(request: NextRequest): boolean {
+  const authHeader = request.headers.get('authorization');
+  const adminUsername = process.env.ADMIN_USERNAME;
+  const adminPassword = process.env.ADMIN_PASSWORD;
+
+  if (!adminUsername || !adminPassword || !authHeader) {
+    return false;
+  }
+
+  const base64Credentials = authHeader.split(' ')[1];
+  if (!base64Credentials) {
+    return false;
+  }
+
+  const credentials = Buffer.from(base64Credentials, 'base64').toString(
+    'ascii'
+  );
+  const [username, password] = credentials.split(':');
+  return username === adminUsername && password === adminPassword;
+}
+
 export async function GET(request: NextRequest) {
   try {
+    // SECURITY: Only admins can view analytics events
+    if (!isAdminAuthorized(request)) {
+      return NextResponse.json(
+        { error: 'Unauthorized. Admin credentials required.' },
+        { status: 401 }
+      );
+    }
+
     const supabase = await createClient();
 
     // Get query parameters

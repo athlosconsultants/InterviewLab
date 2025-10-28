@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { openai, MODELS } from '@/lib/openai';
 import { createClient } from '@/lib/supabase-server';
 
@@ -13,11 +13,42 @@ const ROLES = [
 ];
 
 /**
+ * Verify the request is from Vercel Cron or an authorized admin
+ */
+function isAuthorized(request: NextRequest): boolean {
+  // Check for Vercel Cron secret
+  const authHeader = request.headers.get('authorization');
+  const cronSecret = process.env.CRON_SECRET;
+
+  if (cronSecret && authHeader === `Bearer ${cronSecret}`) {
+    return true;
+  }
+
+  // Fallback: Check for admin credentials (for manual triggering)
+  const adminUsername = process.env.ADMIN_USERNAME;
+  const adminPassword = process.env.ADMIN_PASSWORD;
+
+  if (adminUsername && adminPassword && authHeader) {
+    const base64Credentials = authHeader.split(' ')[1];
+    if (base64Credentials) {
+      const credentials = Buffer.from(base64Credentials, 'base64').toString(
+        'ascii'
+      );
+      const [username, password] = credentials.split(':');
+      return username === adminUsername && password === adminPassword;
+    }
+  }
+
+  return false;
+}
+
+/**
  * T62 & T63: Generate preview questions using premium interview prompt logic
  * This endpoint generates 8-12 high-quality behavioral questions per role
  * and stores them in the preview_questions table for random serving
  *
  * T64: Called hourly by Vercel Cron job
+ * SECURITY: Protected by CRON_SECRET or admin Basic Auth
  */
 async function regenerateQuestions() {
   try {
@@ -201,12 +232,34 @@ Return ONLY a JSON array of strings (the questions), no other text:
   }
 }
 
-// T64: Support GET for Vercel Cron
-export async function GET() {
+// T64: Support GET for Vercel Cron (with auth check)
+export async function GET(request: NextRequest) {
+  // SECURITY: Verify authorization
+  if (!isAuthorized(request)) {
+    return NextResponse.json(
+      {
+        error:
+          'Unauthorized. This endpoint requires CRON_SECRET or admin credentials.',
+      },
+      { status: 401 }
+    );
+  }
+
   return regenerateQuestions();
 }
 
-// Also support POST for manual triggering
-export async function POST() {
+// Also support POST for manual triggering (with auth check)
+export async function POST(request: NextRequest) {
+  // SECURITY: Verify authorization
+  if (!isAuthorized(request)) {
+    return NextResponse.json(
+      {
+        error:
+          'Unauthorized. This endpoint requires CRON_SECRET or admin credentials.',
+      },
+      { status: 401 }
+    );
+  }
+
   return regenerateQuestions();
 }

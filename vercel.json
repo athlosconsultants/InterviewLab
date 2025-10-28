@@ -2,7 +2,13 @@
   "crons": [
     {
       "path": "/api/regenerate-preview-questions",
-      "schedule": "0 * * * *"
+      "schedule": "0 * * * *",
+      "headers": [
+        {
+          "key": "Authorization",
+          "value": "Bearer $CRON_SECRET"
+        }
+      ]
     }
   ]
 }

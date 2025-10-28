@@ -28,8 +28,30 @@ export default function AnalyticsDebugPage() {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch('/api/analytics/events?limit=500');
+      // Get admin session token from sessionStorage
+      const sessionToken = sessionStorage.getItem('admin_session');
+      if (!sessionToken) {
+        throw new Error(
+          'Not authenticated. Please refresh the page and log in again.'
+        );
+      }
+
+      // Decode session token to get credentials
+      const credentials = JSON.parse(atob(sessionToken));
+      const basicAuth = btoa(`${credentials.username}:${credentials.password}`);
+
+      const response = await fetch('/api/analytics/events?limit=500', {
+        headers: {
+          Authorization: `Basic ${basicAuth}`,
+        },
+      });
+
       if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error(
+            'Unauthorized. Please refresh the page and log in again.'
+          );
+        }
         throw new Error('Failed to fetch events');
       }
       const data = await response.json();
