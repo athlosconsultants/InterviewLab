@@ -7,21 +7,22 @@ import { previewQuestions } from '@/lib/previewQuestions';
 import { analyzeAnswer, type FeedbackPoint } from '@/lib/preview-feedback';
 import { track } from '@/lib/analytics';
 
+// T65: Updated roles to match API
 const ROLES = [
   'Software Engineer',
   'Product Manager',
+  'Data Scientist',
+  'Designer',
   'Marketing Manager',
-  'Data Analyst',
-  'Sales Representative',
-  'UX Designer',
+  'Consultant',
 ];
 
 export function QuickTryWidget() {
   const [selectedRole, setSelectedRole] = React.useState<string>('');
   const [answer, setAnswer] = React.useState<string>('');
   const [feedback, setFeedback] = React.useState<FeedbackPoint[] | null>(null);
-
-  const question = selectedRole ? previewQuestions[selectedRole] : null;
+  const [question, setQuestion] = React.useState<string | null>(null);
+  const [isLoadingQuestion, setIsLoadingQuestion] = React.useState(false);
   const charCount = answer.length;
   const minChars = 200;
   const isAnswerValid = charCount >= minChars;
@@ -30,6 +31,44 @@ export function QuickTryWidget() {
   React.useEffect(() => {
     track({ name: 'preview_widget_load' });
   }, []);
+
+  // T65: Fetch question from API when role changes
+  React.useEffect(() => {
+    if (!selectedRole) {
+      setQuestion(null);
+      return;
+    }
+
+    // Reset answer and feedback when role changes
+    setAnswer('');
+    setFeedback(null);
+
+    // Fetch question from API
+    setIsLoadingQuestion(true);
+    fetch(`/api/preview-question?role=${encodeURIComponent(selectedRole)}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.question) {
+          setQuestion(data.question);
+          // T67: Track question served
+          track({
+            name: 'preview_question_served',
+            payload: { role: selectedRole, source: data.source },
+          });
+        } else {
+          // Fallback to static question
+          setQuestion(previewQuestions[selectedRole] || null);
+        }
+      })
+      .catch((error) => {
+        console.error('Failed to fetch question:', error);
+        // Fallback to static question
+        setQuestion(previewQuestions[selectedRole] || null);
+      })
+      .finally(() => {
+        setIsLoadingQuestion(false);
+      });
+  }, [selectedRole]);
 
   // T40: Track role selection
   const handleRoleChange = (role: string) => {
@@ -108,7 +147,13 @@ export function QuickTryWidget() {
       </div>
 
       {/* Question Display */}
-      {question && (
+      {isLoadingQuestion && (
+        <div className="mb-6 p-4 bg-slate-50 rounded-lg border border-slate-200 animate-pulse">
+          <div className="h-4 bg-slate-300 rounded w-3/4 mb-2"></div>
+          <div className="h-4 bg-slate-300 rounded w-1/2"></div>
+        </div>
+      )}
+      {!isLoadingQuestion && question && (
         <div className="mb-6 p-4 bg-slate-50 rounded-lg border border-slate-200 animate-in fade-in slide-in-from-top-2 duration-300">
           <p className="text-sm font-medium text-slate-900 leading-relaxed">
             {question}

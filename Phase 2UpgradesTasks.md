@@ -186,6 +186,82 @@
 
 ---
 
+Phase 6 — Dynamic Preview Question Generation & Caching
+
+Goal: Introduce dynamic, non-repetitive preview questions using cached OpenAI-generated variants per role, refreshed hourly.
+
+T60. Create Supabase table
+
+Start: none
+
+Do: SQL migration for preview_questions (id, role, question, created_at) with index on role
+
+End/Verify: supabase db push; table exists
+
+T61. Implement /api/preview-question
+
+Start: none
+
+Do: add GET route that selects up to 10 cached questions by role and returns one at random
+
+End/Verify: calling endpoint returns random question JSON
+
+T62. Build generator route /api/regenerate-preview-questions
+
+Start: none
+
+Do: loop through 6 roles; call OpenAI once per role; request 8–12 question variants in one API call
+
+End/Verify: Supabase table populated with 8–12 questions/role
+
+T63. Integrate premium backend prompt logic
+
+Start: reference lib/openai.ts or lib/interview.ts
+
+Do: reuse existing interview question generation prompt for quality consistency
+
+End/Verify: generated questions match premium tone and difficulty
+
+T64. Add hourly refresh job
+
+Start: staging environment
+
+Do: add Vercel Cron job or Supabase Edge function to call /api/regenerate-preview-questions hourly
+
+End/Verify: automatic refresh verified in logs
+
+T65. Modify QuickTryWidget fetch logic
+
+Start: static question source
+
+Do: update to call /api/preview-question?role={selectedRole}
+
+End/Verify: each role fetches randomized question instantly
+
+T66. Add fallback
+
+Start: API route
+
+Do: if no cached data, return one from static local backup list
+
+End/Verify: route returns valid fallback even with empty DB
+
+T67. Add analytics hooks
+
+Start: lib/analytics.ts
+
+Do: log events: preview_question_generated, preview_question_served
+
+End/Verify: events visible in DB/console
+
+T68. QA caching behavior
+
+Start: after 1+ hour test window
+
+Do: confirm question set refreshes hourly; repeated role selections yield different questions
+
+End/Verify: consistent randomization and fresh variants
+
 ## Definition of Done
 
 - Widget loads under 3s and provides instant feedback with no API calls.
