@@ -122,12 +122,12 @@ export function QuickTryWidget() {
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto bg-white rounded-2xl shadow-lg p-4 sm:p-6">
+    <div className="w-full max-w-2xl mx-auto bg-white rounded-2xl shadow-xl border-2 border-slate-200 p-4 sm:p-6">
       {/* Role Dropdown */}
       <div className="mb-4">
         <label
           htmlFor="role-select"
-          className="block text-sm font-medium text-slate-700 mb-2"
+          className="block text-sm font-semibold text-slate-900 mb-2"
         >
           Select Your Role
         </label>
@@ -135,7 +135,7 @@ export function QuickTryWidget() {
           id="role-select"
           value={selectedRole}
           onChange={(e) => handleRoleChange(e.target.value)}
-          className="w-full rounded-md border border-input bg-transparent px-3 py-3 sm:py-2 text-base shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring min-h-[44px]"
+          className="w-full rounded-lg border-2 border-slate-300 bg-white px-4 py-3 sm:py-2 text-base shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 focus-visible:border-cyan-500 min-h-[44px] transition-all duration-200"
         >
           <option value="">Choose a role...</option>
           {ROLES.map((role) => (
@@ -148,14 +148,14 @@ export function QuickTryWidget() {
 
       {/* Question Display */}
       {isLoadingQuestion && (
-        <div className="mb-6 p-4 bg-slate-50 rounded-lg border border-slate-200 animate-pulse">
+        <div className="mb-6 p-5 bg-gradient-to-br from-cyan-50 to-blue-50 rounded-xl border-2 border-cyan-200 animate-pulse">
           <div className="h-4 bg-slate-300 rounded w-3/4 mb-2"></div>
           <div className="h-4 bg-slate-300 rounded w-1/2"></div>
         </div>
       )}
       {!isLoadingQuestion && question && (
-        <div className="mb-6 p-4 bg-slate-50 rounded-lg border border-slate-200 animate-in fade-in slide-in-from-top-2 duration-300">
-          <p className="text-sm font-medium text-slate-900 leading-relaxed">
+        <div className="mb-6 p-5 bg-gradient-to-br from-cyan-50 to-blue-50 rounded-xl border-2 border-cyan-200 shadow-sm animate-in fade-in slide-in-from-top-2 duration-300">
+          <p className="text-sm font-semibold text-slate-900 leading-relaxed">
             {question}
           </p>
         </div>
@@ -166,7 +166,7 @@ export function QuickTryWidget() {
         <div className="mb-4">
           <label
             htmlFor="answer-input"
-            className="block text-sm font-medium text-slate-700 mb-2"
+            className="block text-sm font-semibold text-slate-900 mb-2"
           >
             Your Answer
           </label>
@@ -176,18 +176,18 @@ export function QuickTryWidget() {
             onChange={(e) => setAnswer(e.target.value)}
             placeholder="Type your answer here..."
             rows={6}
-            className="flex min-h-[120px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+            className="flex min-h-[120px] w-full rounded-lg border-2 border-slate-300 bg-white px-4 py-3 text-base shadow-sm placeholder:text-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 focus-visible:border-cyan-500 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-200"
           />
           <div className="mt-2 flex items-center justify-between text-xs">
             <span
               className={
-                isAnswerValid ? 'text-green-600 font-medium' : 'text-slate-500'
+                isAnswerValid ? 'text-cyan-600 font-semibold' : 'text-slate-500'
               }
             >
               {charCount} / {minChars} characters
             </span>
             {!isAnswerValid && charCount > 0 && (
-              <span className="text-amber-600">
+              <span className="text-blue-600 font-medium">
                 {minChars - charCount} more characters needed
               </span>
             )}
@@ -198,20 +198,18 @@ export function QuickTryWidget() {
       {/* Feedback Section */}
       {feedback && (
         <div className="mb-6 space-y-3 animate-in fade-in slide-in-from-bottom-4 duration-500">
-          <h3 className="text-lg font-semibold text-slate-900">
-            Your Feedback
-          </h3>
+          <h3 className="text-lg font-bold text-slate-900">Your Feedback</h3>
           <ul className="space-y-2">
             {feedback.map((point, index) => (
               <li
                 key={index}
-                className="flex items-start gap-3 p-3 rounded-lg bg-slate-50 border border-slate-200 animate-in fade-in slide-in-from-left-2 duration-300"
+                className="flex items-start gap-3 p-4 rounded-xl bg-gradient-to-br from-cyan-50/50 to-blue-50/50 border-2 border-cyan-200 animate-in fade-in slide-in-from-left-2 duration-300"
                 style={{ animationDelay: `${index * 100}ms` }}
               >
                 <span className="text-lg flex-shrink-0">
                   {getIcon(point.type)}
                 </span>
-                <span className="text-sm text-slate-700 leading-relaxed">
+                <span className="text-sm text-slate-700 leading-relaxed font-medium">
                   {point.message}
                 </span>
               </li>
@@ -225,7 +223,7 @@ export function QuickTryWidget() {
         <Button
           disabled={!isAnswerValid}
           onClick={handleSubmit}
-          className="w-full min-h-[44px] text-base transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+          className="w-full min-h-[44px] text-base font-semibold bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
         >
           Get Instant Feedback
         </Button>
@@ -242,7 +240,7 @@ export function QuickTryWidget() {
             });
           }}
         >
-          <Button className="w-full min-h-[44px] text-base transition-all duration-200 hover:scale-[1.02] hover:shadow-lg active:scale-[0.98]">
+          <Button className="w-full min-h-[44px] text-base font-semibold bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]">
             Get Your Full 3-Question Assessment →
           </Button>
         </Link>
