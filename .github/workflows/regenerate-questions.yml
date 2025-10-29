@@ -1,0 +1,39 @@
+name: Regenerate Preview Questions
+
+# Run every hour to refresh the question pool
+on:
+  schedule:
+    # Runs at minute 0 of every hour (UTC)
+    # Adjust timing as needed (e.g., '0 */6 * * *' for every 6 hours)
+    - cron: '0 * * * *'
+  
+  # Allow manual triggering from GitHub Actions UI
+  workflow_dispatch:
+
+jobs:
+  regenerate:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Regenerate preview questions
+        run: |
+          response=$(curl -s -w "\n%{http_code}" -u "${{ secrets.ADMIN_USERNAME }}:${{ secrets.ADMIN_PASSWORD }}" \
+            -X POST https://www.theinterviewlab.io/api/regenerate-preview-questions)
+          
+          http_code=$(echo "$response" | tail -n1)
+          body=$(echo "$response" | sed '$d')
+          
+          echo "HTTP Status: $http_code"
+          echo "Response: $body"
+          
+          if [ "$http_code" != "200" ]; then
+            echo "Error: API returned status $http_code"
+            exit 1
+          fi
+          
+          echo "✅ Successfully regenerated preview questions"
+        env:
+          # These will be set in GitHub repository secrets
+          ADMIN_USERNAME: ${{ secrets.ADMIN_USERNAME }}
+          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+
