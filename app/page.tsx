@@ -79,11 +79,8 @@ export default async function Home() {
         <div className="relative container mx-auto px-6 pt-32 pb-24">
           <div className="max-w-4xl mx-auto text-center space-y-8">
             {/* Headline */}
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight">
-              Try a Real Interview Question{' '}
-              <span className="bg-gradient-to-r from-cyan-500 to-blue-600 bg-clip-text text-transparent">
-                Now
-              </span>
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight bg-gradient-to-r from-cyan-500 to-blue-600 bg-clip-text text-transparent">
+              Try a Real Interview Question Now
             </h1>
 
             {/* Subheadline */}
@@ -259,8 +256,13 @@ export default async function Home() {
       </section>
 
       {/* Features Section */}
-      <section className="py-24">
-        <div className="container mx-auto px-6">
+      <section className="py-24 relative overflow-hidden">
+        {/* Background gradient orbs */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-gradient-to-br from-blue-500/15 to-cyan-400/15 rounded-full blur-3xl" />
+        </div>
+
+        <div className="container mx-auto px-6 relative z-10">
           <div className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl font-bold mb-4">
               Built for serious candidates
@@ -469,8 +471,13 @@ export default async function Home() {
       </section>
 
       {/* Final CTA Section */}
-      <section className="py-24">
-        <div className="container mx-auto px-6">
+      <section className="py-24 relative overflow-hidden">
+        {/* Background gradient orbs */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute bottom-1/4 left-1/3 w-96 h-96 bg-gradient-to-br from-cyan-400/20 to-blue-500/20 rounded-full blur-3xl" />
+        </div>
+
+        <div className="container mx-auto px-6 relative z-10">
           <div className="max-w-4xl mx-auto text-center bg-gradient-to-br from-cyan-50 to-blue-50 rounded-3xl p-12 border-2 border-cyan-200 shadow-lg">
             <h2 className="text-3xl sm:text-4xl font-bold mb-4">
               Ready to ace your next interview?

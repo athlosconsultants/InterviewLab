@@ -48,16 +48,20 @@ export default function MobileLandingPage() {
   const ctaHref = isAuthenticated ? '/assessment/setup' : '/sign-in';
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white via-slate-50 to-white pb-24">
+    <div className="min-h-screen bg-gradient-to-b from-white via-slate-50 to-white pb-24 relative overflow-hidden">
+      {/* Background gradient orbs */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 right-0 w-64 h-64 bg-gradient-to-br from-cyan-400/20 to-blue-500/20 rounded-full blur-3xl" />
+        <div className="absolute top-[600px] left-0 w-64 h-64 bg-gradient-to-br from-blue-500/15 to-cyan-400/15 rounded-full blur-3xl" />
+        <div className="absolute bottom-40 right-0 w-64 h-64 bg-gradient-to-br from-cyan-400/20 to-blue-500/20 rounded-full blur-3xl" />
+      </div>
+
       {/* Hero Section with QuickTryWidget */}
-      <section className="px-6 pt-12 pb-8">
+      <section className="px-6 pt-12 pb-8 relative z-10">
         {/* Headline */}
         <div className="text-center mb-6">
-          <h1 className="text-3xl font-bold leading-tight mb-3">
-            Try a Real Interview Question{' '}
-            <span className="bg-gradient-to-r from-cyan-500 to-blue-600 bg-clip-text text-transparent">
-              Now
-            </span>
+          <h1 className="text-3xl font-bold leading-tight mb-3 bg-gradient-to-r from-cyan-500 to-blue-600 bg-clip-text text-transparent">
+            Try a Real Interview Question Now
           </h1>
           <p className="text-base text-gray-600">
             No signup required. Instant feedback.
@@ -111,7 +115,7 @@ export default function MobileLandingPage() {
       </section>
 
       {/* Features */}
-      <section className="px-6 pb-8">
+      <section className="px-6 pb-8 relative z-10">
         <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
           {/* Header */}
           <div className="px-6 py-5 border-b border-gray-100">
@@ -156,7 +160,7 @@ export default function MobileLandingPage() {
       </section>
 
       {/* How It Works */}
-      <section className="px-6 pb-8">
+      <section className="px-6 pb-8 relative z-10">
         <h2 className="font-bold text-xl text-gray-900 mb-4 text-center">
           How It Works (In 3 Easy Steps)
         </h2>
@@ -185,7 +189,7 @@ export default function MobileLandingPage() {
       </section>
 
       {/* Why It Works */}
-      <section className="px-6 pb-8">
+      <section className="px-6 pb-8 relative z-10">
         <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
           <h2 className="font-bold text-xl text-gray-900 mb-4 text-center">
             Why It Works
@@ -203,7 +207,7 @@ export default function MobileLandingPage() {
       </section>
 
       {/* Testimonials */}
-      <section className="px-6 pb-8">
+      <section className="px-6 pb-8 relative z-10">
         <h2 className="font-bold text-xl text-gray-900 mb-4 text-center">
           What Candidates Are Saying
         </h2>
@@ -232,7 +236,7 @@ export default function MobileLandingPage() {
       </section>
 
       {/* Final CTA Section */}
-      <section className="px-6 pb-12">
+      <section className="px-6 pb-12 relative z-10">
         <div className="bg-gradient-to-br from-cyan-50 to-blue-50 rounded-2xl p-8 text-center border-2 border-cyan-200 shadow-lg">
           <h2 className="font-bold text-2xl text-gray-900 mb-3">
             Get Interview-Ready — Without the Stress
