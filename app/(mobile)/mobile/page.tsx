@@ -48,14 +48,14 @@ export default function MobileLandingPage() {
   const ctaHref = isAuthenticated ? '/assessment/setup' : '/sign-in';
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white via-cyan-50/30 to-blue-50/50 pb-24">
+    <div className="min-h-screen bg-gradient-to-b from-white via-slate-50 to-white pb-24">
       {/* Hero Section with QuickTryWidget */}
       <section className="px-6 pt-12 pb-8">
         {/* Headline */}
         <div className="text-center mb-6">
           <h1 className="text-3xl font-bold leading-tight mb-3">
             Try a Real Interview Question{' '}
-            <span className="bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-cyan-500 to-blue-600 bg-clip-text text-transparent">
               Now
             </span>
           </h1>
@@ -67,15 +67,15 @@ export default function MobileLandingPage() {
         {/* Trust badges */}
         <div className="flex flex-wrap items-center justify-center gap-3 mb-6 text-xs text-gray-600">
           <div className="flex items-center gap-1">
-            <CheckCircle2 className="w-3 h-3 text-primary" />
+            <CheckCircle2 className="w-3 h-3 text-cyan-500" />
             <span>10,000+ real interviews</span>
           </div>
           <div className="flex items-center gap-1">
-            <Users className="w-3 h-3 text-primary" />
+            <Users className="w-3 h-3 text-cyan-500" />
             <span>2,847 this week</span>
           </div>
           <div className="flex items-center gap-1">
-            <Briefcase className="w-3 h-3 text-primary" />
+            <Briefcase className="w-3 h-3 text-cyan-500" />
             <span>50+ industries</span>
           </div>
         </div>
@@ -95,7 +95,7 @@ export default function MobileLandingPage() {
             asChild
             size="lg"
             disabled={isLoading}
-            className="w-full h-14 text-base font-bold bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 shadow-xl"
+            className="w-full h-14 text-base font-bold bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-xl"
           >
             <Link
               href={ctaHref}
@@ -146,8 +146,8 @@ export default function MobileLandingPage() {
 
           {/* CTA in card */}
           <div className="px-6 pb-6">
-            <div className="bg-gradient-to-br from-cyan-50 to-blue-50 rounded-xl p-4 text-center border border-cyan-100">
-              <p className="text-sm font-medium text-blue-600 mb-1">
+            <div className="bg-gradient-to-br from-cyan-50 to-blue-50 rounded-xl p-4 text-center border-2 border-cyan-200">
+              <p className="text-sm font-medium text-cyan-600 mb-1">
                 Try your first interview free — see how you perform.
               </p>
             </div>
@@ -178,7 +178,7 @@ export default function MobileLandingPage() {
           />
         </div>
         <div className="mt-5 text-center">
-          <p className="text-sm font-medium text-blue-600">
+          <p className="text-sm font-medium text-cyan-600">
             Take your first interview — it&apos;s free to try.
           </p>
         </div>
@@ -245,7 +245,7 @@ export default function MobileLandingPage() {
             asChild
             size="lg"
             disabled={isLoading}
-            className="w-full h-14 text-base font-bold bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 shadow-xl"
+            className="w-full h-14 text-base font-bold bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-xl"
           >
             <Link
               href={ctaHref}

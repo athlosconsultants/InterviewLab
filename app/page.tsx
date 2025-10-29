@@ -67,13 +67,13 @@ export default async function Home() {
     }
   }
   return (
-    <main className="min-h-screen bg-gradient-to-b from-background via-background to-muted/20">
+    <main className="min-h-screen bg-gradient-to-b from-white via-slate-50 to-white">
       {/* Hero Section */}
       <section className="relative overflow-hidden">
         {/* Background gradient orbs */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-0 right-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
-          <div className="absolute bottom-1/4 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl" />
+          <div className="absolute top-0 right-1/4 w-96 h-96 bg-gradient-to-br from-cyan-400/20 to-blue-500/20 rounded-full blur-3xl" />
+          <div className="absolute bottom-1/4 left-1/4 w-96 h-96 bg-gradient-to-br from-blue-500/20 to-cyan-400/20 rounded-full blur-3xl" />
         </div>
 
         <div className="relative container mx-auto px-6 pt-32 pb-24">
@@ -81,7 +81,7 @@ export default async function Home() {
             {/* Headline */}
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight">
               Try a Real Interview Question{' '}
-              <span className="bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-cyan-500 to-blue-600 bg-clip-text text-transparent">
                 Now
               </span>
             </h1>
@@ -94,15 +94,15 @@ export default async function Home() {
             {/* Trust badges */}
             <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-sm text-muted-foreground">
               <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-primary" />
+                <CheckCircle2 className="w-4 h-4 text-cyan-500" />
                 <span>10,000+ real interviews</span>
               </div>
               <div className="flex items-center gap-2">
-                <Users className="w-4 h-4 text-primary" />
+                <Users className="w-4 h-4 text-cyan-500" />
                 <span>2,847 practiced this week</span>
               </div>
               <div className="flex items-center gap-2">
-                <Briefcase className="w-4 h-4 text-primary" />
+                <Briefcase className="w-4 h-4 text-cyan-500" />
                 <span>50+ industries</span>
               </div>
             </div>
@@ -131,7 +131,7 @@ export default async function Home() {
                   <Link href="/setup">
                     <Button
                       size="lg"
-                      className="text-lg px-8 py-6 shadow-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700"
+                      className="text-lg px-8 py-6 shadow-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white"
                     >
                       Start Premium Interview ({passType})
                       <ArrowRight className="ml-2 h-5 w-5" />
@@ -141,7 +141,7 @@ export default async function Home() {
                     <Button
                       size="lg"
                       variant="outline"
-                      className="text-lg px-8 py-6 border-2"
+                      className="text-lg px-8 py-6 border-2 border-cyan-500 text-cyan-600 hover:bg-cyan-50"
                     >
                       Try Free Assessment
                     </Button>
@@ -152,7 +152,7 @@ export default async function Home() {
                   <Link href="/assessment/setup">
                     <Button
                       size="lg"
-                      className="text-lg px-8 py-6 shadow-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700"
+                      className="text-lg px-8 py-6 shadow-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white"
                     >
                       Start My Free 3-Question Assessment →
                     </Button>
@@ -161,7 +161,7 @@ export default async function Home() {
                     <Button
                       size="lg"
                       variant="outline"
-                      className="text-lg px-8 py-6 border-2"
+                      className="text-lg px-8 py-6 border-2 border-cyan-500 text-cyan-600 hover:bg-cyan-50"
                     >
                       Explore Premium Plans
                     </Button>
@@ -174,7 +174,7 @@ export default async function Home() {
       </section>
 
       {/* How It Works Section */}
-      <section className="py-24 bg-muted/30">
+      <section className="py-24 bg-slate-50">
         <div className="container mx-auto px-6">
           <div className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl font-bold mb-4">
@@ -187,7 +187,7 @@ export default async function Home() {
 
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             {/* Step 1 */}
-            <div className="relative bg-card rounded-2xl p-8 shadow-lg border border-border hover:border-primary/50 transition-all duration-300">
+            <div className="relative bg-white rounded-2xl p-8 shadow-lg border border-slate-200 hover:border-cyan-400 transition-all duration-300">
               <div className="space-y-4">
                 <div className="relative inline-block">
                   <div className="w-12 h-12 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-xl flex items-center justify-center">
@@ -205,7 +205,7 @@ export default async function Home() {
                       />
                     </svg>
                   </div>
-                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-primary rounded-full flex items-center justify-center text-white text-xs font-bold shadow-lg">
+                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-lg">
                     1
                   </div>
                 </div>
@@ -218,13 +218,13 @@ export default async function Home() {
             </div>
 
             {/* Step 2 */}
-            <div className="relative bg-card rounded-2xl p-8 shadow-lg border border-border hover:border-primary/50 transition-all duration-300">
+            <div className="relative bg-white rounded-2xl p-8 shadow-lg border border-slate-200 hover:border-cyan-400 transition-all duration-300">
               <div className="space-y-4">
                 <div className="relative inline-block">
                   <div className="w-12 h-12 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-xl flex items-center justify-center">
                     <Brain className="w-6 h-6 text-white" />
                   </div>
-                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-primary rounded-full flex items-center justify-center text-white text-xs font-bold shadow-lg">
+                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-lg">
                     2
                   </div>
                 </div>
@@ -237,13 +237,13 @@ export default async function Home() {
             </div>
 
             {/* Step 3 */}
-            <div className="relative bg-card rounded-2xl p-8 shadow-lg border border-border hover:border-primary/50 transition-all duration-300">
+            <div className="relative bg-white rounded-2xl p-8 shadow-lg border border-slate-200 hover:border-cyan-400 transition-all duration-300">
               <div className="space-y-4">
                 <div className="relative inline-block">
                   <div className="w-12 h-12 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-xl flex items-center justify-center">
                     <Target className="w-6 h-6 text-white" />
                   </div>
-                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-primary rounded-full flex items-center justify-center text-white text-xs font-bold shadow-lg">
+                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-lg">
                     3
                   </div>
                 </div>
@@ -272,7 +272,7 @@ export default async function Home() {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {/* Feature 1 - Voice Mode */}
-            <div className="bg-card rounded-2xl p-8 shadow-lg border border-border space-y-4">
+            <div className="bg-white rounded-2xl p-8 shadow-lg border border-slate-200 space-y-4">
               <div className="w-14 h-14 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-2xl flex items-center justify-center">
                 <Mic className="w-7 h-7 text-white" />
               </div>
@@ -285,7 +285,7 @@ export default async function Home() {
             </div>
 
             {/* Feature 2 - Text Mode */}
-            <div className="bg-card rounded-2xl p-8 shadow-lg border border-border space-y-4">
+            <div className="bg-white rounded-2xl p-8 shadow-lg border border-slate-200 space-y-4">
               <div className="w-14 h-14 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-2xl flex items-center justify-center">
                 <Type className="w-7 h-7 text-white" />
               </div>
@@ -297,7 +297,7 @@ export default async function Home() {
             </div>
 
             {/* Feature 3 - Adaptive Difficulty */}
-            <div className="bg-card rounded-2xl p-8 shadow-lg border border-border space-y-4">
+            <div className="bg-white rounded-2xl p-8 shadow-lg border border-slate-200 space-y-4">
               <div className="w-14 h-14 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-2xl flex items-center justify-center">
                 <Zap className="w-7 h-7 text-white" />
               </div>
@@ -309,7 +309,7 @@ export default async function Home() {
             </div>
 
             {/* Feature 4 - Multi-Stage */}
-            <div className="bg-card rounded-2xl p-8 shadow-lg border border-border space-y-4">
+            <div className="bg-white rounded-2xl p-8 shadow-lg border border-slate-200 space-y-4">
               <div className="w-14 h-14 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-2xl flex items-center justify-center">
                 <Target className="w-7 h-7 text-white" />
               </div>
@@ -321,7 +321,7 @@ export default async function Home() {
             </div>
 
             {/* Feature 5 - Smart Research */}
-            <div className="bg-card rounded-2xl p-8 shadow-lg border border-border space-y-4">
+            <div className="bg-white rounded-2xl p-8 shadow-lg border border-slate-200 space-y-4">
               <div className="w-14 h-14 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-2xl flex items-center justify-center">
                 <Brain className="w-7 h-7 text-white" />
               </div>
@@ -333,7 +333,7 @@ export default async function Home() {
             </div>
 
             {/* Feature 6 - Detailed Reports */}
-            <div className="bg-card rounded-2xl p-8 shadow-lg border border-border space-y-4">
+            <div className="bg-white rounded-2xl p-8 shadow-lg border border-slate-200 space-y-4">
               <div className="w-14 h-14 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-2xl flex items-center justify-center">
                 <BarChart3 className="w-7 h-7 text-white" />
               </div>
@@ -348,7 +348,7 @@ export default async function Home() {
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-24 bg-muted/30">
+      <section className="py-24 bg-slate-50">
         <div className="container mx-auto px-6">
           <div className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl font-bold mb-4">
@@ -361,7 +361,7 @@ export default async function Home() {
 
           <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {/* Testimonial 1 */}
-            <div className="bg-card rounded-2xl p-8 shadow-lg border border-border space-y-4">
+            <div className="bg-white rounded-2xl p-8 shadow-lg border border-slate-200 space-y-4">
               <div className="flex gap-1 text-yellow-500">
                 {[...Array(5)].map((_, i) => (
                   <svg
@@ -396,7 +396,7 @@ export default async function Home() {
             </div>
 
             {/* Testimonial 2 */}
-            <div className="bg-card rounded-2xl p-8 shadow-lg border border-border space-y-4">
+            <div className="bg-white rounded-2xl p-8 shadow-lg border border-slate-200 space-y-4">
               <div className="flex gap-1 text-yellow-500">
                 {[...Array(5)].map((_, i) => (
                   <svg
@@ -431,7 +431,7 @@ export default async function Home() {
             </div>
 
             {/* Testimonial 3 */}
-            <div className="bg-card rounded-2xl p-8 shadow-lg border border-border space-y-4">
+            <div className="bg-white rounded-2xl p-8 shadow-lg border border-slate-200 space-y-4">
               <div className="flex gap-1 text-yellow-500">
                 {[...Array(5)].map((_, i) => (
                   <svg
@@ -471,7 +471,7 @@ export default async function Home() {
       {/* Final CTA Section */}
       <section className="py-24">
         <div className="container mx-auto px-6">
-          <div className="max-w-4xl mx-auto text-center bg-gradient-to-br from-primary/10 to-blue-500/10 rounded-3xl p-12 border border-primary/20">
+          <div className="max-w-4xl mx-auto text-center bg-gradient-to-br from-cyan-50 to-blue-50 rounded-3xl p-12 border-2 border-cyan-200 shadow-lg">
             <h2 className="text-3xl sm:text-4xl font-bold mb-4">
               Ready to ace your next interview?
             </h2>
@@ -483,7 +483,7 @@ export default async function Home() {
               <Link href="/assessment/setup">
                 <Button
                   size="lg"
-                  className="text-lg px-8 py-6 shadow-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700"
+                  className="text-lg px-8 py-6 shadow-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white"
                 >
                   Start your free interview today
                   <ArrowRight className="ml-2 h-5 w-5" />
