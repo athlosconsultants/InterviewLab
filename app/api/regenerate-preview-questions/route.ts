@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { openai, MODELS } from '@/lib/openai';
-import { createClient } from '@/lib/supabase-server';
+import { createServiceRoleClient } from '@/lib/supabase-server';
 
 // Roles to generate questions for
 const ROLES = [
@@ -54,7 +54,8 @@ async function regenerateQuestions() {
   try {
     console.log('[Preview Questions] Starting regeneration job...');
 
-    const supabase = await createClient();
+    // Use service role client to bypass RLS for insert/delete operations
+    const supabase = createServiceRoleClient();
     const generatedQuestions: Array<{ role: string; question: string }> = [];
 
     // Generate questions for each role
