@@ -26,6 +26,21 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 OPENAI_API_KEY=sk-your-openai-api-key-here
 ```
 
+### Cartesia.ai TTS Configuration
+
+```bash
+CARTESIA_API_KEY=your-cartesia-api-key-here
+CARTESIA_MODEL=sonic-3
+CARTESIA_VOICE_ID=694f9389-aac1-45b6-b726-9d9369183238
+CARTESIA_VERSION=2025-04-16
+```
+
+**Important:** Cartesia.ai is used for text-to-speech voice generation. Get your API key from [cartesia.ai](https://cartesia.ai).
+
+- `CARTESIA_MODEL`: The TTS model to use (default: sonic-3)
+- `CARTESIA_VOICE_ID`: The voice ID for the interviewer (default: professional neutral voice)
+- `CARTESIA_VERSION`: API version (default: 2025-04-16)
+
 ### Admin Dashboard Authentication
 
 ```bash
@@ -66,6 +81,15 @@ openssl rand -base64 32
 3. Go to API Keys section
 4. Create a new API key
 5. Copy the key (starts with `sk-`)
+
+### Cartesia.ai
+
+1. Go to [cartesia.ai](https://cartesia.ai)
+2. Sign up for an account
+3. Navigate to your API dashboard
+4. Create a new API key
+5. Copy the API key
+6. (Optional) Browse the voice library to find different voice IDs if you want to change the default voice
 
 ## Important Notes
 

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase-server';
-import { openai, MODELS } from '@/lib/openai';
+import { generateCartesiaSpeech } from '@/lib/cartesia';
 
 export async function POST(request: NextRequest) {
   try {
@@ -101,16 +101,8 @@ export async function POST(request: NextRequest) {
       ttsKey = turn.tts_key;
     }
 
-    // Generate TTS audio using OpenAI
-    const mp3 = await openai.audio.speech.create({
-      model: MODELS.TTS,
-      voice: 'alloy', // Professional, neutral voice
-      input: text,
-      speed: 1.0,
-    });
-
-    // Convert response to buffer
-    const buffer = Buffer.from(await mp3.arrayBuffer());
+    // Generate TTS audio using Cartesia.ai
+    const buffer = await generateCartesiaSpeech(text);
 
     // T114: Generate storage key based on type
     const storageKey = turnId
