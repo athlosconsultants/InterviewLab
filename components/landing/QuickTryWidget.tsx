@@ -223,7 +223,8 @@ export function QuickTryWidget() {
         <Button
           disabled={!isAnswerValid}
           onClick={handleSubmit}
-          className="w-full min-h-[44px] text-base font-semibold bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+          size="default"
+          className="w-full"
         >
           Get Instant Feedback
         </Button>
@@ -240,7 +241,7 @@ export function QuickTryWidget() {
             });
           }}
         >
-          <Button className="w-full min-h-[44px] text-base font-semibold bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]">
+          <Button size="default" className="w-full">
             Get Your Full 3-Question Assessment →
           </Button>
         </Link>

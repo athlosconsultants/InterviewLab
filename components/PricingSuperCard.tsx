@@ -241,7 +241,8 @@ export default function PricingSuperCard() {
             <Button
               onClick={() => handlePurchase(currentPlan.id)}
               disabled={loading !== null}
-              className="w-full rounded-xl bg-gradient-to-r from-[#3E8BFF] to-[#3DCBFF] py-3 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 h-12 mb-6"
+              size="default"
+              className="w-full mb-6"
             >
               {loading === currentPlan.id ? (
                 <>
@@ -341,7 +342,9 @@ export default function PricingSuperCard() {
           <Button
             onClick={() => handlePurchase('lifetime')}
             disabled={loading !== null}
-            className="w-full rounded-xl border-2 border-[#3E8BFF] bg-white text-[#3E8BFF] font-semibold py-3 hover:bg-gradient-to-r hover:from-[#3E8BFF]/10 hover:to-[#3DCBFF]/10 transition-all duration-300 h-12"
+            variant="outline"
+            size="default"
+            className="w-full"
           >
             {loading === 'lifetime' ? (
               <>
@@ -534,11 +537,9 @@ export default function PricingSuperCard() {
                   handlePurchase(plan.id);
                 }}
                 disabled={loading !== null}
-                className={`w-full rounded-xl py-3 font-semibold transition-all duration-300 h-11 ${
-                  selectedPlan === plan.id
-                    ? 'bg-gradient-to-r from-[#3E8BFF] to-[#3DCBFF] text-white shadow-lg hover:shadow-xl'
-                    : 'bg-white border-2 border-[#3E8BFF] text-[#3E8BFF] hover:bg-gradient-to-r hover:from-[#3E8BFF]/10 hover:to-[#3DCBFF]/10'
-                }`}
+                variant={selectedPlan === plan.id ? 'default' : 'outline'}
+                size="default"
+                className="w-full"
               >
                 {loading === plan.id ? (
                   <>
@@ -618,7 +619,9 @@ export default function PricingSuperCard() {
             <Button
               onClick={() => handlePurchase('lifetime')}
               disabled={loading !== null}
-              className="w-full rounded-xl border-2 border-[#3E8BFF] bg-white text-[#3E8BFF] font-semibold py-3 hover:bg-gradient-to-r hover:from-[#3E8BFF]/10 hover:to-[#3DCBFF]/10 transition-all duration-300 h-11"
+              variant="outline"
+              size="default"
+              className="w-full"
             >
               {loading === 'lifetime' ? (
                 <>

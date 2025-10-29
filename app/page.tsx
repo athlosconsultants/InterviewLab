@@ -126,20 +126,13 @@ export default async function Home() {
               {user && hasActivePass ? (
                 <>
                   <Link href="/setup">
-                    <Button
-                      size="lg"
-                      className="text-lg px-8 py-6 shadow-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white"
-                    >
+                    <Button size="lg">
                       Start Premium Interview ({passType})
                       <ArrowRight className="ml-2 h-5 w-5" />
                     </Button>
                   </Link>
                   <Link href="/assessment/setup">
-                    <Button
-                      size="lg"
-                      variant="outline"
-                      className="text-lg px-8 py-6 border-2 border-cyan-500 text-cyan-600 hover:bg-cyan-50"
-                    >
+                    <Button size="lg" variant="outline">
                       Try Free Assessment
                     </Button>
                   </Link>
@@ -147,19 +140,12 @@ export default async function Home() {
               ) : (
                 <>
                   <Link href="/assessment/setup">
-                    <Button
-                      size="lg"
-                      className="text-lg px-8 py-6 shadow-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white"
-                    >
+                    <Button size="lg">
                       Start My Free 3-Question Assessment →
                     </Button>
                   </Link>
                   <Link href="/pricing">
-                    <Button
-                      size="lg"
-                      variant="outline"
-                      className="text-lg px-8 py-6 border-2 border-cyan-500 text-cyan-600 hover:bg-cyan-50"
-                    >
+                    <Button size="lg" variant="outline">
                       Explore Premium Plans
                     </Button>
                   </Link>
@@ -488,10 +474,7 @@ export default async function Home() {
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link href="/assessment/setup">
-                <Button
-                  size="lg"
-                  className="text-lg px-8 py-6 shadow-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white"
-                >
+                <Button size="lg">
                   Start your free interview today
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>

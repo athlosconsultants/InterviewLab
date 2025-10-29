@@ -95,12 +95,7 @@ export default function MobileLandingPage() {
           <p className="text-sm text-gray-600 mb-4">
             Get your complete 3-question assessment with detailed feedback
           </p>
-          <Button
-            asChild
-            size="lg"
-            disabled={isLoading}
-            className="w-full h-14 text-base font-bold bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-xl"
-          >
+          <Button asChild size="lg" disabled={isLoading} className="w-full">
             <Link
               href={ctaHref}
               className="flex items-center justify-center gap-2"
@@ -245,12 +240,7 @@ export default function MobileLandingPage() {
             Experience your first AI interview free. Real questions, real
             feedback, real confidence.
           </p>
-          <Button
-            asChild
-            size="lg"
-            disabled={isLoading}
-            className="w-full h-14 text-base font-bold bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-xl"
-          >
+          <Button asChild size="lg" disabled={isLoading} className="w-full">
             <Link
               href={ctaHref}
               className="flex items-center justify-center gap-2"
