@@ -2,32 +2,23 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import {
-  Zap,
+  Mic,
+  Brain,
   Target,
-  Award,
-  TrendingUp,
+  Zap,
   ArrowRight,
   CheckCircle2,
-  Users,
   Briefcase,
 } from 'lucide-react';
-import { MobileCTA } from '@/components/marketing/MobileCTA';
 import { Footer } from '@/components/Footer';
 import { createClient } from '@/lib/supabase-client';
 import { QuickTryWidget } from '@/components/landing/QuickTryWidget';
 
 /**
- * Mobile Landing Page (Hormozi Offer Stack)
- *
- * Optimized for TikTok and mobile social traffic
- * Uses Hormozi-style copywriting with:
- * - Pain-focused headline + dream outcome
- * - Value stack with clear bullets
- * - Social proof and urgency
- * - Sticky CTA button
+ * Mobile Landing Page - Updated with Rory's feedback
+ * Conversion-optimized for TikTok and Instagram traffic
  */
 export default function MobileLandingPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -48,23 +39,15 @@ export default function MobileLandingPage() {
   const ctaHref = isAuthenticated ? '/assessment/setup' : '/sign-in';
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white via-slate-50 to-white pb-24 relative overflow-hidden">
-      {/* Background gradient orbs */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 right-0 w-64 h-64 bg-gradient-to-br from-cyan-400/20 to-blue-500/20 rounded-full blur-3xl" />
-        <div className="absolute top-[600px] left-0 w-64 h-64 bg-gradient-to-br from-blue-500/15 to-cyan-400/15 rounded-full blur-3xl" />
-        <div className="absolute bottom-40 right-0 w-64 h-64 bg-gradient-to-br from-cyan-400/20 to-blue-500/20 rounded-full blur-3xl" />
-      </div>
-
-      {/* Hero Section with QuickTryWidget */}
-      <section className="px-6 pt-12 pb-8 relative z-10">
-        {/* Headline */}
+    <div className="min-h-screen bg-gradient-to-b from-white via-slate-50 to-white pb-24">
+      {/* Hero Section */}
+      <section className="px-6 pt-12 pb-8">
         <div className="text-center mb-6">
           <h1 className="text-3xl font-bold leading-tight mb-3 bg-gradient-to-r from-cyan-500 to-blue-600 bg-clip-text text-transparent">
             Try a Real Interview Question Now
           </h1>
           <p className="text-base text-gray-600">
-            No signup required. Instant feedback.
+            No signup. Instant feedback.
           </p>
         </div>
 
@@ -72,11 +55,7 @@ export default function MobileLandingPage() {
         <div className="flex flex-wrap items-center justify-center gap-3 mb-6 text-xs text-gray-600">
           <div className="flex items-center gap-1">
             <CheckCircle2 className="w-3 h-3 text-cyan-500" />
-            <span>10,000+ real interviews</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Users className="w-3 h-3 text-cyan-500" />
-            <span>2,847 this week</span>
+            <span>AI trained on 10,000+ interviews</span>
           </div>
           <div className="flex items-center gap-1">
             <Briefcase className="w-3 h-3 text-cyan-500" />
@@ -91,271 +70,262 @@ export default function MobileLandingPage() {
 
         {/* CTA Below Widget */}
         <div className="text-center">
-          <h2 className="text-xl font-bold mb-2">Want the full experience?</h2>
+          <h2 className="text-xl font-bold mb-2">Want more?</h2>
           <p className="text-sm text-gray-600 mb-4">
-            Get your complete 3-question assessment with detailed feedback
+            Full assessment + detailed feedback
           </p>
           <Button asChild size="lg" disabled={isLoading} className="w-full">
             <Link
               href={ctaHref}
               className="flex items-center justify-center gap-2"
             >
-              {isLoading
-                ? 'Loading...'
-                : 'Start My Free 3-Question Assessment →'}
-              {!isLoading && <ArrowRight className="w-5 h-5" />}
+              {isLoading ? 'Loading...' : 'Start Free 3-Question Assessment →'}
             </Link>
           </Button>
         </div>
       </section>
 
-      {/* Features */}
-      <section className="px-6 pb-8 relative z-10">
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
-          {/* Header */}
-          <div className="px-6 py-5 border-b border-gray-100">
-            <h2 className="font-bold text-xl text-gray-900 text-center">
-              Everything You Need to Ace Your Next Interview
-            </h2>
-          </div>
+      {/* Why This Works - Weak vs Strong */}
+      <section className="px-6 pb-8">
+        <div className="text-center mb-6">
+          <h2 className="text-2xl font-bold mb-2">
+            See What You&apos;re Missing
+          </h2>
+          <p className="text-sm text-gray-600">
+            Most people don&apos;t realize these mistakes
+          </p>
+        </div>
 
-          {/* Value Items */}
-          <div className="p-6 space-y-5">
-            <FeatureItem
-              icon={<Target className="w-5 h-5" />}
-              title="Industry-Specific Questions"
-              description="Practice questions based on real roles at top companies, tailored to your target job."
-            />
-            <FeatureItem
-              icon={<Zap className="w-5 h-5" />}
-              title="Instant Feedback"
-              description="Get clear improvement suggestions after each session so you always know what to work on next."
-            />
-            <FeatureItem
-              icon={<Award className="w-5 h-5" />}
-              title="Multiple Practice Modes"
-              description="Switch between voice or text interviews to simulate real conversations."
-            />
-            <FeatureItem
-              icon={<TrendingUp className="w-5 h-5" />}
-              title="Track Your Progress"
-              description="Watch your scores rise with detailed performance insights after every interview."
-            />
-          </div>
-
-          {/* CTA in card */}
-          <div className="px-6 pb-6">
-            <div className="bg-gradient-to-br from-cyan-50 to-blue-50 rounded-xl p-4 text-center border-2 border-cyan-200">
-              <p className="text-sm font-medium text-cyan-600 mb-1">
-                Try your first interview free — see how you perform.
+        <div className="space-y-4">
+          {/* Weak Answer */}
+          <div className="bg-white rounded-xl p-5 border-2 border-red-200">
+            <div className="mb-3">
+              <span className="inline-block px-2 py-1 bg-red-100 text-red-700 text-xs font-bold rounded-full">
+                ❌ WEAK
+              </span>
+            </div>
+            <p className="text-xs font-semibold text-gray-700 mb-2">
+              &quot;Tell me about a time you failed.&quot;
+            </p>
+            <div className="bg-gray-50 rounded-lg p-3 mb-3">
+              <p className="text-xs text-gray-700">
+                I&apos;m a hard worker. I&apos;m passionate. I give 110% and
+                I&apos;m a team player.
               </p>
+            </div>
+            <ul className="space-y-1 text-xs text-red-600">
+              <li>❌ No specific example</li>
+              <li>❌ Generic clichés</li>
+              <li>❌ No results</li>
+            </ul>
+          </div>
+
+          {/* Strong Answer */}
+          <div className="bg-white rounded-xl p-5 border-2 border-green-200">
+            <div className="mb-3">
+              <span className="inline-block px-2 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-full">
+                ✅ STRONG
+              </span>
+            </div>
+            <p className="text-xs font-semibold text-gray-700 mb-2">
+              &quot;Tell me about a time you failed.&quot;
+            </p>
+            <div className="bg-gray-50 rounded-lg p-3 mb-3">
+              <p className="text-xs text-gray-700">
+                At my last internship, I missed a deadline by two weeks. I told
+                my manager immediately, we redistributed tasks, and I stayed
+                late. We launched only 3 days late, and I learned to build in
+                20% buffer time.
+              </p>
+            </div>
+            <ul className="space-y-1 text-xs text-green-600">
+              <li>✅ Clear situation</li>
+              <li>✅ Specific actions</li>
+              <li>✅ Quantified result (3 days vs 14)</li>
+            </ul>
+          </div>
+        </div>
+
+        <div className="text-center mt-6">
+          <Link href="/assessment/setup">
+            <Button size="lg" className="w-full">
+              See What Your Answers Are Missing →
+            </Button>
+          </Link>
+        </div>
+      </section>
+
+      {/* What You Get - Free vs Premium */}
+      <section className="px-6 pb-8 bg-slate-50 -mx-6 py-8">
+        <div className="px-6">
+          <div className="text-center mb-6">
+            <h2 className="text-2xl font-bold mb-2">What You Get</h2>
+            <p className="text-sm text-gray-600">Start free, upgrade later</p>
+          </div>
+
+          <div className="space-y-4">
+            {/* Free */}
+            <div className="bg-white rounded-xl p-5 border-2 border-slate-200">
+              <h3 className="text-lg font-bold mb-1">Free Assessment</h3>
+              <p className="text-xs text-gray-600 mb-4">Try it now</p>
+              <ul className="space-y-2 text-sm mb-4">
+                <li className="flex items-start gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-cyan-500 flex-shrink-0 mt-0.5" />
+                  <span>3 behavioral questions</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-cyan-500 flex-shrink-0 mt-0.5" />
+                  <span>Feedback on 1 category</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-cyan-500 flex-shrink-0 mt-0.5" />
+                  <span>Text-only mode</span>
+                </li>
+              </ul>
+              <Button variant="outline" size="default" className="w-full">
+                <Link href="/assessment/setup">Try Free</Link>
+              </Button>
+            </div>
+
+            {/* Premium */}
+            <div className="bg-white rounded-xl p-5 border-2 border-cyan-500 relative">
+              <div className="absolute -top-2 left-1/2 -translate-x-1/2">
+                <span className="inline-block px-3 py-1 bg-gradient-to-r from-cyan-500 to-blue-600 text-white text-xs font-bold rounded-full">
+                  POPULAR
+                </span>
+              </div>
+              <h3 className="text-lg font-bold mb-1 mt-2">Premium</h3>
+              <p className="text-xs text-gray-600 mb-4">Full simulation</p>
+              <ul className="space-y-2 text-sm mb-4">
+                <li className="flex items-start gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-cyan-500 flex-shrink-0 mt-0.5" />
+                  <span>Unlimited questions</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-cyan-500 flex-shrink-0 mt-0.5" />
+                  <span>Full AI feedback (3 categories)</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-cyan-500 flex-shrink-0 mt-0.5" />
+                  <span>Voice mode (like Zoom)</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-cyan-500 flex-shrink-0 mt-0.5" />
+                  <span>Personalized to your CV</span>
+                </li>
+              </ul>
+              <Button size="default" className="w-full">
+                <Link href="/pricing">See Pricing</Link>
+              </Button>
+            </div>
+
+            {/* Why Upgrade */}
+            <div className="bg-white rounded-xl p-5 border-2 border-slate-200">
+              <h3 className="text-lg font-bold mb-4">Why Upgrade?</h3>
+              <ul className="space-y-3">
+                <li className="flex items-start gap-2">
+                  <Mic className="w-4 h-4 text-cyan-500 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-semibold">Practice Speaking</p>
+                    <p className="text-xs text-gray-600">
+                      Voice mode = think on your feet
+                    </p>
+                  </div>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Brain className="w-4 h-4 text-cyan-500 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-semibold">
+                      Get Specific Feedback
+                    </p>
+                    <p className="text-xs text-gray-600">
+                      See exactly what to fix
+                    </p>
+                  </div>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Target className="w-4 h-4 text-cyan-500 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-semibold">
+                      Match Real Conditions
+                    </p>
+                    <p className="text-xs text-gray-600">
+                      Multi-stage = actual format
+                    </p>
+                  </div>
+                </li>
+              </ul>
             </div>
           </div>
         </div>
       </section>
 
-      {/* How It Works */}
-      <section className="px-6 pb-8 relative z-10">
-        <h2 className="font-bold text-xl text-gray-900 mb-4 text-center">
-          How It Works (In 3 Easy Steps)
-        </h2>
-        <div className="space-y-3">
-          <StepItem
-            number={1}
-            title="Upload Your Details"
-            description="Add your CV, job title, job description, location, and company name — it only takes a minute. This helps the AI understand the exact role you're preparing for."
-          />
-          <StepItem
-            number={2}
-            title="Practice a Real Interview"
-            description="Answer dynamic, AI-generated questions that flow naturally — just like talking to a real interviewer. Every session feels human, tailored, and unique."
-          />
-          <StepItem
-            number={3}
-            title="Get Your Personalised Report"
-            description="When the interview ends, receive a full analysis document with your overall score, key strengths, and specific areas to improve before your next interview."
-          />
+      {/* Common Questions */}
+      <section className="px-6 pb-8">
+        <div className="text-center mb-6">
+          <h2 className="text-2xl font-bold">Common Questions</h2>
         </div>
-        <div className="mt-5 text-center">
-          <p className="text-sm font-medium text-cyan-600">
-            Take your first interview — it&apos;s free to try.
-          </p>
-        </div>
-      </section>
 
-      {/* Why It Works */}
-      <section className="px-6 pb-8 relative z-10">
-        <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
-          <h2 className="font-bold text-xl text-gray-900 mb-4 text-center">
-            Why It Works
-          </h2>
-          <p className="text-gray-700 leading-relaxed mb-4">
-            InterviewLab is trained on real interview data from top global
-            companies like Google, Deloitte, and Amazon — so every question and
-            insight mirrors how real hiring teams evaluate candidates.
-          </p>
-          <p className="text-gray-700 leading-relaxed">
-            Most users see measurable improvement after just one session —
-            gaining confidence and clarity before their next big opportunity.
-          </p>
-        </div>
-      </section>
+        <div className="space-y-4">
+          <div className="bg-white rounded-xl p-4 border border-slate-200">
+            <h3 className="text-sm font-bold mb-1 text-gray-900">
+              Is the free version really free?
+            </h3>
+            <p className="text-xs text-gray-700">
+              Yes. No card. 3 questions + feedback. Upgrade if you want more.
+            </p>
+          </div>
 
-      {/* Testimonials */}
-      <section className="px-6 pb-8 relative z-10">
-        <h2 className="font-bold text-xl text-gray-900 mb-4 text-center">
-          What Candidates Are Saying
-        </h2>
-        <div className="space-y-3">
-          <Testimonial
-            name="Sarah Chen"
-            role="Software Engineer"
-            company="at Google"
-            quote="The feedback helped me spot gaps in my answers and boosted my confidence before my real interview."
-            image="/Sarah_Chen Headshot.png"
-          />
-          <Testimonial
-            name="Marcus Johnson"
-            role="Product Manager"
-            company="at Amazon"
-            quote="Practicing with AI felt like a real conversation. I refined my answers without pressure — it's an incredible tool."
-            image="/Marcus_Johnson Headshot.png"
-          />
-        </div>
-        <div className="mt-5 text-center">
-          <p className="text-sm text-gray-600">
-            ⭐ Hundreds of candidates use InterviewLab to prepare smarter and
-            walk into interviews with confidence.
-          </p>
-        </div>
-      </section>
+          <div className="bg-white rounded-xl p-4 border border-slate-200">
+            <h3 className="text-sm font-bold mb-1 text-gray-900">
+              Better than practicing with a friend?
+            </h3>
+            <p className="text-xs text-gray-700">
+              Friends won&apos;t tell you your answer was vague. AI will.
+            </p>
+          </div>
 
-      {/* Final CTA Section */}
-      <section className="px-6 pb-12 relative z-10">
-        <div className="bg-gradient-to-br from-cyan-50 to-blue-50 rounded-2xl p-8 text-center border-2 border-cyan-200 shadow-lg">
-          <h2 className="font-bold text-2xl text-gray-900 mb-3">
-            Get Interview-Ready — Without the Stress
-          </h2>
-          <p className="text-base text-gray-700 mb-6 leading-relaxed">
-            Experience your first AI interview free. Real questions, real
-            feedback, real confidence.
-          </p>
-          <Button asChild size="lg" disabled={isLoading} className="w-full">
-            <Link
-              href={ctaHref}
-              className="flex items-center justify-center gap-2"
-            >
-              {isLoading ? 'Loading...' : 'Start Free Interview'}
-              {!isLoading && <ArrowRight className="w-5 h-5" />}
-            </Link>
-          </Button>
-          <p className="text-xs text-gray-500 text-center mt-3">
-            3 questions • Text-based only • No credit card needed
-          </p>
-        </div>
-      </section>
+          <div className="bg-white rounded-xl p-4 border border-slate-200">
+            <h3 className="text-sm font-bold mb-1 text-gray-900">
+              Does AI know my company?
+            </h3>
+            <p className="text-xs text-gray-700">
+              If it&apos;s S&P 500 or well-known, yes. Questions match what they
+              actually ask.
+            </p>
+          </div>
 
-      {/* Mobile CTA Banner */}
-      <MobileCTA />
-
-      {/* Footer */}
-      <Footer />
-    </div>
-  );
-}
-
-/**
- * Feature Item Component
- */
-function FeatureItem({
-  icon,
-  title,
-  description,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-}) {
-  return (
-    <div className="flex gap-4">
-      <div className="flex-shrink-0">
-        <div className="w-10 h-10 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-lg flex items-center justify-center text-white">
-          {icon}
-        </div>
-      </div>
-      <div className="flex-1">
-        <h3 className="font-semibold text-gray-900 text-base mb-1">{title}</h3>
-        <p className="text-sm text-gray-600 leading-relaxed">{description}</p>
-      </div>
-    </div>
-  );
-}
-
-/**
- * Step Item Component
- */
-function StepItem({
-  number,
-  title,
-  description,
-}: {
-  number: number;
-  title: string;
-  description: string;
-}) {
-  return (
-    <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
-      <div className="flex gap-4">
-        <div className="flex-shrink-0">
-          <div className="w-10 h-10 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-full flex items-center justify-center">
-            <span className="text-white font-bold text-lg">{number}</span>
+          <div className="bg-white rounded-xl p-4 border border-slate-200">
+            <h3 className="text-sm font-bold mb-1 text-gray-900">
+              What if I mess up?
+            </h3>
+            <p className="text-xs text-gray-700">
+              That&apos;s the point. Mess up here, not in the real interview.
+            </p>
           </div>
         </div>
-        <div className="flex-1">
-          <h3 className="font-semibold text-gray-900 text-base mb-1">
-            {title}
-          </h3>
-          <p className="text-sm text-gray-600">{description}</p>
-        </div>
-      </div>
-    </div>
-  );
-}
+      </section>
 
-/**
- * Testimonial Component
- */
-function Testimonial({
-  name,
-  role,
-  company,
-  quote,
-  image,
-}: {
-  name: string;
-  role: string;
-  company: string;
-  quote: string;
-  image: string;
-}) {
-  return (
-    <div className="bg-white rounded-lg p-4 border border-gray-200 text-left shadow-sm">
-      <p className="text-sm text-gray-700 mb-3 italic">&quot;{quote}&quot;</p>
-      <div className="flex items-center gap-2">
-        <Image
-          src={image}
-          alt={name}
-          width={32}
-          height={32}
-          className="w-8 h-8 rounded-full object-cover"
-        />
-        <div>
-          <p className="font-semibold text-sm text-gray-900">{name}</p>
+      {/* Final CTA */}
+      <section className="px-6 pb-8">
+        <div className="bg-gradient-to-br from-cyan-50 to-blue-50 rounded-2xl p-6 border-2 border-cyan-200 text-center">
+          <h2 className="text-2xl font-bold mb-3">
+            One bad interview = lost offer
+          </h2>
+          <p className="text-sm text-gray-700 mb-6">
+            Don&apos;t find out what&apos;s wrong in the actual interview. Find
+            out now, free.
+          </p>
+          <Button size="lg" className="w-full mb-3">
+            <Link href="/assessment/setup">Try Free Assessment →</Link>
+          </Button>
           <p className="text-xs text-gray-600">
-            {role} {company}
+            No card • 3 questions • Instant feedback
           </p>
         </div>
-      </div>
+      </section>
+
+      <Footer />
     </div>
   );
 }

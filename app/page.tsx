@@ -92,15 +92,11 @@ export default async function Home() {
             <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-sm text-muted-foreground">
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-cyan-500" />
-                <span>10,000+ real interviews</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Users className="w-4 h-4 text-cyan-500" />
-                <span>2,847 practiced this week</span>
+                <span>AI trained on 10,000+ S&P 500 interviews</span>
               </div>
               <div className="flex items-center gap-2">
                 <Briefcase className="w-4 h-4 text-cyan-500" />
-                <span>50+ industries</span>
+                <span>50+ industries covered</span>
               </div>
             </div>
           </div>
@@ -156,301 +152,363 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* How It Works Section */}
+      {/* Why This Works Section - Weak vs Strong Comparison */}
       <section className="py-24 bg-slate-50">
         <div className="container mx-auto px-6">
           <div className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-              Three steps to interview mastery
+              See What Most People Miss
             </h2>
             <p className="text-lg text-muted-foreground">
-              Get started in minutes with our streamlined process
+              Our AI catches the mistakes friends won&apos;t tell you about
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {/* Step 1 */}
-            <div className="relative bg-white rounded-2xl p-8 shadow-lg border border-slate-200 hover:border-cyan-400 transition-all duration-300">
-              <div className="space-y-4">
-                <div className="relative inline-block">
-                  <div className="w-12 h-12 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-xl flex items-center justify-center">
-                    <svg
-                      className="w-6 h-6 text-white"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                      />
-                    </svg>
-                  </div>
-                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-lg">
-                    1
-                  </div>
-                </div>
-                <h3 className="text-xl font-semibold">Upload</h3>
-                <p className="text-muted-foreground">
-                  Share your CV and the job description. Supports PDF, images,
-                  and text.
+          <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+            {/* Weak Answer Column */}
+            <div className="bg-white rounded-2xl p-8 shadow-lg border-2 border-red-200">
+              <div className="mb-4">
+                <span className="inline-block px-3 py-1 bg-red-100 text-red-700 text-sm font-semibold rounded-full">
+                  ❌ WEAK ANSWER
+                </span>
+              </div>
+
+              <p className="text-sm font-semibold text-slate-700 mb-4">
+                &quot;Tell me about a time you failed.&quot;
+              </p>
+
+              <div className="bg-slate-50 rounded-lg p-6 mb-4">
+                <p className="text-sm text-slate-700 leading-relaxed">
+                  I&apos;m a hard worker. I&apos;m very passionate about this
+                  role. I always give 110% and I&apos;m a team player. I really
+                  want this job because I think it would be a great opportunity
+                  for growth.
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <p className="text-sm text-red-600 flex items-start gap-2">
+                  <span>❌</span>
+                  <span>No specific example</span>
+                </p>
+                <p className="text-sm text-red-600 flex items-start gap-2">
+                  <span>❌</span>
+                  <span>
+                    Generic clichés (&quot;110%&quot;, &quot;team player&quot;)
+                  </span>
+                </p>
+                <p className="text-sm text-red-600 flex items-start gap-2">
+                  <span>❌</span>
+                  <span>No measurable results</span>
+                </p>
+                <p className="text-sm text-red-600 flex items-start gap-2">
+                  <span>❌</span>
+                  <span>Doesn&apos;t actually answer the question</span>
                 </p>
               </div>
             </div>
 
-            {/* Step 2 */}
-            <div className="relative bg-white rounded-2xl p-8 shadow-lg border border-slate-200 hover:border-cyan-400 transition-all duration-300">
-              <div className="space-y-4">
-                <div className="relative inline-block">
-                  <div className="w-12 h-12 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-xl flex items-center justify-center">
-                    <Brain className="w-6 h-6 text-white" />
-                  </div>
-                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-lg">
-                    2
-                  </div>
-                </div>
-                <h3 className="text-xl font-semibold">Research</h3>
-                <p className="text-muted-foreground">
-                  Our AI researches the company, analyzes your background, and
-                  crafts personalized questions.
-                </p>
+            {/* Strong Answer Column */}
+            <div className="bg-white rounded-2xl p-8 shadow-lg border-2 border-green-200">
+              <div className="mb-4">
+                <span className="inline-block px-3 py-1 bg-green-100 text-green-700 text-sm font-semibold rounded-full">
+                  ✅ STRONG ANSWER
+                </span>
               </div>
-            </div>
 
-            {/* Step 3 */}
-            <div className="relative bg-white rounded-2xl p-8 shadow-lg border border-slate-200 hover:border-cyan-400 transition-all duration-300">
-              <div className="space-y-4">
-                <div className="relative inline-block">
-                  <div className="w-12 h-12 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-xl flex items-center justify-center">
-                    <Target className="w-6 h-6 text-white" />
-                  </div>
-                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-lg">
-                    3
-                  </div>
-                </div>
-                <h3 className="text-xl font-semibold">Interview</h3>
-                <p className="text-muted-foreground">
-                  Practice with voice or text mode. Get real-time feedback and
-                  detailed performance reports.
+              <p className="text-sm font-semibold text-slate-700 mb-4">
+                &quot;Tell me about a time you failed.&quot;
+              </p>
+
+              <div className="bg-slate-50 rounded-lg p-6 mb-4">
+                <p className="text-sm text-slate-700 leading-relaxed">
+                  At my last internship, I misestimated a project timeline by
+                  two weeks, which delayed our product launch. I immediately
+                  notified my manager, worked with the team to redistribute
+                  tasks, and stayed late for a week to catch up. We launched
+                  only 3 days behind schedule, and I learned to build in 20%
+                  buffer time for estimates.
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <p className="text-sm text-green-600 flex items-start gap-2">
+                  <span>✅</span>
+                  <span>Clear situation (missed timeline)</span>
+                </p>
+                <p className="text-sm text-green-600 flex items-start gap-2">
+                  <span>✅</span>
+                  <span>Owned the mistake</span>
+                </p>
+                <p className="text-sm text-green-600 flex items-start gap-2">
+                  <span>✅</span>
+                  <span>Specific actions taken</span>
+                </p>
+                <p className="text-sm text-green-600 flex items-start gap-2">
+                  <span>✅</span>
+                  <span>Quantified outcome (3 days vs 14 days)</span>
+                </p>
+                <p className="text-sm text-green-600 flex items-start gap-2">
+                  <span>✅</span>
+                  <span>Shows learning and growth</span>
                 </p>
               </div>
             </div>
+          </div>
+
+          {/* CTA below comparison */}
+          <div className="text-center mt-12">
+            <p className="text-lg text-slate-700 mb-6">
+              See what your answers are missing
+            </p>
+            <Link href="/assessment/setup">
+              <Button size="lg">Try Free Assessment →</Button>
+            </Link>
           </div>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-24 relative overflow-hidden">
-        {/* Background gradient orbs */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-gradient-to-br from-blue-500/15 to-cyan-400/15 rounded-full blur-3xl" />
-        </div>
-
-        <div className="container mx-auto px-6 relative z-10">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-              Built for serious candidates
-            </h2>
-            <p className="text-lg text-muted-foreground">
-              Professional features that mirror real interview conditions
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {/* Feature 1 - Voice Mode */}
-            <div className="bg-white rounded-2xl p-8 shadow-lg border border-slate-200 space-y-4">
-              <div className="w-14 h-14 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-2xl flex items-center justify-center">
-                <Mic className="w-7 h-7 text-white" />
-              </div>
-              <h3 className="text-xl font-semibold">Voice Mode</h3>
-              <p className="text-muted-foreground">
-                Practice speaking naturally with AI-powered voice interviews.
-                Realistic TTS reads questions aloud, and voice recognition
-                captures your answers.
-              </p>
-            </div>
-
-            {/* Feature 2 - Text Mode */}
-            <div className="bg-white rounded-2xl p-8 shadow-lg border border-slate-200 space-y-4">
-              <div className="w-14 h-14 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-2xl flex items-center justify-center">
-                <Type className="w-7 h-7 text-white" />
-              </div>
-              <h3 className="text-xl font-semibold">Text Mode</h3>
-              <p className="text-muted-foreground">
-                Perfect for practicing written communication. Type thoughtful
-                responses and get detailed feedback on structure and content.
-              </p>
-            </div>
-
-            {/* Feature 3 - Adaptive Difficulty */}
-            <div className="bg-white rounded-2xl p-8 shadow-lg border border-slate-200 space-y-4">
-              <div className="w-14 h-14 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-2xl flex items-center justify-center">
-                <Zap className="w-7 h-7 text-white" />
-              </div>
-              <h3 className="text-xl font-semibold">Adaptive Difficulty</h3>
-              <p className="text-muted-foreground">
-                Questions adjust in real-time based on your performance. Strong
-                answers unlock harder questions, just like real interviews.
-              </p>
-            </div>
-
-            {/* Feature 4 - Multi-Stage */}
-            <div className="bg-white rounded-2xl p-8 shadow-lg border border-slate-200 space-y-4">
-              <div className="w-14 h-14 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-2xl flex items-center justify-center">
-                <Target className="w-7 h-7 text-white" />
-              </div>
-              <h3 className="text-xl font-semibold">Multi-Stage Interviews</h3>
-              <p className="text-muted-foreground">
-                Simulate complete interview processes with up to 3 stages.
-                Technical, behavioral, and case questions all in one session.
-              </p>
-            </div>
-
-            {/* Feature 5 - Smart Research */}
-            <div className="bg-white rounded-2xl p-8 shadow-lg border border-slate-200 space-y-4">
-              <div className="w-14 h-14 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-2xl flex items-center justify-center">
-                <Brain className="w-7 h-7 text-white" />
-              </div>
-              <h3 className="text-xl font-semibold">Smart Research</h3>
-              <p className="text-muted-foreground">
-                AI analyzes job descriptions and company data to generate
-                questions that match the actual role and company culture.
-              </p>
-            </div>
-
-            {/* Feature 6 - Detailed Reports */}
-            <div className="bg-white rounded-2xl p-8 shadow-lg border border-slate-200 space-y-4">
-              <div className="w-14 h-14 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-2xl flex items-center justify-center">
-                <BarChart3 className="w-7 h-7 text-white" />
-              </div>
-              <h3 className="text-xl font-semibold">Detailed Reports</h3>
-              <p className="text-muted-foreground">
-                Get comprehensive feedback on communication, problem-solving,
-                and domain knowledge with actionable improvement suggestions.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials Section */}
+      {/* What You Get Section - Free vs Premium */}
       <section className="py-24 bg-slate-50">
         <div className="container mx-auto px-6">
           <div className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-              Loved by job seekers everywhere
+              What You Actually Get
             </h2>
             <p className="text-lg text-muted-foreground">
-              Real feedback from candidates who landed their dream jobs
+              Start free, upgrade when you&apos;re ready
             </p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {/* Testimonial 1 */}
-            <div className="bg-white rounded-2xl p-8 shadow-lg border border-slate-200 space-y-4">
-              <div className="flex gap-1 text-yellow-500">
-                {[...Array(5)].map((_, i) => (
-                  <svg
-                    key={i}
-                    className="w-5 h-5 fill-current"
-                    viewBox="0 0 20 20"
-                  >
-                    <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
-                  </svg>
-                ))}
+            {/* Column 1 - Free Assessment */}
+            <div className="bg-white rounded-2xl p-8 shadow-lg border-2 border-slate-200 space-y-6">
+              <div>
+                <h3 className="text-2xl font-bold mb-2">Free Assessment</h3>
+                <p className="text-sm text-slate-600">Try it right now</p>
               </div>
-              <p className="text-muted-foreground italic">
-                &ldquo;The voice mode is incredible. It felt just like my actual
-                Google interview. The adaptive difficulty really pushed me to
-                improve.&rdquo;
-              </p>
-              <div className="flex items-center gap-3">
-                <Image
-                  src="/Sarah_Chen Headshot.png"
-                  alt="Sarah Chen"
-                  width={40}
-                  height={40}
-                  className="w-10 h-10 rounded-full object-cover"
-                />
-                <div>
-                  <p className="font-semibold">Sarah Chen</p>
-                  <p className="text-sm text-muted-foreground">
-                    Software Engineer at Google
-                  </p>
-                </div>
-              </div>
+
+              <ul className="space-y-3">
+                <li className="flex items-start gap-3">
+                  <CheckCircle2 className="w-5 h-5 text-cyan-500 flex-shrink-0 mt-0.5" />
+                  <span className="text-sm text-slate-700">
+                    3 real behavioral questions
+                  </span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <CheckCircle2 className="w-5 h-5 text-cyan-500 flex-shrink-0 mt-0.5" />
+                  <span className="text-sm text-slate-700">
+                    AI feedback on 1 category (Communication)
+                  </span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <CheckCircle2 className="w-5 h-5 text-cyan-500 flex-shrink-0 mt-0.5" />
+                  <span className="text-sm text-slate-700">Text-only mode</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <CheckCircle2 className="w-5 h-5 text-cyan-500 flex-shrink-0 mt-0.5" />
+                  <span className="text-sm text-slate-700">
+                    See what you&apos;re missing
+                  </span>
+                </li>
+              </ul>
+
+              <Link href="/assessment/setup" className="block">
+                <Button variant="outline" size="default" className="w-full">
+                  Try Free Now
+                </Button>
+              </Link>
             </div>
 
-            {/* Testimonial 2 */}
-            <div className="bg-white rounded-2xl p-8 shadow-lg border border-slate-200 space-y-4">
-              <div className="flex gap-1 text-yellow-500">
-                {[...Array(5)].map((_, i) => (
-                  <svg
-                    key={i}
-                    className="w-5 h-5 fill-current"
-                    viewBox="0 0 20 20"
-                  >
-                    <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
-                  </svg>
-                ))}
+            {/* Column 2 - Premium Features */}
+            <div className="bg-white rounded-2xl p-8 shadow-lg border-2 border-cyan-500 space-y-6 relative">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                <span className="inline-block px-4 py-1 bg-gradient-to-r from-cyan-500 to-blue-600 text-white text-xs font-bold rounded-full">
+                  MOST POPULAR
+                </span>
               </div>
-              <p className="text-muted-foreground italic">
-                &ldquo;Best interview prep tool I&apos;ve used. The AI generates
-                questions specific to the actual job posting. Got offers from 3
-                out of 4 companies!&rdquo;
-              </p>
-              <div className="flex items-center gap-3">
-                <Image
-                  src="/Marcus_Johnson Headshot.png"
-                  alt="Marcus Johnson"
-                  width={40}
-                  height={40}
-                  className="w-10 h-10 rounded-full object-cover"
-                />
-                <div>
-                  <p className="font-semibold">Marcus Johnson</p>
-                  <p className="text-sm text-muted-foreground">
-                    Product Manager at Amazon
-                  </p>
-                </div>
+
+              <div>
+                <h3 className="text-2xl font-bold mb-2">Premium</h3>
+                <p className="text-sm text-slate-600">
+                  Full interview simulation
+                </p>
               </div>
+
+              <ul className="space-y-3">
+                <li className="flex items-start gap-3">
+                  <CheckCircle2 className="w-5 h-5 text-cyan-500 flex-shrink-0 mt-0.5" />
+                  <span className="text-sm text-slate-700">
+                    Unlimited questions
+                  </span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <CheckCircle2 className="w-5 h-5 text-cyan-500 flex-shrink-0 mt-0.5" />
+                  <span className="text-sm text-slate-700">
+                    Full AI feedback (all 3 categories)
+                  </span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <CheckCircle2 className="w-5 h-5 text-cyan-500 flex-shrink-0 mt-0.5" />
+                  <span className="text-sm text-slate-700">
+                    Realistic voice mode (like Zoom)
+                  </span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <CheckCircle2 className="w-5 h-5 text-cyan-500 flex-shrink-0 mt-0.5" />
+                  <span className="text-sm text-slate-700">
+                    Personalized to your CV & job description
+                  </span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <CheckCircle2 className="w-5 h-5 text-cyan-500 flex-shrink-0 mt-0.5" />
+                  <span className="text-sm text-slate-700">
+                    Multi-stage interviews (up to 3 rounds)
+                  </span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <CheckCircle2 className="w-5 h-5 text-cyan-500 flex-shrink-0 mt-0.5" />
+                  <span className="text-sm text-slate-700">
+                    Questions get harder as you improve
+                  </span>
+                </li>
+              </ul>
+
+              <Link href="/pricing" className="block">
+                <Button size="default" className="w-full">
+                  See Pricing
+                </Button>
+              </Link>
             </div>
 
-            {/* Testimonial 3 */}
-            <div className="bg-white rounded-2xl p-8 shadow-lg border border-slate-200 space-y-4">
-              <div className="flex gap-1 text-yellow-500">
-                {[...Array(5)].map((_, i) => (
-                  <svg
-                    key={i}
-                    className="w-5 h-5 fill-current"
-                    viewBox="0 0 20 20"
-                  >
-                    <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
-                  </svg>
-                ))}
+            {/* Column 3 - Why People Upgrade */}
+            <div className="bg-white rounded-2xl p-8 shadow-lg border-2 border-slate-200 space-y-6">
+              <div>
+                <h3 className="text-2xl font-bold mb-2">Why Upgrade?</h3>
+                <p className="text-sm text-slate-600">What you unlock</p>
               </div>
-              <p className="text-muted-foreground italic">
-                &ldquo;The detailed feedback helped me identify exactly where I
-                was weak. Within 2 weeks of practice, I aced my Meta
-                interview.&rdquo;
+
+              <ul className="space-y-3">
+                <li className="flex items-start gap-3">
+                  <Mic className="w-5 h-5 text-cyan-500 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-semibold text-slate-900">
+                      Practice Speaking
+                    </p>
+                    <p className="text-xs text-slate-600">
+                      Voice mode forces you to think on your feet
+                    </p>
+                  </div>
+                </li>
+                <li className="flex items-start gap-3">
+                  <Brain className="w-5 h-5 text-cyan-500 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-semibold text-slate-900">
+                      Get Specific Feedback
+                    </p>
+                    <p className="text-xs text-slate-600">
+                      See exactly what to fix in your answers
+                    </p>
+                  </div>
+                </li>
+                <li className="flex items-start gap-3">
+                  <Target className="w-5 h-5 text-cyan-500 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-semibold text-slate-900">
+                      Match Real Conditions
+                    </p>
+                    <p className="text-xs text-slate-600">
+                      Multi-stage interviews = actual interview format
+                    </p>
+                  </div>
+                </li>
+                <li className="flex items-start gap-3">
+                  <Zap className="w-5 h-5 text-cyan-500 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-semibold text-slate-900">
+                      Adaptive Difficulty
+                    </p>
+                    <p className="text-xs text-slate-600">
+                      Questions adjust to push your limits
+                    </p>
+                  </div>
+                </li>
+              </ul>
+
+              <p className="text-xs text-slate-600 italic">
+                Most people upgrade after the free assessment once they see the
+                gaps in their answers.
               </p>
-              <div className="flex items-center gap-3">
-                <Image
-                  src="/Priya_Patel Headshot.png"
-                  alt="Priya Patel"
-                  width={40}
-                  height={40}
-                  className="w-10 h-10 rounded-full object-cover"
-                />
-                <div>
-                  <p className="font-semibold">Priya Patel</p>
-                  <p className="text-sm text-muted-foreground">
-                    Data Scientist at Meta
-                  </p>
-                </div>
-              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Common Questions Section */}
+      <section className="py-24">
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold mb-4">
+              Common Questions
+            </h2>
+          </div>
+
+          <div className="max-w-3xl mx-auto space-y-6">
+            {/* Question 1 */}
+            <div className="bg-white rounded-xl p-6 shadow-md border border-slate-200">
+              <h3 className="text-lg font-semibold mb-2 text-slate-900">
+                Is the free version actually free?
+              </h3>
+              <p className="text-sm text-slate-700">
+                Yes. No credit card. You get 3 questions and feedback on your
+                communication skills. If you want more, you upgrade.
+              </p>
+            </div>
+
+            {/* Question 2 */}
+            <div className="bg-white rounded-xl p-6 shadow-md border border-slate-200">
+              <h3 className="text-lg font-semibold mb-2 text-slate-900">
+                How is this better than practicing with a friend?
+              </h3>
+              <p className="text-sm text-slate-700">
+                Friends are nice. They won&apos;t tell you your answer was
+                vague, or that you used &quot;like&quot; 14 times. Our AI will.
+              </p>
+            </div>
+
+            {/* Question 3 */}
+            <div className="bg-white rounded-xl p-6 shadow-md border border-slate-200">
+              <h3 className="text-lg font-semibold mb-2 text-slate-900">
+                Does the AI actually know about my company?
+              </h3>
+              <p className="text-sm text-slate-700">
+                If it&apos;s a major company (S&P 500 or well-known startup),
+                yes. The AI researches the role and generates questions that
+                match what they actually ask.
+              </p>
+            </div>
+
+            {/* Question 4 */}
+            <div className="bg-white rounded-xl p-6 shadow-md border border-slate-200">
+              <h3 className="text-lg font-semibold mb-2 text-slate-900">
+                What if I mess up the free assessment?
+              </h3>
+              <p className="text-sm text-slate-700">
+                That&apos;s the point. You mess up here, not in the real
+                interview. You can try again in 7 days.
+              </p>
+            </div>
+
+            {/* Question 5 */}
+            <div className="bg-white rounded-xl p-6 shadow-md border border-slate-200">
+              <h3 className="text-lg font-semibold mb-2 text-slate-900">
+                How long does a full premium interview take?
+              </h3>
+              <p className="text-sm text-slate-700">
+                Depends on how much you practice. A single-stage interview with
+                8 questions takes 15-20 minutes. Multi-stage interviews can go
+                longer.
+              </p>
             </div>
           </div>
         </div>
@@ -466,22 +524,22 @@ export default async function Home() {
         <div className="container mx-auto px-6 relative z-10">
           <div className="max-w-4xl mx-auto text-center bg-gradient-to-br from-cyan-50 to-blue-50 rounded-3xl p-12 border-2 border-cyan-200 shadow-lg">
             <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-              Ready to ace your next interview?
+              You&apos;re one bad interview away from losing an offer
             </h2>
-            <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Join thousands of candidates who have improved their interview
-              skills and landed offers at top companies.
+            <p className="text-lg text-slate-700 mb-8 max-w-2xl mx-auto">
+              Don&apos;t find out what&apos;s wrong with your answers in the
+              actual interview. Find out now, for free.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link href="/assessment/setup">
                 <Button size="lg">
-                  Start your free interview today
+                  Try Free Assessment
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
             </div>
-            <p className="text-sm text-muted-foreground mt-6">
-              No credit card required • Get started in 2 minutes
+            <p className="text-sm text-slate-600 mt-6">
+              No credit card • 3 questions • Instant feedback
             </p>
           </div>
         </div>
