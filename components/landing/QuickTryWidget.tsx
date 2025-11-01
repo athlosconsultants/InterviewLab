@@ -135,7 +135,7 @@ export function QuickTryWidget() {
           id="role-select"
           value={selectedRole}
           onChange={(e) => handleRoleChange(e.target.value)}
-          className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-base text-slate-900 shadow-sm focus-visible:outline-none focus-visible:border-cyan-500 focus-visible:ring-2 focus-visible:ring-cyan-500/20 min-h-[44px] transition-all duration-200"
+          className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-base text-slate-900 focus-visible:outline-none focus-visible:border-cyan-500 focus-visible:ring-2 focus-visible:ring-cyan-500/20 min-h-[44px] transition-all duration-200"
         >
           <option value="">Choose a role...</option>
           {ROLES.map((role) => (

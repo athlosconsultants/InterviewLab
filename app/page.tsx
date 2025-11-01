@@ -170,12 +170,15 @@ export default async function Home() {
               ) : (
                 <>
                   <Link href="/assessment/setup">
-                    <Button size="lg">
+                    <Button size="lg" className="border-2 border-cyan-600">
                       Start My Free 3-Question Assessment →
                     </Button>
                   </Link>
                   <Link href="/pricing">
-                    <Button size="lg" variant="outline">
+                    <Button
+                      size="lg"
+                      className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white"
+                    >
                       Explore Premium Plans
                     </Button>
                   </Link>
@@ -296,7 +299,12 @@ export default async function Home() {
               See what your answers are missing
             </p>
             <Link href="/assessment/setup">
-              <Button size="lg">Try Free Assessment →</Button>
+              <Button
+                size="lg"
+                className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white"
+              >
+                Try Free Assessment →
+              </Button>
             </Link>
           </div>
         </div>
@@ -409,7 +417,10 @@ export default async function Home() {
               </ul>
 
               <Link href="/pricing" className="block">
-                <Button size="default" className="w-full">
+                <Button
+                  size="default"
+                  className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white"
+                >
                   See Pricing
                 </Button>
               </Link>
@@ -566,7 +577,10 @@ export default async function Home() {
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link href="/assessment/setup">
-                <Button size="lg">
+                <Button
+                  size="lg"
+                  className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white"
+                >
                   Try Free Assessment
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>

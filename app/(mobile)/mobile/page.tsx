@@ -100,7 +100,12 @@ export default function MobileLandingPage() {
             <p className="text-sm text-gray-700 font-semibold mb-4 drop-shadow-[0_0_8px_rgba(255,255,255,1)]">
               Full assessment + detailed feedback
             </p>
-            <Button asChild size="lg" disabled={isLoading} className="w-full">
+            <Button
+              asChild
+              size="lg"
+              disabled={isLoading}
+              className="w-full border-2 border-cyan-600"
+            >
               <Link
                 href={ctaHref}
                 className="flex items-center justify-center gap-2"
@@ -177,7 +182,10 @@ export default function MobileLandingPage() {
 
         <div className="text-center mt-6">
           <Link href="/assessment/setup">
-            <Button size="lg" className="w-full">
+            <Button
+              size="lg"
+              className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white"
+            >
               See What Your Answers Are Missing →
             </Button>
           </Link>
@@ -243,7 +251,10 @@ export default function MobileLandingPage() {
                   <span>Personalized to your CV</span>
                 </li>
               </ul>
-              <Button size="default" className="w-full">
+              <Button
+                size="default"
+                className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white"
+              >
                 <Link href="/pricing">See Pricing</Link>
               </Button>
             </div>
@@ -345,7 +356,10 @@ export default function MobileLandingPage() {
             Don&apos;t find out what&apos;s wrong in the actual interview. Find
             out now, free.
           </p>
-          <Button size="lg" className="w-full mb-3">
+          <Button
+            size="lg"
+            className="w-full mb-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white"
+          >
             <Link href="/assessment/setup">Try Free Assessment →</Link>
           </Button>
           <p className="text-xs text-gray-600">
