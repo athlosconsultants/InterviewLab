@@ -173,7 +173,7 @@ export default async function Home() {
               ) : (
                 <>
                   <Link href="/assessment/setup">
-                    <Button size="lg" className="border-2 border-cyan-600">
+                    <Button size="lg" variant="outline">
                       Start My Free 3-Question Assessment →
                     </Button>
                   </Link>

@@ -103,8 +103,9 @@ export default function MobileLandingPage() {
             <Button
               asChild
               size="lg"
+              variant="outline"
               disabled={isLoading}
-              className="w-full border-2 border-cyan-600"
+              className="w-full"
             >
               <Link
                 href={ctaHref}
