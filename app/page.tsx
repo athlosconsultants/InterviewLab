@@ -84,20 +84,20 @@ export default async function Home() {
             />
           </div>
 
-          {/* Responsive Gradient Overlay - Stronger on mobile for readability, subtle on desktop */}
+          {/* Mobile Gradient Overlay - Translucent to show image while maintaining readability */}
           <div
-            className="absolute inset-0"
+            className="absolute inset-0 md:hidden"
             style={{
               background:
-                'linear-gradient(to bottom, rgba(224, 242, 254, 0.92) 0%, rgba(224, 242, 254, 0.90) 25%, rgba(224, 242, 254, 0.85) 50%, rgba(224, 242, 254, 0.90) 75%, rgb(240, 249, 255) 100%)',
+                'linear-gradient(180deg, rgba(224, 242, 254, 0.45) 0%, rgba(186, 230, 253, 0.50) 50%, rgba(224, 242, 254, 0.55) 100%)',
             }}
           />
-          {/* Desktop Gradient Overlay - More subtle to show image */}
+          {/* Desktop Gradient Overlay - Very subtle to showcase image */}
           <div
             className="absolute inset-0 hidden md:block"
             style={{
               background:
-                'linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.2) 30%, rgba(224, 242, 254, 0.4) 60%, rgba(224, 242, 254, 0.7) 85%, rgb(240, 249, 255) 100%)',
+                'linear-gradient(180deg, rgba(224, 242, 254, 0.25) 0%, rgba(186, 230, 253, 0.30) 50%, rgba(224, 242, 254, 0.35) 100%)',
             }}
           />
         </div>
@@ -120,15 +120,15 @@ export default async function Home() {
               No signup required. Instant feedback.
             </p>
 
-            {/* Trust badges - Mobile: white glow, Desktop: minimal shadow */}
+            {/* Trust badges - Individual backgrounds for readability over image */}
             <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-sm">
-              <div className="flex items-center gap-2 text-slate-800 drop-shadow-[0_0_8px_rgba(255,255,255,1)] md:drop-shadow-[0_1px_4px_rgba(255,255,255,0.8)]">
+              <div className="flex items-center gap-2 text-slate-800 bg-white/85 px-4 py-2 rounded-lg backdrop-blur-sm drop-shadow-[0_0_8px_rgba(255,255,255,1)] md:drop-shadow-[0_1px_4px_rgba(255,255,255,0.8)]">
                 <CheckCircle2 className="w-4 h-4 text-cyan-600 drop-shadow-[0_0_6px_rgba(255,255,255,1)] md:drop-shadow-[0_1px_3px_rgba(255,255,255,0.9)]" />
                 <span className="font-semibold">
                   AI trained on 10,000+ S&P 500 interviews
                 </span>
               </div>
-              <div className="flex items-center gap-2 text-slate-800 drop-shadow-[0_0_8px_rgba(255,255,255,1)] md:drop-shadow-[0_1px_4px_rgba(255,255,255,0.8)]">
+              <div className="flex items-center gap-2 text-slate-800 bg-white/85 px-4 py-2 rounded-lg backdrop-blur-sm drop-shadow-[0_0_8px_rgba(255,255,255,1)] md:drop-shadow-[0_1px_4px_rgba(255,255,255,0.8)]">
                 <Briefcase className="w-4 h-4 text-cyan-600 drop-shadow-[0_0_6px_rgba(255,255,255,1)] md:drop-shadow-[0_1px_3px_rgba(255,255,255,0.9)]" />
                 <span className="font-semibold">50+ industries covered</span>
               </div>

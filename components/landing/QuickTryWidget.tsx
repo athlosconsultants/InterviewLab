@@ -122,7 +122,7 @@ export function QuickTryWidget() {
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto bg-white/95 md:bg-white backdrop-blur-sm md:backdrop-blur-none rounded-2xl shadow-xl md:shadow-2xl border-2 border-slate-200 p-4 sm:p-6">
+    <div className="w-full max-w-2xl mx-auto bg-white/97 md:bg-white/92 backdrop-blur-[10px] md:backdrop-blur-[12px] rounded-2xl shadow-xl md:shadow-2xl border-2 border-slate-200 p-4 sm:p-6">
       {/* Role Dropdown */}
       <div className="mb-4">
         <label

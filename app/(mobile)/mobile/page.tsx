@@ -53,12 +53,12 @@ export default function MobileLandingPage() {
             />
           </div>
 
-          {/* Strong Gradient Overlay for mobile readability */}
+          {/* Translucent Gradient Overlay - Shows background image while maintaining readability */}
           <div
             className="absolute inset-0"
             style={{
               background:
-                'linear-gradient(to bottom, rgba(224, 242, 254, 0.92) 0%, rgba(224, 242, 254, 0.90) 25%, rgba(224, 242, 254, 0.85) 50%, rgba(224, 242, 254, 0.90) 75%, rgb(240, 249, 255) 100%)',
+                'linear-gradient(180deg, rgba(224, 242, 254, 0.45) 0%, rgba(186, 230, 253, 0.50) 50%, rgba(224, 242, 254, 0.55) 100%)',
             }}
           />
         </div>
@@ -73,15 +73,15 @@ export default function MobileLandingPage() {
             </p>
           </div>
 
-          {/* Trust badges */}
+          {/* Trust badges - Individual backgrounds for readability */}
           <div className="flex flex-wrap items-center justify-center gap-3 mb-6 text-xs text-gray-800">
-            <div className="flex items-center gap-1 drop-shadow-[0_0_8px_rgba(255,255,255,1)]">
+            <div className="flex items-center gap-1 bg-white/85 px-4 py-2 rounded-lg backdrop-blur-sm drop-shadow-[0_0_8px_rgba(255,255,255,1)]">
               <CheckCircle2 className="w-3 h-3 text-cyan-600 drop-shadow-[0_0_6px_rgba(255,255,255,1)]" />
               <span className="font-semibold">
                 AI trained on 10,000+ interviews
               </span>
             </div>
-            <div className="flex items-center gap-1 drop-shadow-[0_0_8px_rgba(255,255,255,1)]">
+            <div className="flex items-center gap-1 bg-white/85 px-4 py-2 rounded-lg backdrop-blur-sm drop-shadow-[0_0_8px_rgba(255,255,255,1)]">
               <Briefcase className="w-3 h-3 text-cyan-600 drop-shadow-[0_0_6px_rgba(255,255,255,1)]" />
               <span className="font-semibold">50+ industries</span>
             </div>
