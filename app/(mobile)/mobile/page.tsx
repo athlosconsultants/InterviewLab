@@ -40,48 +40,77 @@ export default function MobileLandingPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white via-slate-50 to-white pb-24">
-      {/* Hero Section */}
-      <section className="px-6 pt-12 pb-8">
-        <div className="text-center mb-6">
-          <h1 className="text-3xl font-bold leading-tight mb-3 bg-gradient-to-r from-cyan-500 to-blue-600 bg-clip-text text-transparent">
-            Try a Real Interview Question Now
-          </h1>
-          <p className="text-base text-gray-600">
-            No signup. Instant feedback.
-          </p>
-        </div>
-
-        {/* Trust badges */}
-        <div className="flex flex-wrap items-center justify-center gap-3 mb-6 text-xs text-gray-600">
-          <div className="flex items-center gap-1">
-            <CheckCircle2 className="w-3 h-3 text-cyan-500" />
-            <span>AI trained on 10,000+ interviews</span>
+      {/* Hero Section - Mobile Optimized with Background */}
+      <section className="relative overflow-hidden min-h-[60vh] px-6 pt-12 pb-8">
+        {/* Background Image Layer - Mobile optimized with zoom */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none -z-10">
+          <div className="absolute inset-0 scale-110">
+            <img
+              src="/Images/hero-bg.jpg"
+              alt=""
+              className="w-full h-full object-cover object-center"
+              loading="eager"
+            />
           </div>
-          <div className="flex items-center gap-1">
-            <Briefcase className="w-3 h-3 text-cyan-500" />
-            <span>50+ industries</span>
+
+          {/* Strong Gradient Overlay for mobile readability */}
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                'linear-gradient(to bottom, rgba(224, 242, 254, 0.92) 0%, rgba(224, 242, 254, 0.90) 25%, rgba(224, 242, 254, 0.85) 50%, rgba(224, 242, 254, 0.90) 75%, rgb(240, 249, 255) 100%)',
+            }}
+          />
+        </div>
+
+        <div className="relative z-10">
+          <div className="text-center mb-6">
+            <h1 className="text-3xl font-bold leading-tight mb-3 bg-gradient-to-r from-cyan-500 to-blue-600 bg-clip-text text-transparent drop-shadow-[0_0_12px_rgba(255,255,255,1)]">
+              Try a Real Interview Question Now
+            </h1>
+            <p className="text-base text-gray-800 font-semibold drop-shadow-[0_0_10px_rgba(255,255,255,1)]">
+              No signup. Instant feedback.
+            </p>
           </div>
-        </div>
 
-        {/* QuickTry Widget */}
-        <div className="mb-8">
-          <QuickTryWidget />
-        </div>
+          {/* Trust badges */}
+          <div className="flex flex-wrap items-center justify-center gap-3 mb-6 text-xs text-gray-800">
+            <div className="flex items-center gap-1 drop-shadow-[0_0_8px_rgba(255,255,255,1)]">
+              <CheckCircle2 className="w-3 h-3 text-cyan-600 drop-shadow-[0_0_6px_rgba(255,255,255,1)]" />
+              <span className="font-semibold">
+                AI trained on 10,000+ interviews
+              </span>
+            </div>
+            <div className="flex items-center gap-1 drop-shadow-[0_0_8px_rgba(255,255,255,1)]">
+              <Briefcase className="w-3 h-3 text-cyan-600 drop-shadow-[0_0_6px_rgba(255,255,255,1)]" />
+              <span className="font-semibold">50+ industries</span>
+            </div>
+          </div>
 
-        {/* CTA Below Widget */}
-        <div className="text-center">
-          <h2 className="text-xl font-bold mb-2">Want more?</h2>
-          <p className="text-sm text-gray-600 mb-4">
-            Full assessment + detailed feedback
-          </p>
-          <Button asChild size="lg" disabled={isLoading} className="w-full">
-            <Link
-              href={ctaHref}
-              className="flex items-center justify-center gap-2"
-            >
-              {isLoading ? 'Loading...' : 'Start Free 3-Question Assessment →'}
-            </Link>
-          </Button>
+          {/* QuickTry Widget */}
+          <div className="mb-8">
+            <QuickTryWidget />
+          </div>
+
+          {/* CTA Below Widget */}
+          <div className="text-center">
+            <h2 className="text-xl font-bold mb-2 drop-shadow-[0_0_8px_rgba(255,255,255,1)]">
+              Want more?
+            </h2>
+            <p className="text-sm text-gray-700 font-semibold mb-4 drop-shadow-[0_0_8px_rgba(255,255,255,1)]">
+              Full assessment + detailed feedback
+            </p>
+            <Button asChild size="lg" disabled={isLoading} className="w-full">
+              <Link
+                href={ctaHref}
+                className="flex items-center justify-center gap-2"
+              >
+                {isLoading
+                  ? 'Loading...'
+                  : 'Start Free 3-Question Assessment →'}
+              </Link>
+            </Button>
+          </div>
         </div>
       </section>
 

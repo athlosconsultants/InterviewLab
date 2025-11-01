@@ -70,23 +70,31 @@ export default async function Home() {
     <main className="min-h-screen bg-gradient-to-b from-cyan-50 via-white via-slate-50 to-white">
       {/* Hero Section */}
       <section className="relative overflow-hidden min-h-[60vh] md:min-h-[70vh] lg:min-h-[80vh]">
-        {/* Background Image Layer - Full hero height, prominent display */}
+        {/* Background Image Layer - Mobile optimized positioning and scale */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute inset-0">
+          <div className="absolute inset-0 scale-110 md:scale-100">
             <Image
               src="/Images/hero-bg.jpg"
               alt=""
               fill
               priority
-              className="object-cover object-center"
+              className="object-cover object-center md:object-center"
               sizes="100vw"
               quality={90}
             />
           </div>
 
-          {/* Subtle Gradient Overlay - Allows image to show through while maintaining readability */}
+          {/* Responsive Gradient Overlay - Stronger on mobile for readability, subtle on desktop */}
           <div
             className="absolute inset-0"
+            style={{
+              background:
+                'linear-gradient(to bottom, rgba(224, 242, 254, 0.92) 0%, rgba(224, 242, 254, 0.90) 25%, rgba(224, 242, 254, 0.85) 50%, rgba(224, 242, 254, 0.90) 75%, rgb(240, 249, 255) 100%)',
+            }}
+          />
+          {/* Desktop Gradient Overlay - More subtle to show image */}
+          <div
+            className="absolute inset-0 hidden md:block"
             style={{
               background:
                 'linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.2) 30%, rgba(224, 242, 254, 0.4) 60%, rgba(224, 242, 254, 0.7) 85%, rgb(240, 249, 255) 100%)',
@@ -94,34 +102,34 @@ export default async function Home() {
           />
         </div>
 
-        {/* Subtle gradient orbs for depth - reduced opacity so image is primary */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none z-[1]">
+        {/* Subtle gradient orbs for depth - Desktop only */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none z-[1] hidden md:block">
           <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-gradient-to-br from-cyan-400/5 to-blue-500/5 rounded-full blur-3xl" />
           <div className="absolute bottom-1/3 left-1/4 w-96 h-96 bg-gradient-to-br from-blue-500/5 to-cyan-400/5 rounded-full blur-3xl" />
         </div>
 
         <div className="relative z-[2] container mx-auto px-6 pt-32 pb-24">
           <div className="max-w-4xl mx-auto text-center space-y-8">
-            {/* Headline - Enhanced for readability over image */}
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight bg-gradient-to-r from-cyan-500 to-blue-600 bg-clip-text text-transparent drop-shadow-[0_2px_8px_rgba(0,0,0,0.3)]">
+            {/* Headline - Mobile: white glow for readability, Desktop: subtle shadow */}
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight bg-gradient-to-r from-cyan-500 to-blue-600 bg-clip-text text-transparent drop-shadow-[0_0_12px_rgba(255,255,255,1)] md:drop-shadow-[0_2px_8px_rgba(0,0,0,0.3)]">
               Try a Real Interview Question Now
             </h1>
 
-            {/* Subheadline - Enhanced contrast with strong shadow */}
-            <p className="text-lg sm:text-xl text-slate-800 font-semibold max-w-2xl mx-auto drop-shadow-[0_2px_6px_rgba(255,255,255,0.9)]">
+            {/* Subheadline - Mobile: strong white glow, Desktop: subtle shadow */}
+            <p className="text-lg sm:text-xl text-slate-800 font-semibold max-w-2xl mx-auto drop-shadow-[0_0_10px_rgba(255,255,255,1)] md:drop-shadow-[0_2px_6px_rgba(255,255,255,0.9)]">
               No signup required. Instant feedback.
             </p>
 
-            {/* Trust badges - Enhanced readability with white text shadow */}
+            {/* Trust badges - Mobile: white glow, Desktop: minimal shadow */}
             <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-sm">
-              <div className="flex items-center gap-2 text-slate-800 drop-shadow-[0_1px_4px_rgba(255,255,255,0.8)]">
-                <CheckCircle2 className="w-4 h-4 text-cyan-600 drop-shadow-[0_1px_3px_rgba(255,255,255,0.9)]" />
+              <div className="flex items-center gap-2 text-slate-800 drop-shadow-[0_0_8px_rgba(255,255,255,1)] md:drop-shadow-[0_1px_4px_rgba(255,255,255,0.8)]">
+                <CheckCircle2 className="w-4 h-4 text-cyan-600 drop-shadow-[0_0_6px_rgba(255,255,255,1)] md:drop-shadow-[0_1px_3px_rgba(255,255,255,0.9)]" />
                 <span className="font-semibold">
                   AI trained on 10,000+ S&P 500 interviews
                 </span>
               </div>
-              <div className="flex items-center gap-2 text-slate-800 drop-shadow-[0_1px_4px_rgba(255,255,255,0.8)]">
-                <Briefcase className="w-4 h-4 text-cyan-600 drop-shadow-[0_1px_3px_rgba(255,255,255,0.9)]" />
+              <div className="flex items-center gap-2 text-slate-800 drop-shadow-[0_0_8px_rgba(255,255,255,1)] md:drop-shadow-[0_1px_4px_rgba(255,255,255,0.8)]">
+                <Briefcase className="w-4 h-4 text-cyan-600 drop-shadow-[0_0_6px_rgba(255,255,255,1)] md:drop-shadow-[0_1px_3px_rgba(255,255,255,0.9)]" />
                 <span className="font-semibold">50+ industries covered</span>
               </div>
             </div>
