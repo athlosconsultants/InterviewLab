@@ -69,16 +69,32 @@ export default async function Home() {
   return (
     <main className="min-h-screen bg-gradient-to-b from-cyan-50 via-white via-slate-50 to-white">
       {/* Hero Section */}
-      <section className="relative overflow-hidden min-h-[60vh] md:min-h-[70vh] lg:min-h-[80vh]">
-        {/* Background Image Layer - Mobile optimized positioning and scale */}
+      <section className="relative overflow-hidden min-h-[100svh] md:min-h-[70vh] lg:min-h-[80vh]">
+        {/* Background Image Layer - Mobile-specific optimized images for mobile, desktop image for larger screens */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute inset-0 scale-110 md:scale-100">
+          {/* Mobile Background - WebP with JPG fallback */}
+          <picture className="absolute inset-0 md:hidden">
+            <source
+              type="image/webp"
+              srcSet="/Images/mobile-bg-v2.webp"
+              media="(max-width: 768px)"
+            />
+            <img
+              src="/Images/mobile-bg-v2.jpg"
+              alt=""
+              className="w-full h-full object-cover object-center"
+              loading="eager"
+            />
+          </picture>
+
+          {/* Desktop Background - Original hero-bg.jpg */}
+          <div className="absolute inset-0 hidden md:block">
             <Image
               src="/Images/hero-bg.jpg"
               alt=""
               fill
               priority
-              className="object-cover object-center md:object-center"
+              className="object-cover object-center"
               sizes="100vw"
               quality={90}
             />

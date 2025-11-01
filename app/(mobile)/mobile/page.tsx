@@ -40,18 +40,20 @@ export default function MobileLandingPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white via-slate-50 to-white pb-24">
-      {/* Hero Section - Mobile Optimized with Background */}
-      <section className="relative overflow-hidden min-h-[60vh] px-6 pt-12 pb-8">
-        {/* Background Image Layer - Mobile optimized with zoom */}
+      {/* Hero Section - Mobile Optimized with Mobile-specific Background */}
+      <section className="relative overflow-hidden min-h-[100svh] px-6 pt-12 pb-8">
+        {/* Background Image Layer - Mobile-specific optimized images */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none -z-10">
-          <div className="absolute inset-0 scale-110">
+          {/* Mobile Background - WebP with JPG fallback */}
+          <picture className="absolute inset-0">
+            <source type="image/webp" srcSet="/Images/mobile-bg-v2.webp" />
             <img
-              src="/Images/hero-bg.jpg"
+              src="/Images/mobile-bg-v2.jpg"
               alt=""
               className="w-full h-full object-cover object-center"
               loading="eager"
             />
-          </div>
+          </picture>
 
           {/* Translucent Gradient Overlay - Shows background image while maintaining readability */}
           <div
