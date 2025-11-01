@@ -156,7 +156,10 @@ export default async function Home() {
               {user && hasActivePass ? (
                 <>
                   <Link href="/setup">
-                    <Button size="lg">
+                    <Button
+                      size="lg"
+                      className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white"
+                    >
                       Start Premium Interview ({passType})
                       <ArrowRight className="ml-2 h-5 w-5" />
                     </Button>
