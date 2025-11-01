@@ -69,59 +69,60 @@ export default async function Home() {
   return (
     <main className="min-h-screen bg-gradient-to-b from-cyan-50 via-white via-slate-50 to-white">
       {/* Hero Section */}
-      <section className="relative overflow-hidden">
-        {/* Background Image Layer - z-index: 0 */}
+      <section className="relative overflow-hidden min-h-[60vh] md:min-h-[70vh] lg:min-h-[80vh]">
+        {/* Background Image Layer - Full hero height, prominent display */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute inset-0 h-[30vh] md:h-[35vh] lg:h-[45vh]">
+          <div className="absolute inset-0">
             <Image
               src="/Images/hero-bg.jpg"
               alt=""
               fill
               priority
-              className="object-cover object-top"
+              className="object-cover object-center"
               sizes="100vw"
+              quality={90}
             />
           </div>
 
-          {/* Gradient Overlay - z-index: 1 - Fades from transparent to light blue */}
+          {/* Subtle Gradient Overlay - Allows image to show through while maintaining readability */}
           <div
-            className="absolute inset-0 h-[30vh] md:h-[40vh] lg:h-[50vh]"
+            className="absolute inset-0"
             style={{
               background:
-                'linear-gradient(to bottom, transparent 0%, transparent 40%, rgba(224, 242, 254, 0.3) 60%, rgba(224, 242, 254, 0.7) 80%, rgb(224, 242, 254) 100%)',
+                'linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.2) 30%, rgba(224, 242, 254, 0.4) 60%, rgba(224, 242, 254, 0.7) 85%, rgb(240, 249, 255) 100%)',
             }}
           />
         </div>
 
-        {/* Background gradient orbs - subtle enhancement */}
+        {/* Subtle gradient orbs for depth - reduced opacity so image is primary */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none z-[1]">
-          <div className="absolute top-0 right-1/4 w-96 h-96 bg-gradient-to-br from-cyan-400/10 to-blue-500/10 rounded-full blur-3xl" />
-          <div className="absolute bottom-1/4 left-1/4 w-96 h-96 bg-gradient-to-br from-blue-500/10 to-cyan-400/10 rounded-full blur-3xl" />
+          <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-gradient-to-br from-cyan-400/5 to-blue-500/5 rounded-full blur-3xl" />
+          <div className="absolute bottom-1/3 left-1/4 w-96 h-96 bg-gradient-to-br from-blue-500/5 to-cyan-400/5 rounded-full blur-3xl" />
         </div>
 
         <div className="relative z-[2] container mx-auto px-6 pt-32 pb-24">
           <div className="max-w-4xl mx-auto text-center space-y-8">
             {/* Headline - Enhanced for readability over image */}
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight bg-gradient-to-r from-cyan-500 to-blue-600 bg-clip-text text-transparent drop-shadow-lg">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight bg-gradient-to-r from-cyan-500 to-blue-600 bg-clip-text text-transparent drop-shadow-[0_2px_8px_rgba(0,0,0,0.3)]">
               Try a Real Interview Question Now
             </h1>
 
-            {/* Subheadline - Enhanced contrast with subtle background */}
-            <p className="text-lg sm:text-xl text-slate-700 font-medium max-w-2xl mx-auto drop-shadow-md">
+            {/* Subheadline - Enhanced contrast with strong shadow */}
+            <p className="text-lg sm:text-xl text-slate-800 font-semibold max-w-2xl mx-auto drop-shadow-[0_2px_6px_rgba(255,255,255,0.9)]">
               No signup required. Instant feedback.
             </p>
 
-            {/* Trust badges - Enhanced readability */}
+            {/* Trust badges - Enhanced readability with white text shadow */}
             <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-sm">
-              <div className="flex items-center gap-2 text-slate-700 drop-shadow-sm">
-                <CheckCircle2 className="w-4 h-4 text-cyan-500 drop-shadow-sm" />
-                <span className="font-medium">
+              <div className="flex items-center gap-2 text-slate-800 drop-shadow-[0_1px_4px_rgba(255,255,255,0.8)]">
+                <CheckCircle2 className="w-4 h-4 text-cyan-600 drop-shadow-[0_1px_3px_rgba(255,255,255,0.9)]" />
+                <span className="font-semibold">
                   AI trained on 10,000+ S&P 500 interviews
                 </span>
               </div>
-              <div className="flex items-center gap-2 text-slate-700 drop-shadow-sm">
-                <Briefcase className="w-4 h-4 text-cyan-500 drop-shadow-sm" />
-                <span className="font-medium">50+ industries covered</span>
+              <div className="flex items-center gap-2 text-slate-800 drop-shadow-[0_1px_4px_rgba(255,255,255,0.8)]">
+                <Briefcase className="w-4 h-4 text-cyan-600 drop-shadow-[0_1px_3px_rgba(255,255,255,0.9)]" />
+                <span className="font-semibold">50+ industries covered</span>
               </div>
             </div>
           </div>
