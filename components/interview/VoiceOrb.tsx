@@ -28,13 +28,13 @@ export function VoiceOrb({ state, size = 'lg' }: VoiceOrbProps) {
     lg: 'w-48 h-48',
   };
 
-  // T125: Updated thinking state to muted grey
+  // Design system colors - matching design.json voiceOrb states
   const stateColors = {
-    idle: 'bg-gradient-to-br from-primary/20 to-primary/40',
-    ready: 'bg-gradient-to-br from-primary/20 to-primary/40', // Same as idle, awaiting input
-    speaking: 'bg-gradient-to-br from-primary to-primary/60',
-    listening: 'bg-gradient-to-br from-blue-500 to-blue-600',
-    thinking: 'bg-gradient-to-br from-gray-400 to-gray-500', // T125: Muted grey for thinking
+    idle: 'bg-gradient-to-[135deg] from-cyan-500/20 to-blue-600/40',
+    ready: 'bg-gradient-to-[135deg] from-cyan-500/20 to-blue-600/40',
+    speaking: 'bg-gradient-to-[135deg] from-cyan-500 to-cyan-600',
+    listening: 'bg-gradient-to-[135deg] from-blue-500 to-blue-600',
+    thinking: 'bg-gradient-to-[135deg] from-slate-400 to-slate-500',
   };
 
   return (
@@ -48,7 +48,7 @@ export function VoiceOrb({ state, size = 'lg' }: VoiceOrbProps) {
               className={cn(
                 'absolute rounded-full',
                 sizeClasses[size],
-                state === 'speaking' ? 'bg-primary/10' : 'bg-blue-500/10',
+                state === 'speaking' ? 'bg-cyan-500/10' : 'bg-blue-500/10',
                 'animate-ping'
               )}
               style={{
@@ -60,7 +60,7 @@ export function VoiceOrb({ state, size = 'lg' }: VoiceOrbProps) {
               className={cn(
                 'absolute rounded-full',
                 sizeClasses[size],
-                state === 'speaking' ? 'bg-primary/5' : 'bg-blue-500/5',
+                state === 'speaking' ? 'bg-cyan-500/5' : 'bg-blue-500/5',
                 'animate-pulse'
               )}
               style={{
@@ -102,7 +102,7 @@ export function VoiceOrb({ state, size = 'lg' }: VoiceOrbProps) {
       </div>
 
       {/* State indicator - below the orb */}
-      <p className="text-sm font-medium text-muted-foreground">
+      <p className="text-sm font-medium text-slate-600">
         {state === 'idle' && 'Ready'}
         {state === 'ready' && 'Ready'}
         {state === 'speaking' && 'Speaking...'}

@@ -12,8 +12,8 @@ export async function Header() {
   } = await supabase.auth.getUser();
 
   return (
-    <header className="border-b">
-      <div className="container mx-auto px-4 py-4 flex justify-between items-center gap-2">
+    <header className="border-b border-slate-200 bg-white">
+      <div className="container mx-auto px-6 py-4 flex justify-between items-center gap-2">
         <Link href="/" className="flex items-center gap-2 min-w-0 flex-shrink">
           <Image
             src="/logo.png"
@@ -22,7 +22,9 @@ export async function Header() {
             height={32}
             className="h-8 w-8 flex-shrink-0"
           />
-          <span className="text-xl font-bold truncate">InterviewLab</span>
+          <span className="text-xl font-bold text-slate-900 truncate">
+            InterviewLab
+          </span>
         </Link>
 
         <div className="flex items-center gap-2 md:gap-4 flex-shrink-0">
@@ -30,7 +32,7 @@ export async function Header() {
             <>
               {/* T139: Show entitlement counter for logged-in users */}
               <EntitlementBadge />
-              <span className="text-sm text-muted-foreground hidden sm:inline">
+              <span className="text-sm text-slate-600 hidden sm:inline">
                 {user.email}
               </span>
               <form action={signOut}>

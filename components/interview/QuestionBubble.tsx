@@ -80,23 +80,23 @@ export function QuestionBubble({
 
   return (
     <div className="flex justify-start">
-      <div className="max-w-[80%] rounded-lg bg-muted p-4">
-        <div className="mb-2 flex items-center gap-2">
-          <span className="text-xs font-medium text-muted-foreground uppercase">
+      <div className="max-w-[80%] rounded-xl bg-slate-50 border border-slate-200 p-6 shadow-sm">
+        <div className="mb-3 flex items-center gap-2 flex-wrap">
+          <span className="text-xs font-semibold text-slate-600 uppercase tracking-wide">
             Question {questionNumber}
           </span>
-          <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+          <span className="inline-flex items-center rounded-full bg-gradient-to-[135deg] from-cyan-500 to-blue-600 px-3 py-1 text-xs font-semibold text-white">
             {question.category}
           </span>
-          <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-medium">
+          <span className="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-900">
             {question.difficulty}
           </span>
           <Button
             variant="ghost"
-            size="sm"
+            size="icon"
             onClick={handlePlayAudio}
             disabled={isLoading}
-            className="ml-auto h-7 w-7 p-0"
+            className="ml-auto"
             aria-label={isPlaying ? 'Pause audio' : 'Play audio'}
           >
             {isLoading ? (
@@ -108,7 +108,9 @@ export function QuestionBubble({
             )}
           </Button>
         </div>
-        <p className="text-base">{question.text}</p>
+        <p className="text-base text-slate-900 leading-relaxed">
+          {question.text}
+        </p>
       </div>
     </div>
   );

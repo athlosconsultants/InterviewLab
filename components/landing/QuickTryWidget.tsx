@@ -122,12 +122,12 @@ export function QuickTryWidget() {
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto bg-white/97 md:bg-white/92 backdrop-blur-[10px] md:backdrop-blur-[12px] rounded-2xl shadow-xl md:shadow-2xl border-2 border-slate-200 p-4 sm:p-6">
+    <div className="w-full max-w-2xl mx-auto bg-white rounded-2xl shadow-lg p-6">
       {/* Role Dropdown */}
-      <div className="mb-4">
+      <div className="mb-6">
         <label
           htmlFor="role-select"
-          className="block text-sm font-semibold text-slate-900 mb-2"
+          className="block text-sm font-medium text-slate-900 mb-2"
         >
           Select Your Role
         </label>
@@ -135,7 +135,7 @@ export function QuickTryWidget() {
           id="role-select"
           value={selectedRole}
           onChange={(e) => handleRoleChange(e.target.value)}
-          className="w-full rounded-lg border-2 border-slate-300 bg-white px-4 py-3 sm:py-2 text-base shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 focus-visible:border-cyan-500 min-h-[44px] transition-all duration-200"
+          className="w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-base text-slate-900 shadow-sm focus-visible:outline-none focus-visible:border-cyan-500 focus-visible:ring-2 focus-visible:ring-cyan-500/20 min-h-[44px] transition-all duration-200"
         >
           <option value="">Choose a role...</option>
           {ROLES.map((role) => (
@@ -148,14 +148,14 @@ export function QuickTryWidget() {
 
       {/* Question Display */}
       {isLoadingQuestion && (
-        <div className="mb-6 p-5 bg-gradient-to-br from-cyan-50 to-blue-50 rounded-xl border-2 border-cyan-200 animate-pulse">
+        <div className="mb-6 p-6 bg-slate-50 rounded-xl border border-slate-200 animate-pulse">
           <div className="h-4 bg-slate-300 rounded w-3/4 mb-2"></div>
           <div className="h-4 bg-slate-300 rounded w-1/2"></div>
         </div>
       )}
       {!isLoadingQuestion && question && (
-        <div className="mb-6 p-5 bg-gradient-to-br from-cyan-50 to-blue-50 rounded-xl border-2 border-cyan-200 shadow-sm animate-in fade-in slide-in-from-top-2 duration-300">
-          <p className="text-sm font-semibold text-slate-900 leading-relaxed">
+        <div className="mb-6 p-6 bg-gradient-to-br from-cyan-50 to-blue-50 rounded-xl border border-slate-200 shadow-sm animate-in fade-in slide-in-from-top-2 duration-300">
+          <p className="text-base font-medium text-slate-900 leading-relaxed">
             {question}
           </p>
         </div>
@@ -163,10 +163,10 @@ export function QuickTryWidget() {
 
       {/* Answer Input */}
       {question && (
-        <div className="mb-4">
+        <div className="mb-6">
           <label
             htmlFor="answer-input"
-            className="block text-sm font-semibold text-slate-900 mb-2"
+            className="block text-sm font-medium text-slate-900 mb-2"
           >
             Your Answer
           </label>
@@ -176,7 +176,7 @@ export function QuickTryWidget() {
             onChange={(e) => setAnswer(e.target.value)}
             placeholder="Type your answer here..."
             rows={6}
-            className="flex min-h-[120px] w-full rounded-lg border-2 border-slate-300 bg-white px-4 py-3 text-base shadow-sm placeholder:text-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 focus-visible:border-cyan-500 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-200"
+            className="flex min-h-[120px] w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-base text-slate-900 shadow-sm placeholder:text-slate-400 focus-visible:outline-none focus-visible:border-cyan-500 focus-visible:ring-2 focus-visible:ring-cyan-500/20 transition-all duration-200"
           />
           <div className="mt-2 flex items-center justify-between text-xs">
             <span
@@ -187,8 +187,8 @@ export function QuickTryWidget() {
               {charCount} / {minChars} characters
             </span>
             {!isAnswerValid && charCount > 0 && (
-              <span className="text-blue-600 font-medium">
-                {minChars - charCount} more characters needed
+              <span className="text-cyan-600 font-medium">
+                {minChars - charCount} more needed
               </span>
             )}
           </div>
@@ -197,19 +197,21 @@ export function QuickTryWidget() {
 
       {/* Feedback Section */}
       {feedback && (
-        <div className="mb-6 space-y-3 animate-in fade-in slide-in-from-bottom-4 duration-500">
-          <h3 className="text-lg font-bold text-slate-900">Your Feedback</h3>
+        <div className="mb-6 space-y-3 animate-in fade-in slide-in-from-bottom-4 duration-300">
+          <h3 className="text-lg font-semibold text-slate-900">
+            Your Feedback
+          </h3>
           <ul className="space-y-2">
             {feedback.map((point, index) => (
               <li
                 key={index}
-                className="flex items-start gap-3 p-4 rounded-xl bg-gradient-to-br from-cyan-50/50 to-blue-50/50 border-2 border-cyan-200 animate-in fade-in slide-in-from-left-2 duration-300"
+                className="flex items-start gap-3 p-4 rounded-xl bg-slate-50 border border-slate-200 animate-in fade-in slide-in-from-left-2 duration-200"
                 style={{ animationDelay: `${index * 100}ms` }}
               >
                 <span className="text-lg flex-shrink-0">
                   {getIcon(point.type)}
                 </span>
-                <span className="text-sm text-slate-700 leading-relaxed font-medium">
+                <span className="text-sm text-slate-700 leading-relaxed">
                   {point.message}
                 </span>
               </li>

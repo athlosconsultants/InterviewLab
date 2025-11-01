@@ -25,20 +25,21 @@ export function ScoreDial({ score, grade, size = 'lg' }: ScoreDialProps) {
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (score / 100) * circumference;
 
+  // Design system colors
   const gradeColors = {
-    A: 'text-green-500',
-    B: 'text-blue-500',
-    C: 'text-yellow-500',
-    D: 'text-orange-500',
+    A: 'text-cyan-600',
+    B: 'text-blue-600',
+    C: 'text-blue-500',
+    D: 'text-slate-600',
     F: 'text-red-500',
   };
 
   const gradeColorStrokes = {
-    A: '#22c55e',
-    B: '#3b82f6',
-    C: '#eab308',
-    D: '#f97316',
-    F: '#ef4444',
+    A: '#0891b2', // cyan-600
+    B: '#2563eb', // blue-600
+    C: '#3b82f6', // blue-500
+    D: '#475569', // slate-600
+    F: '#ef4444', // red-500
   };
 
   return (
@@ -58,7 +59,7 @@ export function ScoreDial({ score, grade, size = 'lg' }: ScoreDialProps) {
             stroke="currentColor"
             strokeWidth="8"
             fill="none"
-            className="text-muted"
+            className="text-slate-200"
           />
           {/* Progress circle */}
           <circle
@@ -71,7 +72,7 @@ export function ScoreDial({ score, grade, size = 'lg' }: ScoreDialProps) {
             strokeDasharray={circumference}
             strokeDashoffset={strokeDashoffset}
             strokeLinecap="round"
-            className="transition-all duration-1000 ease-out"
+            className="transition-all duration-500 ease-out"
           />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
@@ -84,13 +85,13 @@ export function ScoreDial({ score, grade, size = 'lg' }: ScoreDialProps) {
           >
             {Math.round(score)}
           </span>
-          <span className="text-xs text-muted-foreground">/ 100</span>
+          <span className="text-xs text-slate-600 font-medium">/ 100</span>
         </div>
       </div>
       <div className="flex items-center gap-2">
         <span
           className={cn(
-            'text-3xl font-bold px-4 py-1 rounded-lg',
+            'text-3xl font-bold px-4 py-1 rounded-xl',
             gradeColors[grade]
           )}
         >

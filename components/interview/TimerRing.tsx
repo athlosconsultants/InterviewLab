@@ -61,17 +61,17 @@ export function TimerRing({ timeLimit, onExpire, startTime }: TimerRingProps) {
   // Calculate percentage for ring progress
   const percentage = (timeRemaining / timeLimit) * 100;
 
-  // Determine color based on time remaining
+  // Determine color based on time remaining - design system colors
   const getColor = () => {
-    if (percentage > 50) return 'text-green-600';
-    if (percentage > 25) return 'text-yellow-600';
-    return 'text-red-600';
+    if (percentage > 50) return 'text-cyan-600';
+    if (percentage > 25) return 'text-blue-600';
+    return 'text-red-500';
   };
 
   const getStrokeColor = () => {
-    if (percentage > 50) return 'stroke-green-600';
-    if (percentage > 25) return 'stroke-yellow-600';
-    return 'stroke-red-600';
+    if (percentage > 50) return 'stroke-cyan-600';
+    if (percentage > 25) return 'stroke-blue-600';
+    return 'stroke-red-500';
   };
 
   return (
@@ -84,9 +84,9 @@ export function TimerRing({ timeLimit, onExpire, startTime }: TimerRingProps) {
           cy="32"
           r="28"
           stroke="currentColor"
-          strokeWidth="4"
+          strokeWidth="6"
           fill="none"
-          className="text-muted"
+          className="text-slate-200"
         />
         {/* Progress circle */}
         <circle
@@ -94,7 +94,7 @@ export function TimerRing({ timeLimit, onExpire, startTime }: TimerRingProps) {
           cy="32"
           r="28"
           stroke="currentColor"
-          strokeWidth="4"
+          strokeWidth="6"
           fill="none"
           strokeDasharray={`${2 * Math.PI * 28}`}
           strokeDashoffset={`${2 * Math.PI * 28 * (1 - percentage / 100)}`}
