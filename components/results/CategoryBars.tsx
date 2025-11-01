@@ -15,11 +15,12 @@ export function CategoryBars({ dimensions }: CategoryBarsProps) {
     cultural_fit: 'Cultural Fit',
   };
 
+  // Design system colors
   const getColorClass = (score: number) => {
-    if (score >= 80) return 'bg-green-500';
-    if (score >= 70) return 'bg-blue-500';
-    if (score >= 60) return 'bg-yellow-500';
-    if (score >= 50) return 'bg-orange-500';
+    if (score >= 80) return 'bg-gradient-to-r from-cyan-500 to-cyan-600';
+    if (score >= 70) return 'bg-gradient-to-r from-cyan-500 to-blue-600';
+    if (score >= 60) return 'bg-gradient-to-r from-blue-500 to-blue-600';
+    if (score >= 50) return 'bg-slate-400';
     return 'bg-red-500';
   };
 
@@ -33,23 +34,21 @@ export function CategoryBars({ dimensions }: CategoryBarsProps) {
         return (
           <div key={key} className="space-y-2">
             <div className="flex items-center justify-between">
-              <span className="font-medium">{label}</span>
-              <span className="text-sm font-semibold">
+              <span className="font-semibold text-slate-900">{label}</span>
+              <span className="text-sm font-bold text-slate-900">
                 {Math.round(score)}/100
               </span>
             </div>
-            <div className="relative h-3 w-full overflow-hidden rounded-full bg-muted">
+            <div className="relative h-4 w-full overflow-hidden rounded-full bg-slate-200">
               <div
                 className={cn(
-                  'h-full transition-all duration-1000 ease-out rounded-full',
+                  'h-full transition-all duration-500 ease-out rounded-full shadow-sm',
                   getColorClass(score)
                 )}
                 style={{ width: `${score}%` }}
               />
             </div>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              {feedback}
-            </p>
+            <p className="text-sm text-slate-600 leading-relaxed">{feedback}</p>
           </div>
         );
       })}
