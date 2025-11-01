@@ -322,7 +322,7 @@ export default async function Home() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
             {/* Column 1 - Free Assessment */}
             <div className="bg-white rounded-2xl p-8 shadow-lg border-2 border-slate-200 space-y-6">
               <div>
@@ -362,8 +362,8 @@ export default async function Home() {
               </Link>
             </div>
 
-            {/* Column 2 - Premium Features */}
-            <div className="bg-white rounded-2xl p-8 shadow-lg border-2 border-cyan-500 space-y-6 relative">
+            {/* Column 2 - Premium Super Card */}
+            <div className="bg-white rounded-2xl p-8 shadow-xl border-2 border-cyan-500 space-y-6 relative">
               <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                 <span className="inline-block px-4 py-1 bg-gradient-to-r from-cyan-500 to-blue-600 text-white text-xs font-bold rounded-full">
                   MOST POPULAR
@@ -377,44 +377,103 @@ export default async function Home() {
                 </p>
               </div>
 
-              <ul className="space-y-3">
-                <li className="flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-cyan-500 flex-shrink-0 mt-0.5" />
-                  <span className="text-sm text-slate-700">
-                    Unlimited questions
-                  </span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-cyan-500 flex-shrink-0 mt-0.5" />
-                  <span className="text-sm text-slate-700">
-                    Full AI feedback (all 3 categories)
-                  </span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-cyan-500 flex-shrink-0 mt-0.5" />
-                  <span className="text-sm text-slate-700">
-                    Realistic voice mode (like Zoom)
-                  </span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-cyan-500 flex-shrink-0 mt-0.5" />
-                  <span className="text-sm text-slate-700">
-                    Personalized to your CV & job description
-                  </span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-cyan-500 flex-shrink-0 mt-0.5" />
-                  <span className="text-sm text-slate-700">
-                    Multi-stage interviews (up to 3 rounds)
-                  </span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-cyan-500 flex-shrink-0 mt-0.5" />
-                  <span className="text-sm text-slate-700">
-                    Questions get harder as you improve
-                  </span>
-                </li>
-              </ul>
+              <div className="space-y-4">
+                <div>
+                  <h4 className="text-sm font-bold text-slate-900 mb-3">
+                    What You Get:
+                  </h4>
+                  <ul className="space-y-2">
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-cyan-500 flex-shrink-0 mt-0.5" />
+                      <span className="text-sm text-slate-700">
+                        Unlimited questions
+                      </span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-cyan-500 flex-shrink-0 mt-0.5" />
+                      <span className="text-sm text-slate-700">
+                        Full AI feedback (all 3 categories)
+                      </span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-cyan-500 flex-shrink-0 mt-0.5" />
+                      <span className="text-sm text-slate-700">
+                        Realistic voice mode (like Zoom)
+                      </span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-cyan-500 flex-shrink-0 mt-0.5" />
+                      <span className="text-sm text-slate-700">
+                        Personalized to your CV & job description
+                      </span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-cyan-500 flex-shrink-0 mt-0.5" />
+                      <span className="text-sm text-slate-700">
+                        Multi-stage interviews (up to 3 rounds)
+                      </span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-cyan-500 flex-shrink-0 mt-0.5" />
+                      <span className="text-sm text-slate-700">
+                        Questions get harder as you improve
+                      </span>
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="pt-4 border-t border-slate-200">
+                  <h4 className="text-sm font-bold text-slate-900 mb-3">
+                    Why Upgrade:
+                  </h4>
+                  <ul className="space-y-3">
+                    <li className="flex items-start gap-2">
+                      <Mic className="w-4 h-4 text-cyan-500 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-sm font-semibold text-slate-900">
+                          Practice Speaking
+                        </p>
+                        <p className="text-xs text-slate-600">
+                          Voice mode forces you to think on your feet
+                        </p>
+                      </div>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Brain className="w-4 h-4 text-cyan-500 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-sm font-semibold text-slate-900">
+                          Get Specific Feedback
+                        </p>
+                        <p className="text-xs text-slate-600">
+                          See exactly what to fix in your answers
+                        </p>
+                      </div>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Target className="w-4 h-4 text-cyan-500 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-sm font-semibold text-slate-900">
+                          Match Real Conditions
+                        </p>
+                        <p className="text-xs text-slate-600">
+                          Multi-stage = actual interview format
+                        </p>
+                      </div>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Zap className="w-4 h-4 text-cyan-500 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-sm font-semibold text-slate-900">
+                          Adaptive Difficulty
+                        </p>
+                        <p className="text-xs text-slate-600">
+                          Questions adjust to push your limits
+                        </p>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+              </div>
 
               <Link href="/pricing" className="block">
                 <Button
@@ -424,61 +483,6 @@ export default async function Home() {
                   See Pricing
                 </Button>
               </Link>
-            </div>
-
-            {/* Column 3 - Why People Upgrade */}
-            <div className="bg-white rounded-2xl p-8 shadow-lg border-2 border-slate-200 space-y-6">
-              <div>
-                <h3 className="text-2xl font-bold mb-2">Why Upgrade?</h3>
-                <p className="text-sm text-slate-600">What you unlock</p>
-              </div>
-
-              <ul className="space-y-3">
-                <li className="flex items-start gap-3">
-                  <Mic className="w-5 h-5 text-cyan-500 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="text-sm font-semibold text-slate-900">
-                      Practice Speaking
-                    </p>
-                    <p className="text-xs text-slate-600">
-                      Voice mode forces you to think on your feet
-                    </p>
-                  </div>
-                </li>
-                <li className="flex items-start gap-3">
-                  <Brain className="w-5 h-5 text-cyan-500 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="text-sm font-semibold text-slate-900">
-                      Get Specific Feedback
-                    </p>
-                    <p className="text-xs text-slate-600">
-                      See exactly what to fix in your answers
-                    </p>
-                  </div>
-                </li>
-                <li className="flex items-start gap-3">
-                  <Target className="w-5 h-5 text-cyan-500 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="text-sm font-semibold text-slate-900">
-                      Match Real Conditions
-                    </p>
-                    <p className="text-xs text-slate-600">
-                      Multi-stage interviews = actual interview format
-                    </p>
-                  </div>
-                </li>
-                <li className="flex items-start gap-3">
-                  <Zap className="w-5 h-5 text-cyan-500 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="text-sm font-semibold text-slate-900">
-                      Adaptive Difficulty
-                    </p>
-                    <p className="text-xs text-slate-600">
-                      Questions adjust to push your limits
-                    </p>
-                  </div>
-                </li>
-              </ul>
 
               <p className="text-xs text-slate-600 italic">
                 Most people upgrade after the free assessment once they see the

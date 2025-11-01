@@ -224,7 +224,7 @@ export default function MobileLandingPage() {
               </Button>
             </div>
 
-            {/* Premium */}
+            {/* Premium Super Card */}
             <div className="bg-white rounded-xl p-5 border-2 border-cyan-500 relative">
               <div className="absolute -top-2 left-1/2 -translate-x-1/2">
                 <span className="inline-block px-3 py-1 bg-gradient-to-r from-cyan-500 to-blue-600 text-white text-xs font-bold rounded-full">
@@ -233,68 +233,78 @@ export default function MobileLandingPage() {
               </div>
               <h3 className="text-lg font-bold mb-1 mt-2">Premium</h3>
               <p className="text-xs text-gray-600 mb-4">Full simulation</p>
-              <ul className="space-y-2 text-sm mb-4">
-                <li className="flex items-start gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-cyan-500 flex-shrink-0 mt-0.5" />
-                  <span>Unlimited questions</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-cyan-500 flex-shrink-0 mt-0.5" />
-                  <span>Full AI feedback (3 categories)</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-cyan-500 flex-shrink-0 mt-0.5" />
-                  <span>Voice mode (like Zoom)</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-cyan-500 flex-shrink-0 mt-0.5" />
-                  <span>Personalized to your CV</span>
-                </li>
-              </ul>
+
+              <div className="space-y-4">
+                <div>
+                  <h4 className="text-xs font-bold text-slate-900 mb-2">
+                    What You Get:
+                  </h4>
+                  <ul className="space-y-2 text-sm">
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-cyan-500 flex-shrink-0 mt-0.5" />
+                      <span>Unlimited questions</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-cyan-500 flex-shrink-0 mt-0.5" />
+                      <span>Full AI feedback (3 categories)</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-cyan-500 flex-shrink-0 mt-0.5" />
+                      <span>Voice mode (like Zoom)</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-cyan-500 flex-shrink-0 mt-0.5" />
+                      <span>Personalized to your CV</span>
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="pt-3 border-t border-slate-200">
+                  <h4 className="text-xs font-bold text-slate-900 mb-2">
+                    Why Upgrade:
+                  </h4>
+                  <ul className="space-y-2">
+                    <li className="flex items-start gap-2">
+                      <Mic className="w-4 h-4 text-cyan-500 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-sm font-semibold">
+                          Practice Speaking
+                        </p>
+                        <p className="text-xs text-gray-600">
+                          Voice = think on your feet
+                        </p>
+                      </div>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Brain className="w-4 h-4 text-cyan-500 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-sm font-semibold">
+                          Specific Feedback
+                        </p>
+                        <p className="text-xs text-gray-600">
+                          See exactly what to fix
+                        </p>
+                      </div>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Target className="w-4 h-4 text-cyan-500 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-sm font-semibold">Real Conditions</p>
+                        <p className="text-xs text-gray-600">
+                          Multi-stage = actual format
+                        </p>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
               <Button
                 size="default"
-                className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white"
+                className="w-full mt-4 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white"
               >
                 <Link href="/pricing">See Pricing</Link>
               </Button>
-            </div>
-
-            {/* Why Upgrade */}
-            <div className="bg-white rounded-xl p-5 border-2 border-slate-200">
-              <h3 className="text-lg font-bold mb-4">Why Upgrade?</h3>
-              <ul className="space-y-3">
-                <li className="flex items-start gap-2">
-                  <Mic className="w-4 h-4 text-cyan-500 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="text-sm font-semibold">Practice Speaking</p>
-                    <p className="text-xs text-gray-600">
-                      Voice mode = think on your feet
-                    </p>
-                  </div>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Brain className="w-4 h-4 text-cyan-500 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="text-sm font-semibold">
-                      Get Specific Feedback
-                    </p>
-                    <p className="text-xs text-gray-600">
-                      See exactly what to fix
-                    </p>
-                  </div>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Target className="w-4 h-4 text-cyan-500 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="text-sm font-semibold">
-                      Match Real Conditions
-                    </p>
-                    <p className="text-xs text-gray-600">
-                      Multi-stage = actual format
-                    </p>
-                  </div>
-                </li>
-              </ul>
             </div>
           </div>
         </div>
