@@ -67,42 +67,67 @@ export default async function Home() {
     }
   }
   return (
-    <main className="min-h-screen bg-gradient-to-b from-white via-slate-50 to-white">
+    <main className="min-h-screen bg-gradient-to-b from-cyan-50 via-white via-slate-50 to-white">
       {/* Hero Section */}
       <section className="relative overflow-hidden">
-        {/* Background gradient orbs */}
+        {/* Background Image Layer - z-index: 0 */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-0 right-1/4 w-96 h-96 bg-gradient-to-br from-cyan-400/20 to-blue-500/20 rounded-full blur-3xl" />
-          <div className="absolute bottom-1/4 left-1/4 w-96 h-96 bg-gradient-to-br from-blue-500/20 to-cyan-400/20 rounded-full blur-3xl" />
+          <div className="absolute inset-0 h-[30vh] md:h-[35vh] lg:h-[45vh]">
+            <Image
+              src="/Images/hero-bg.jpg"
+              alt=""
+              fill
+              priority
+              className="object-cover object-top"
+              sizes="100vw"
+            />
+          </div>
+
+          {/* Gradient Overlay - z-index: 1 - Fades from transparent to light blue */}
+          <div
+            className="absolute inset-0 h-[30vh] md:h-[40vh] lg:h-[50vh]"
+            style={{
+              background:
+                'linear-gradient(to bottom, transparent 0%, transparent 40%, rgba(224, 242, 254, 0.3) 60%, rgba(224, 242, 254, 0.7) 80%, rgb(224, 242, 254) 100%)',
+            }}
+          />
         </div>
 
-        <div className="relative container mx-auto px-6 pt-32 pb-24">
+        {/* Background gradient orbs - subtle enhancement */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none z-[1]">
+          <div className="absolute top-0 right-1/4 w-96 h-96 bg-gradient-to-br from-cyan-400/10 to-blue-500/10 rounded-full blur-3xl" />
+          <div className="absolute bottom-1/4 left-1/4 w-96 h-96 bg-gradient-to-br from-blue-500/10 to-cyan-400/10 rounded-full blur-3xl" />
+        </div>
+
+        <div className="relative z-[2] container mx-auto px-6 pt-32 pb-24">
           <div className="max-w-4xl mx-auto text-center space-y-8">
-            {/* Headline */}
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight bg-gradient-to-r from-cyan-500 to-blue-600 bg-clip-text text-transparent">
+            {/* Headline - Enhanced for readability over image */}
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight bg-gradient-to-r from-cyan-500 to-blue-600 bg-clip-text text-transparent drop-shadow-lg">
               Try a Real Interview Question Now
             </h1>
 
-            {/* Subheadline */}
-            <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto">
+            {/* Subheadline - Enhanced contrast with subtle background */}
+            <p className="text-lg sm:text-xl text-slate-700 font-medium max-w-2xl mx-auto drop-shadow-md">
               No signup required. Instant feedback.
             </p>
 
-            {/* Trust badges */}
-            <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-sm text-muted-foreground">
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-cyan-500" />
-                <span>AI trained on 10,000+ S&P 500 interviews</span>
+            {/* Trust badges - Enhanced readability */}
+            <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-sm">
+              <div className="flex items-center gap-2 text-slate-700 drop-shadow-sm">
+                <CheckCircle2 className="w-4 h-4 text-cyan-500 drop-shadow-sm" />
+                <span className="font-medium">
+                  AI trained on 10,000+ S&P 500 interviews
+                </span>
               </div>
-              <div className="flex items-center gap-2">
-                <Briefcase className="w-4 h-4 text-cyan-500" />
-                <span>50+ industries covered</span>
+              <div className="flex items-center gap-2 text-slate-700 drop-shadow-sm">
+                <Briefcase className="w-4 h-4 text-cyan-500 drop-shadow-sm" />
+                <span className="font-medium">50+ industries covered</span>
               </div>
             </div>
           </div>
 
-          {/* QuickTry Widget */}
-          <div className="mt-12">
+          {/* QuickTry Widget - z-index: 3 - Fully opaque card */}
+          <div className="mt-12 relative z-[3]">
             <QuickTryWidget />
           </div>
 
