@@ -127,7 +127,7 @@ export function QuickTryWidget() {
       <div className="mb-6">
         <label
           htmlFor="role-select"
-          className="block text-sm font-medium text-slate-900 mb-2"
+          className="block text-sm font-medium text-slate-900 mb-3"
         >
           Select Your Role
         </label>
@@ -135,7 +135,7 @@ export function QuickTryWidget() {
           id="role-select"
           value={selectedRole}
           onChange={(e) => handleRoleChange(e.target.value)}
-          className="w-full rounded-md border-2 border-slate-300 bg-transparent px-3 py-2.5 text-base text-slate-900 focus-visible:outline-none focus-visible:border-cyan-500 focus-visible:ring-2 focus-visible:ring-cyan-500/20 min-h-[44px] transition-all duration-200"
+          className="w-full rounded-lg border-2 border-slate-300 bg-slate-50 px-4 py-3 text-base text-slate-900 font-medium focus-visible:outline-none focus-visible:border-cyan-500 focus-visible:ring-2 focus-visible:ring-cyan-500/20 focus-visible:bg-white min-h-[48px] transition-all duration-200 cursor-pointer hover:border-slate-400 hover:bg-white"
         >
           <option value="">Choose a role...</option>
           {ROLES.map((role) => (
