@@ -120,7 +120,7 @@ export default function MobileLandingPage() {
       </section>
 
       {/* Why This Works - Weak vs Strong */}
-      <section className="px-6 pb-8">
+      <section className="px-6 pb-8 pt-8 bg-white">
         <div className="text-center mb-6">
           <h2 className="text-2xl font-bold mb-2">
             See What You&apos;re Missing
@@ -301,7 +301,7 @@ export default function MobileLandingPage() {
       </section>
 
       {/* Common Questions */}
-      <section className="px-6 pb-8">
+      <section className="px-6 pb-8 pt-8 bg-white">
         <div className="text-center mb-6">
           <h2 className="text-2xl font-bold">Common Questions</h2>
         </div>
@@ -347,7 +347,7 @@ export default function MobileLandingPage() {
       </section>
 
       {/* Final CTA */}
-      <section className="px-6 pb-8">
+      <section className="px-6 pb-8 pt-8 bg-slate-50">
         <div className="bg-gradient-to-br from-cyan-50 to-blue-50 rounded-2xl p-6 border-2 border-cyan-200 text-center">
           <h2 className="text-2xl font-bold mb-3">
             One bad interview = lost offer
