@@ -644,7 +644,7 @@ export default function PricingSuperCard() {
                       Processing...
                     </>
                   ) : (
-                    'Buy Once, Practice Forever'
+                    'Buy Once, Forever'
                   )}
                 </Button>
               </motion.div>
