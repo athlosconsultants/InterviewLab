@@ -23,6 +23,7 @@ export default function AssessmentSetupPage() {
   const [pendingRedirect, setPendingRedirect] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const [jobDescriptionFocused, setJobDescriptionFocused] = useState(false);
   const router = useRouter();
 
   // T42: Auth guard - redirect to sign-in if not authenticated
@@ -42,6 +43,31 @@ export default function AssessmentSetupPage() {
 
     checkAuth();
   }, [router]);
+
+  // Helper function to detect device type
+  const getDeviceType = () => {
+    if (typeof window === 'undefined') return 'unknown';
+    const ua = navigator.userAgent;
+    if (/mobile/i.test(ua)) return 'mobile';
+    if (/tablet/i.test(ua)) return 'tablet';
+    return 'desktop';
+  };
+
+  // Track page view
+  useEffect(() => {
+    try {
+      const referrer = typeof document !== 'undefined' ? document.referrer : '';
+      track({
+        name: 'assessment_setup_page_viewed',
+        payload: {
+          referrer,
+          device_type: getDeviceType(),
+        },
+      });
+    } catch (err) {
+      console.error('Analytics tracking error:', err);
+    }
+  }, []);
 
   // T30: Read from sessionStorage and prefill job title
   useEffect(() => {
@@ -70,17 +96,100 @@ export default function AssessmentSetupPage() {
     track({ name: 'turnstile_verified' });
   };
 
+  // CV Upload tracking wrapper
+  const handleCvFileSelect = (file: File | null) => {
+    if (file) {
+      try {
+        track({
+          name: 'cv_upload_completed',
+          payload: {
+            file_type: file.type,
+            file_size: (file.size / (1024 * 1024)).toFixed(2), // Convert to MB
+            device_type: getDeviceType(),
+          },
+        });
+      } catch (err) {
+        console.error('Analytics tracking error:', err);
+      }
+    }
+    setCvFile(file);
+  };
+
+  // Job Description field interaction tracking
+  const handleJobDescriptionFocus = () => {
+    if (!jobDescriptionFocused) {
+      try {
+        track({
+          name: 'job_description_field_focused',
+          payload: {
+            device_type: getDeviceType(),
+          },
+        });
+        setJobDescriptionFocused(true);
+      } catch (err) {
+        console.error('Analytics tracking error:', err);
+      }
+    }
+  };
+
+  const handleJobDescriptionBlur = () => {
+    if (jobDescription.trim().length > 0) {
+      try {
+        track({
+          name: 'job_description_added',
+          payload: {
+            has_content: jobDescription.trim().length > 10,
+            character_count: jobDescription.trim().length,
+            device_type: getDeviceType(),
+          },
+        });
+      } catch (err) {
+        console.error('Analytics tracking error:', err);
+      }
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
-    if (!cvFile) {
-      setError('Please upload your CV/Resume.');
-      return;
+    // Track button click
+    try {
+      track({
+        name: 'start_interview_button_clicked',
+        payload: {
+          has_cv: !!cvFile,
+          has_job_description: jobDescription.trim().length > 0,
+          device_type: getDeviceType(),
+        },
+      });
+    } catch (err) {
+      console.error('Analytics tracking error:', err);
     }
 
+    // Validation and tracking
+    const missingFields: string[] = [];
+    if (!cvFile) {
+      missingFields.push('cv_file');
+      setError('Please upload your CV/Resume.');
+    }
     if (!turnstileToken) {
+      missingFields.push('turnstile_token');
       setError('Please complete the security check.');
+    }
+
+    if (missingFields.length > 0) {
+      try {
+        track({
+          name: 'form_validation_failed',
+          payload: {
+            missing_fields: missingFields,
+            device_type: getDeviceType(),
+          },
+        });
+      } catch (err) {
+        console.error('Analytics tracking error:', err);
+      }
       return;
     }
 
@@ -100,9 +209,22 @@ export default function AssessmentSetupPage() {
 
       track({ name: 'assessment_setup_submitted', payload: { jobTitle } });
 
-      // Upload CV file
+      // Upload CV file with upload failure tracking
       const uploadResult = await uploadFile(cvFile, 'cv');
       if (!uploadResult.success || !uploadResult.storageKey) {
+        // Track CV upload failure
+        try {
+          track({
+            name: 'cv_upload_failed',
+            payload: {
+              error_type: uploadResult.error || 'unknown_error',
+              file_type_attempted: cvFile.type,
+              device_type: getDeviceType(),
+            },
+          });
+        } catch (err) {
+          console.error('Analytics tracking error:', err);
+        }
         throw new Error(
           uploadResult.error || 'Failed to upload CV. Please try again.'
         );
@@ -224,7 +346,7 @@ export default function AssessmentSetupPage() {
                     Your CV/Resume <span className="text-red-500">*</span>
                   </Label>
                   <FileDrop
-                    onFileSelect={setCvFile}
+                    onFileSelect={handleCvFileSelect}
                     currentFile={cvFile}
                     label="Drop your CV/Resume here"
                     acceptedTypes={[
@@ -294,6 +416,8 @@ export default function AssessmentSetupPage() {
                     placeholder="Paste the job description or key responsibilities here..."
                     value={jobDescription}
                     onChange={(e) => setJobDescription(e.target.value)}
+                    onFocus={handleJobDescriptionFocus}
+                    onBlur={handleJobDescriptionBlur}
                     disabled={isSubmitting}
                     rows={6}
                     className="w-full px-3 py-2 text-base border rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500 dark:bg-gray-800 dark:border-gray-700"
