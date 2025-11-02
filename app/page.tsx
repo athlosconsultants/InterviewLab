@@ -224,17 +224,19 @@ export default async function Home() {
             </p>
           </div>
 
-          {/* Single Card with Before/After Design */}
-          <div className="max-w-4xl mx-auto">
-            <div className="bg-gradient-to-br from-white to-slate-50 rounded-2xl p-8 md:p-10 border border-slate-200 shadow-sm mb-8">
-              <div className="mb-8">
-                <p className="text-base md:text-lg font-semibold text-slate-900 mb-6">
-                  &quot;Tell me about a time you failed.&quot;
-                </p>
-              </div>
+          {/* Horizontal Layout for Desktop - Side by Side Comparison */}
+          <div className="max-w-7xl mx-auto">
+            {/* Question Heading - Centered above columns */}
+            <div className="text-center mb-8">
+              <p className="text-base md:text-lg font-semibold text-slate-900">
+                &quot;Tell me about a time you failed.&quot;
+              </p>
+            </div>
 
-              {/* Before (Common Mistakes) */}
-              <div className="mb-8 bg-slate-50 rounded-xl p-6 border border-slate-200">
+            {/* Side-by-Side Comparison - Desktop: 2 columns, Mobile/Tablet: stacked */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 mb-8">
+              {/* Left Column: Common Answer */}
+              <div className="bg-slate-50 rounded-xl p-6 border border-slate-200">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-3 h-3 rounded-full bg-slate-400"></div>
                   <span className="text-sm font-bold text-slate-600 uppercase tracking-wide">
@@ -261,7 +263,7 @@ export default async function Home() {
                 </div>
               </div>
 
-              {/* After (What Works) */}
+              {/* Right Column: What Actually Works */}
               <div className="bg-gradient-to-br from-cyan-50 to-blue-50 rounded-xl p-6 border-2 border-cyan-200">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-3 h-3 rounded-full bg-cyan-500"></div>
@@ -296,7 +298,7 @@ export default async function Home() {
               </div>
             </div>
 
-            {/* Trust Signal: Data Point */}
+            {/* Trust Signal: Data Point - Directly below columns */}
             <div className="bg-slate-50 rounded-xl p-6 mb-8 border border-slate-200">
               <div className="flex items-center justify-center gap-8">
                 <div className="text-center">
