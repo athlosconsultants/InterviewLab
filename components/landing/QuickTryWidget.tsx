@@ -122,12 +122,12 @@ export function QuickTryWidget() {
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto bg-white rounded-2xl shadow-lg p-6">
+    <div className="w-full mx-auto bg-white/97 backdrop-blur-sm rounded-2xl shadow-lg p-5">
       {/* Role Dropdown */}
-      <div className="mb-6">
+      <div className="mb-5">
         <label
           htmlFor="role-select"
-          className="block text-sm font-medium text-slate-900 mb-3"
+          className="block text-sm font-semibold text-slate-900 mb-2"
         >
           Select Your Role
         </label>
@@ -135,7 +135,7 @@ export function QuickTryWidget() {
           id="role-select"
           value={selectedRole}
           onChange={(e) => handleRoleChange(e.target.value)}
-          className="w-full rounded-lg border-2 border-slate-300 bg-slate-50 px-4 py-3 text-base text-slate-900 font-medium focus-visible:outline-none focus-visible:border-cyan-500 focus-visible:ring-2 focus-visible:ring-cyan-500/20 focus-visible:bg-white min-h-[48px] transition-all duration-200 cursor-pointer hover:border-slate-400 hover:bg-white"
+          className="w-full rounded-lg border-2 border-slate-300 bg-white px-4 py-3 text-base text-slate-900 font-medium focus-visible:outline-none focus-visible:border-cyan-500 focus-visible:ring-2 focus-visible:ring-cyan-500/20 min-h-[48px] transition-all duration-200 cursor-pointer hover:border-cyan-400 hover:bg-slate-50 shadow-sm"
         >
           <option value="">Choose a role...</option>
           {ROLES.map((role) => (
@@ -148,13 +148,13 @@ export function QuickTryWidget() {
 
       {/* Question Display */}
       {isLoadingQuestion && (
-        <div className="mb-6 p-6 bg-slate-50 rounded-xl border border-slate-200 animate-pulse">
+        <div className="mb-5 p-5 bg-slate-50 rounded-xl border border-slate-200 animate-pulse">
           <div className="h-4 bg-slate-300 rounded w-3/4 mb-2"></div>
           <div className="h-4 bg-slate-300 rounded w-1/2"></div>
         </div>
       )}
       {!isLoadingQuestion && question && (
-        <div className="mb-6 p-6 bg-gradient-to-br from-cyan-50 to-blue-50 rounded-xl border border-slate-200 shadow-sm animate-in fade-in slide-in-from-top-2 duration-300">
+        <div className="mb-5 p-5 bg-gradient-to-br from-cyan-50 to-blue-50 rounded-xl border border-slate-200 shadow-sm animate-in fade-in slide-in-from-top-2 duration-300">
           <p className="text-base font-medium text-slate-900 leading-relaxed">
             {question}
           </p>
@@ -163,10 +163,10 @@ export function QuickTryWidget() {
 
       {/* Answer Input */}
       {question && (
-        <div className="mb-6">
+        <div className="mb-5">
           <label
             htmlFor="answer-input"
-            className="block text-sm font-medium text-slate-900 mb-2"
+            className="block text-sm font-semibold text-slate-900 mb-2"
           >
             Your Answer
           </label>
@@ -176,7 +176,7 @@ export function QuickTryWidget() {
             onChange={(e) => setAnswer(e.target.value)}
             placeholder="Type your answer here..."
             rows={6}
-            className="flex min-h-[120px] w-full rounded-md border border-slate-200 bg-white px-3 py-2.5 text-base text-slate-900 shadow-sm placeholder:text-slate-400 focus-visible:outline-none focus-visible:border-cyan-500 focus-visible:ring-2 focus-visible:ring-cyan-500/20 transition-all duration-200"
+            className="flex min-h-[120px] w-full rounded-lg border-2 border-slate-300 bg-white px-3 py-2.5 text-base text-slate-900 shadow-sm placeholder:text-slate-400 focus-visible:outline-none focus-visible:border-cyan-500 focus-visible:ring-2 focus-visible:ring-cyan-500/20 transition-all duration-200"
           />
           <div className="mt-2 flex items-center justify-between text-xs">
             <span
@@ -197,18 +197,16 @@ export function QuickTryWidget() {
 
       {/* Feedback Section */}
       {feedback && (
-        <div className="mb-6 space-y-3 animate-in fade-in slide-in-from-bottom-4 duration-300">
-          <h3 className="text-lg font-semibold text-slate-900">
-            Your Feedback
-          </h3>
+        <div className="mb-5 space-y-3 animate-in fade-in slide-in-from-bottom-4 duration-300">
+          <h3 className="text-base font-bold text-slate-900">Your Feedback</h3>
           <ul className="space-y-2">
             {feedback.map((point, index) => (
               <li
                 key={index}
-                className="flex items-start gap-3 p-4 rounded-xl bg-slate-50 border border-slate-200 animate-in fade-in slide-in-from-left-2 duration-200"
+                className="flex items-start gap-3 p-3 rounded-lg bg-slate-50 border border-slate-200 animate-in fade-in slide-in-from-left-2 duration-200"
                 style={{ animationDelay: `${index * 100}ms` }}
               >
-                <span className="text-lg flex-shrink-0">
+                <span className="text-base flex-shrink-0">
                   {getIcon(point.type)}
                 </span>
                 <span className="text-sm text-slate-700 leading-relaxed">

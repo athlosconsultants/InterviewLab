@@ -41,7 +41,7 @@ export default function MobileLandingPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-white via-slate-50 to-white pb-24">
       {/* Hero Section - Mobile Optimized with Mobile-specific Background */}
-      <section className="relative overflow-hidden min-h-[100svh] px-6 pt-12 pb-8">
+      <section className="relative overflow-hidden min-h-[100svh] px-4 pt-12 pb-8">
         {/* Background Image Layer - Mobile-specific optimized images */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none -z-10">
           {/* Mobile Background - WebP with JPG fallback */}
@@ -105,9 +105,8 @@ export default function MobileLandingPage() {
             <Button
               asChild
               size="lg"
-              variant="outline"
               disabled={isLoading}
-              className="w-full"
+              className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white"
             >
               <Link
                 href={ctaHref}
@@ -122,72 +121,110 @@ export default function MobileLandingPage() {
         </div>
       </section>
 
-      {/* Why This Works - Weak vs Strong */}
-      <section className="px-6 pb-8 pt-8 bg-white">
-        <div className="text-center mb-6">
-          <h2 className="text-2xl font-bold mb-2">
+      {/* Why This Works - Redesigned Premium Section */}
+      <section className="px-4 pb-12 pt-10 bg-white">
+        <div className="text-center mb-8">
+          <h2 className="text-2xl font-bold mb-2 text-slate-900">
             See What You&apos;re Missing
           </h2>
-          <p className="text-sm text-gray-600">
-            Most people don&apos;t realize these mistakes
+          <p className="text-sm text-slate-600">
+            Most answers lose points—here&apos;s why
           </p>
         </div>
 
-        <div className="space-y-4">
-          {/* Weak Answer */}
-          <div className="bg-white rounded-xl p-5 border-2 border-red-200">
-            <div className="mb-3">
-              <span className="inline-block px-2 py-1 bg-red-100 text-red-700 text-xs font-bold rounded-full">
-                ❌ WEAK
-              </span>
-            </div>
-            <p className="text-xs font-semibold text-gray-700 mb-2">
+        {/* Single Card with Before/After Toggle Visualization */}
+        <div className="bg-gradient-to-br from-white to-slate-50 rounded-2xl p-6 border border-slate-200 shadow-sm mb-6">
+          <div className="mb-5">
+            <p className="text-sm font-semibold text-slate-900 mb-3">
               &quot;Tell me about a time you failed.&quot;
             </p>
-            <div className="bg-gray-50 rounded-lg p-3 mb-3">
-              <p className="text-xs text-gray-700">
-                I&apos;m a hard worker. I&apos;m passionate. I give 110% and
-                I&apos;m a team player.
-              </p>
-            </div>
-            <ul className="space-y-1 text-xs text-red-600">
-              <li>❌ No specific example</li>
-              <li>❌ Generic clichés</li>
-              <li>❌ No results</li>
-            </ul>
           </div>
 
-          {/* Strong Answer */}
-          <div className="bg-white rounded-xl p-5 border-2 border-green-200">
-            <div className="mb-3">
-              <span className="inline-block px-2 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-full">
-                ✅ STRONG
+          {/* Before (Common Mistakes) */}
+          <div className="mb-5 bg-slate-50 rounded-xl p-4 border border-slate-200">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-2 h-2 rounded-full bg-slate-400"></div>
+              <span className="text-xs font-bold text-slate-600 uppercase tracking-wide">
+                Common Answer
               </span>
             </div>
-            <p className="text-xs font-semibold text-gray-700 mb-2">
-              &quot;Tell me about a time you failed.&quot;
+            <p className="text-sm text-slate-700 leading-relaxed mb-3 italic">
+              &quot;I&apos;m a hard worker. I&apos;m passionate. I give 110% and
+              I&apos;m a team player.&quot;
             </p>
-            <div className="bg-gray-50 rounded-lg p-3 mb-3">
-              <p className="text-xs text-gray-700">
-                At my last internship, I missed a deadline by two weeks. I told
-                my manager immediately, we redistributed tasks, and I stayed
-                late. We launched only 3 days late, and I learned to build in
-                20% buffer time.
-              </p>
+            <div className="space-y-1.5">
+              <div className="flex items-start gap-2 text-xs text-slate-600">
+                <span className="text-slate-400 mt-0.5">→</span>
+                <span>Misses the question entirely</span>
+              </div>
+              <div className="flex items-start gap-2 text-xs text-slate-600">
+                <span className="text-slate-400 mt-0.5">→</span>
+                <span>Generic phrases everyone uses</span>
+              </div>
+              <div className="flex items-start gap-2 text-xs text-slate-600">
+                <span className="text-slate-400 mt-0.5">→</span>
+                <span>Zero measurable outcomes</span>
+              </div>
             </div>
-            <ul className="space-y-1 text-xs text-green-600">
-              <li>✅ Clear situation</li>
-              <li>✅ Specific actions</li>
-              <li>✅ Quantified result (3 days vs 14)</li>
-            </ul>
+          </div>
+
+          {/* After (What Works) */}
+          <div className="bg-gradient-to-br from-cyan-50 to-blue-50 rounded-xl p-4 border-2 border-cyan-200">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-2 h-2 rounded-full bg-cyan-500"></div>
+              <span className="text-xs font-bold text-cyan-700 uppercase tracking-wide">
+                What Actually Works
+              </span>
+            </div>
+            <p className="text-sm text-slate-800 leading-relaxed mb-3 font-medium">
+              &quot;At my last internship, I missed a deadline by two weeks. I
+              told my manager immediately, we redistributed tasks, and I stayed
+              late. We launched only 3 days late, and I learned to build in 20%
+              buffer time.&quot;
+            </p>
+            <div className="space-y-1.5">
+              <div className="flex items-start gap-2 text-xs text-cyan-700">
+                <span className="text-cyan-500 mt-0.5">✓</span>
+                <span className="font-medium">Clear situation & action</span>
+              </div>
+              <div className="flex items-start gap-2 text-xs text-cyan-700">
+                <span className="text-cyan-500 mt-0.5">✓</span>
+                <span className="font-medium">
+                  Specific numbers (2 weeks → 3 days)
+                </span>
+              </div>
+              <div className="flex items-start gap-2 text-xs text-cyan-700">
+                <span className="text-cyan-500 mt-0.5">✓</span>
+                <span className="font-medium">Shows learning & growth</span>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="text-center mt-6">
+        {/* Trust Signal: Data Point */}
+        <div className="bg-slate-50 rounded-xl p-4 mb-6 border border-slate-200">
+          <div className="flex items-center justify-center gap-3">
+            <div className="text-center">
+              <p className="text-2xl font-bold text-cyan-600">73%</p>
+              <p className="text-xs text-slate-600">
+                of candidates use generic phrases
+              </p>
+            </div>
+            <div className="w-px h-12 bg-slate-300"></div>
+            <div className="text-center">
+              <p className="text-2xl font-bold text-cyan-600">9/10</p>
+              <p className="text-xs text-slate-600">
+                forget to quantify results
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="text-center">
           <Link href="/assessment/setup">
             <Button
               size="lg"
-              className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white"
+              className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-md hover:shadow-lg transition-all"
             >
               See What Your Answers Are Missing →
             </Button>
@@ -196,125 +233,119 @@ export default function MobileLandingPage() {
       </section>
 
       {/* What You Get - Free vs Premium */}
-      <section className="px-6 pb-8 bg-slate-50 -mx-6 py-8">
-        <div className="px-6">
-          <div className="text-center mb-6">
-            <h2 className="text-2xl font-bold mb-2">What You Get</h2>
-            <p className="text-sm text-gray-600">Start free, upgrade later</p>
+      <section className="px-4 pb-10 pt-10 bg-slate-50">
+        <div className="text-center mb-6">
+          <h2 className="text-2xl font-bold mb-2">What You Get</h2>
+          <p className="text-sm text-gray-600">Start free, upgrade later</p>
+        </div>
+
+        <div className="space-y-4">
+          {/* Free */}
+          <div className="bg-white rounded-xl p-5 border-2 border-slate-200">
+            <h3 className="text-lg font-bold mb-1">Free Assessment</h3>
+            <p className="text-xs text-gray-600 mb-4">Try it now</p>
+            <ul className="space-y-2 text-sm mb-4">
+              <li className="flex items-start gap-2">
+                <CheckCircle2 className="w-4 h-4 text-cyan-500 flex-shrink-0 mt-0.5" />
+                <span>3 behavioral questions</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <CheckCircle2 className="w-4 h-4 text-cyan-500 flex-shrink-0 mt-0.5" />
+                <span>Feedback on 1 category</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <CheckCircle2 className="w-4 h-4 text-cyan-500 flex-shrink-0 mt-0.5" />
+                <span>Text-only mode</span>
+              </li>
+            </ul>
+            <Button variant="outline" size="default" className="w-full">
+              <Link href="/assessment/setup">Try Free</Link>
+            </Button>
           </div>
 
-          <div className="space-y-4">
-            {/* Free */}
-            <div className="bg-white rounded-xl p-5 border-2 border-slate-200">
-              <h3 className="text-lg font-bold mb-1">Free Assessment</h3>
-              <p className="text-xs text-gray-600 mb-4">Try it now</p>
-              <ul className="space-y-2 text-sm mb-4">
-                <li className="flex items-start gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-cyan-500 flex-shrink-0 mt-0.5" />
-                  <span>3 behavioral questions</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-cyan-500 flex-shrink-0 mt-0.5" />
-                  <span>Feedback on 1 category</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-cyan-500 flex-shrink-0 mt-0.5" />
-                  <span>Text-only mode</span>
-                </li>
-              </ul>
-              <Button variant="outline" size="default" className="w-full">
-                <Link href="/assessment/setup">Try Free</Link>
-              </Button>
+          {/* Premium Super Card */}
+          <div className="bg-white rounded-xl p-5 border-2 border-cyan-500 relative">
+            <div className="absolute -top-2 left-1/2 -translate-x-1/2">
+              <span className="inline-block px-3 py-1 bg-gradient-to-r from-cyan-500 to-blue-600 text-white text-xs font-bold rounded-full">
+                POPULAR
+              </span>
             </div>
+            <h3 className="text-lg font-bold mb-1 mt-2">Premium</h3>
+            <p className="text-xs text-gray-600 mb-4">Full simulation</p>
 
-            {/* Premium Super Card */}
-            <div className="bg-white rounded-xl p-5 border-2 border-cyan-500 relative">
-              <div className="absolute -top-2 left-1/2 -translate-x-1/2">
-                <span className="inline-block px-3 py-1 bg-gradient-to-r from-cyan-500 to-blue-600 text-white text-xs font-bold rounded-full">
-                  POPULAR
-                </span>
-              </div>
-              <h3 className="text-lg font-bold mb-1 mt-2">Premium</h3>
-              <p className="text-xs text-gray-600 mb-4">Full simulation</p>
-
-              <div className="space-y-4">
-                <div>
-                  <h4 className="text-xs font-bold text-slate-900 mb-2">
-                    What You Get:
-                  </h4>
-                  <ul className="space-y-2 text-sm">
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-cyan-500 flex-shrink-0 mt-0.5" />
-                      <span>Unlimited questions</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-cyan-500 flex-shrink-0 mt-0.5" />
-                      <span>Full AI feedback (3 categories)</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-cyan-500 flex-shrink-0 mt-0.5" />
-                      <span>Voice mode (like Zoom)</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-cyan-500 flex-shrink-0 mt-0.5" />
-                      <span>Personalized to your CV</span>
-                    </li>
-                  </ul>
-                </div>
-
-                <div className="pt-3 border-t border-slate-200">
-                  <h4 className="text-xs font-bold text-slate-900 mb-2">
-                    Why Upgrade:
-                  </h4>
-                  <ul className="space-y-2">
-                    <li className="flex items-start gap-2">
-                      <Mic className="w-4 h-4 text-cyan-500 flex-shrink-0 mt-0.5" />
-                      <div>
-                        <p className="text-sm font-semibold">
-                          Practice Speaking
-                        </p>
-                        <p className="text-xs text-gray-600">
-                          Voice = think on your feet
-                        </p>
-                      </div>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <Brain className="w-4 h-4 text-cyan-500 flex-shrink-0 mt-0.5" />
-                      <div>
-                        <p className="text-sm font-semibold">
-                          Specific Feedback
-                        </p>
-                        <p className="text-xs text-gray-600">
-                          See exactly what to fix
-                        </p>
-                      </div>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <Target className="w-4 h-4 text-cyan-500 flex-shrink-0 mt-0.5" />
-                      <div>
-                        <p className="text-sm font-semibold">Real Conditions</p>
-                        <p className="text-xs text-gray-600">
-                          Multi-stage = actual format
-                        </p>
-                      </div>
-                    </li>
-                  </ul>
-                </div>
+            <div className="space-y-4">
+              <div>
+                <h4 className="text-xs font-bold text-slate-900 mb-2">
+                  What You Get:
+                </h4>
+                <ul className="space-y-2 text-sm">
+                  <li className="flex items-start gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-cyan-500 flex-shrink-0 mt-0.5" />
+                    <span>Unlimited questions</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-cyan-500 flex-shrink-0 mt-0.5" />
+                    <span>Full AI feedback (3 categories)</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-cyan-500 flex-shrink-0 mt-0.5" />
+                    <span>Voice mode (like Zoom)</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-cyan-500 flex-shrink-0 mt-0.5" />
+                    <span>Personalized to your CV</span>
+                  </li>
+                </ul>
               </div>
 
-              <Button
-                size="default"
-                className="w-full mt-4 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white"
-              >
-                <Link href="/pricing">See Pricing</Link>
-              </Button>
+              <div className="pt-3 border-t border-slate-200">
+                <h4 className="text-xs font-bold text-slate-900 mb-2">
+                  Why Upgrade:
+                </h4>
+                <ul className="space-y-2">
+                  <li className="flex items-start gap-2">
+                    <Mic className="w-4 h-4 text-cyan-500 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-semibold">Practice Speaking</p>
+                      <p className="text-xs text-gray-600">
+                        Voice = think on your feet
+                      </p>
+                    </div>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Brain className="w-4 h-4 text-cyan-500 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-semibold">Specific Feedback</p>
+                      <p className="text-xs text-gray-600">
+                        See exactly what to fix
+                      </p>
+                    </div>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Target className="w-4 h-4 text-cyan-500 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-semibold">Real Conditions</p>
+                      <p className="text-xs text-gray-600">
+                        Multi-stage = actual format
+                      </p>
+                    </div>
+                  </li>
+                </ul>
+              </div>
             </div>
+
+            <Button
+              size="default"
+              className="w-full mt-4 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white"
+            >
+              <Link href="/pricing">See Pricing</Link>
+            </Button>
           </div>
         </div>
       </section>
 
       {/* Common Questions */}
-      <section className="px-6 pb-8 pt-8 bg-white">
+      <section className="px-4 pb-10 pt-10 bg-white">
         <div className="text-center mb-6">
           <h2 className="text-2xl font-bold">Common Questions</h2>
         </div>
@@ -360,7 +391,7 @@ export default function MobileLandingPage() {
       </section>
 
       {/* Final CTA */}
-      <section className="px-6 pb-8 pt-8 bg-slate-50">
+      <section className="px-4 pb-10 pt-10 bg-slate-50">
         <div className="bg-gradient-to-br from-cyan-50 to-blue-50 rounded-2xl p-6 border-2 border-cyan-200 text-center">
           <h2 className="text-2xl font-bold mb-3">
             One bad interview = lost offer
