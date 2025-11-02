@@ -210,6 +210,10 @@ export default function AssessmentSetupPage() {
       track({ name: 'assessment_setup_submitted', payload: { jobTitle } });
 
       // Upload CV file with upload failure tracking
+      // TypeScript note: cvFile is guaranteed to be non-null here due to validation above
+      if (!cvFile) {
+        throw new Error('CV file is required');
+      }
       const uploadResult = await uploadFile(cvFile, 'cv');
       if (!uploadResult.success || !uploadResult.storageKey) {
         // Track CV upload failure
