@@ -102,21 +102,24 @@ export default function MobileLandingPage() {
             <p className="text-sm text-gray-700 font-semibold mb-4 drop-shadow-[0_0_8px_rgba(255,255,255,1)]">
               Full assessment + detailed feedback
             </p>
-            <Button
-              asChild
-              size="lg"
-              disabled={isLoading}
-              className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white"
-            >
-              <Link
-                href={ctaHref}
-                className="flex items-center justify-center gap-2"
+            {isLoading ? (
+              <Button
+                size="lg"
+                disabled
+                className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-none"
               >
-                {isLoading
-                  ? 'Loading...'
-                  : 'Start Free 3-Question Assessment →'}
+                Loading...
+              </Button>
+            ) : (
+              <Link href={ctaHref} className="block">
+                <Button
+                  size="lg"
+                  className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-md hover:shadow-lg transition-all"
+                >
+                  Start Free 3-Question Assessment →
+                </Button>
               </Link>
-            </Button>
+            )}
           </div>
         </div>
       </section>

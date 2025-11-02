@@ -10,16 +10,16 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          'bg-gradient-to-[135deg] from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-lg hover:shadow-xl active:scale-[0.98]',
+          'bg-gradient-to-[135deg] from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-md hover:shadow-lg active:scale-[0.98]',
         destructive:
-          'bg-gradient-to-[135deg] from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-lg hover:shadow-xl active:scale-[0.98]',
+          'bg-gradient-to-[135deg] from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-md hover:shadow-lg active:scale-[0.98]',
         outline:
-          'border-2 border-cyan-600 bg-transparent text-cyan-700 hover:bg-gradient-to-[135deg] hover:from-cyan-500 hover:to-blue-600 hover:text-white hover:border-transparent shadow-md hover:shadow-lg active:scale-[0.98] font-bold',
+          'border-2 border-cyan-600 bg-transparent text-cyan-700 hover:bg-gradient-to-[135deg] hover:from-cyan-500 hover:to-blue-600 hover:text-white hover:border-transparent shadow-sm hover:shadow-md active:scale-[0.98] font-bold',
         secondary:
           'bg-slate-200 text-slate-900 hover:bg-slate-300 border border-slate-300 shadow-sm hover:shadow-md active:scale-[0.98]',
         ghost:
-          'hover:bg-cyan-50 hover:text-cyan-600 active:scale-[0.98] text-slate-700',
-        link: 'text-cyan-600 underline-offset-4 hover:underline hover:text-cyan-700 font-semibold',
+          'hover:bg-cyan-50 hover:text-cyan-600 active:scale-[0.98] text-slate-700 shadow-none',
+        link: 'text-cyan-600 underline-offset-4 hover:underline hover:text-cyan-700 font-semibold shadow-none',
       },
       size: {
         default: 'min-h-[44px] px-6 py-2.5 text-base',
