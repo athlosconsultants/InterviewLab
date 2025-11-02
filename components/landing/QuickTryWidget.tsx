@@ -224,7 +224,7 @@ export function QuickTryWidget() {
           disabled={!isAnswerValid}
           onClick={handleSubmit}
           size="default"
-          className="w-full"
+          className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white"
         >
           Get Instant Feedback
         </Button>
