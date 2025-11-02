@@ -739,8 +739,8 @@ export default function PricingSuperCard() {
           </motion.div>
         </div>
 
-        {/* CTA Section - White background */}
-        <div className="bg-white py-12 md:py-16">
+        {/* CTA Section - Light blue gradient background */}
+        <div className="bg-gradient-to-b from-white via-cyan-50/30 to-blue-50/40 py-12 md:py-16">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
