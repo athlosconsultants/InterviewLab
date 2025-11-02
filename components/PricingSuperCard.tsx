@@ -241,8 +241,8 @@ export default function PricingSuperCard() {
             <Button
               onClick={() => handlePurchase(currentPlan.id)}
               disabled={loading !== null}
-              size="default"
-              className="w-full mb-6"
+              size="lg"
+              className="w-full mb-6 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-md hover:shadow-lg transition-all"
             >
               {loading === currentPlan.id ? (
                 <>
@@ -342,9 +342,8 @@ export default function PricingSuperCard() {
           <Button
             onClick={() => handlePurchase('lifetime')}
             disabled={loading !== null}
-            variant="outline"
-            size="default"
-            className="w-full"
+            size="lg"
+            className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-md hover:shadow-lg transition-all"
           >
             {loading === 'lifetime' ? (
               <>
@@ -356,24 +355,6 @@ export default function PricingSuperCard() {
             )}
           </Button>
         </motion.div>
-
-        {/* CTA Block - Mobile (replaces fake testimonial) */}
-        <div className="rounded-xl border-2 border-cyan-200 bg-gradient-to-br from-cyan-50 to-blue-50 p-6 shadow-sm mt-4">
-          <h3 className="text-lg font-bold text-slate-900 mb-2 text-center">
-            Just try it already.
-          </h3>
-          <p className="text-sm text-slate-700 leading-relaxed mb-4 text-center">
-            You&apos;ve read enough. Try the free 3-question assessment. See if
-            it helps. Then decide.
-            <br />
-            <br />5 minutes. No credit card.
-          </p>
-          <Link href="/assessment/setup">
-            <Button size="default" className="w-full">
-              Start Free Assessment
-            </Button>
-          </Link>
-        </div>
 
         {/* FAQ - Mobile */}
         <div className="mt-6 space-y-4">
@@ -411,6 +392,27 @@ export default function PricingSuperCard() {
               </p>
             </div>
           </div>
+        </div>
+
+        {/* CTA Block - Mobile (repositioned below FAQ) */}
+        <div className="rounded-xl border-2 border-cyan-200 bg-gradient-to-br from-cyan-50 to-blue-50 p-6 shadow-sm mt-6">
+          <h3 className="text-lg font-bold text-slate-900 mb-2 text-center">
+            Just try it already.
+          </h3>
+          <p className="text-sm text-slate-700 leading-relaxed mb-4 text-center">
+            You&apos;ve read enough. Try the free 3-question assessment. See if
+            it helps. Then decide.
+            <br />
+            <br />5 minutes. No credit card.
+          </p>
+          <Link href="/assessment/setup">
+            <Button
+              size="lg"
+              className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-md hover:shadow-lg transition-all"
+            >
+              Start Free Assessment
+            </Button>
+          </Link>
         </div>
 
         <p className="text-xs text-center text-slate-500 mt-6">
@@ -547,9 +549,8 @@ export default function PricingSuperCard() {
                   handlePurchase(plan.id);
                 }}
                 disabled={loading !== null}
-                variant={selectedPlan === plan.id ? 'default' : 'outline'}
-                size="default"
-                className="w-full"
+                size="lg"
+                className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-md hover:shadow-lg transition-all"
               >
                 {loading === plan.id ? (
                   <>
@@ -629,9 +630,8 @@ export default function PricingSuperCard() {
             <Button
               onClick={() => handlePurchase('lifetime')}
               disabled={loading !== null}
-              variant="outline"
-              size="default"
-              className="w-full"
+              size="lg"
+              className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-md hover:shadow-lg transition-all"
             >
               {loading === 'lifetime' ? (
                 <>
@@ -644,44 +644,6 @@ export default function PricingSuperCard() {
             </Button>
           </motion.div>
         </div>
-
-        {/* CTA Block - Desktop (replaces fake testimonial) */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{
-            duration: 0.6,
-            delay: 0.4,
-            ease: [0.22, 1, 0.36, 1],
-          }}
-          className="bg-gradient-to-br from-cyan-50 to-blue-50 rounded-2xl border-2 border-cyan-200 shadow-lg p-10 mb-12"
-        >
-          <div className="text-center max-w-2xl mx-auto space-y-4">
-            <h3 className="text-2xl font-bold text-slate-900">
-              Still reading? Just try it.
-            </h3>
-            <p className="text-base text-slate-700 leading-relaxed">
-              Look, you&apos;ve scrolled this far. You&apos;re clearly
-              interested.
-              <br />
-              <br />
-              Start with the free 3-question assessment. See if the feedback
-              actually helps. Then decide if you want unlimited access.
-              <br />
-              <br />
-              Worst case? You spend 5 minutes. Best case? You nail your next
-              interview.
-            </p>
-            <div className="pt-4">
-              <Link href="/assessment/setup">
-                <Button size="lg">Start Free Assessment</Button>
-              </Link>
-              <p className="text-sm text-slate-600 mt-3">
-                Takes 5 minutes, no credit card
-              </p>
-            </div>
-          </div>
-        </motion.div>
 
         {/* Features Section - Desktop */}
         <motion.div
@@ -766,6 +728,49 @@ export default function PricingSuperCard() {
               <p className="text-sm text-slate-700 leading-relaxed">
                 A: If you&apos;re not more confident after your first 3 practice
                 interviews, email us and we&apos;ll refund you. Simple.
+              </p>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* CTA Block - Desktop (repositioned below FAQ) */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{
+            duration: 0.6,
+            delay: 0.7,
+            ease: [0.22, 1, 0.36, 1],
+          }}
+          className="bg-gradient-to-br from-cyan-50 to-blue-50 rounded-2xl border-2 border-cyan-200 shadow-lg p-10 mt-12"
+        >
+          <div className="text-center max-w-2xl mx-auto space-y-4">
+            <h3 className="text-2xl font-bold text-slate-900">
+              Still reading? Just try it.
+            </h3>
+            <p className="text-base text-slate-700 leading-relaxed">
+              Look, you&apos;ve scrolled this far. You&apos;re clearly
+              interested.
+              <br />
+              <br />
+              Start with the free 3-question assessment. See if the feedback
+              actually helps. Then decide if you want unlimited access.
+              <br />
+              <br />
+              Worst case? You spend 5 minutes. Best case? You nail your next
+              interview.
+            </p>
+            <div className="pt-4">
+              <Link href="/assessment/setup">
+                <Button
+                  size="lg"
+                  className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-md hover:shadow-lg transition-all"
+                >
+                  Start Free Assessment
+                </Button>
+              </Link>
+              <p className="text-sm text-slate-600 mt-3">
+                Takes 5 minutes, no credit card
               </p>
             </div>
           </div>
