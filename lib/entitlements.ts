@@ -3,6 +3,7 @@
  */
 
 import { createClient } from '@/lib/supabase-server';
+import { isSuperAdmin } from '@/lib/super-admin';
 
 export type PassTier = '48h' | '7d' | '30d' | 'lifetime';
 
@@ -10,15 +11,28 @@ export interface UserEntitlement {
   isActive: boolean;
   tier: PassTier | null;
   expiresAt: string | null;
+  isSuperAdmin?: boolean;
 }
 
 /**
  * Get user's current entitlement status
  * Returns { isActive: true } if user has valid, non-expired access
+ * Super admins always return isActive: true
  */
 export async function getUserEntitlements(
   userId: string
 ): Promise<UserEntitlement> {
+  // Check if user is a super admin first
+  const superAdmin = await isSuperAdmin(userId);
+  if (superAdmin) {
+    return {
+      isActive: true,
+      tier: 'lifetime',
+      expiresAt: null,
+      isSuperAdmin: true,
+    };
+  }
+
   const supabase = await createClient();
 
   const { data, error } = await supabase

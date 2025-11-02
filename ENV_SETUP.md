@@ -48,6 +48,23 @@ ADMIN_USERNAME=your-admin-username
 ADMIN_PASSWORD=your-secure-password
 ```
 
+### Super Admin Configuration
+
+```bash
+SUPER_ADMIN_EMAILS=email1@example.com,email2@example.com
+```
+
+**Super Admin Privileges:**
+
+- Unlimited free assessments (no 7-day cooldown)
+- Full access to all premium features without payment
+- No rate limiting or usage restrictions
+- Bypass all entitlement checks
+
+**Format:** Comma-separated list of email addresses (case-insensitive)
+
+**Example:** `SUPER_ADMIN_EMAILS=a.j.szymanski1999@gmail.com,admin@theinterviewlab.io`
+
 **Important:** Choose a strong password for production. The admin dashboard at `/admin/*` is protected by these credentials.
 
 ### Cron Job Security

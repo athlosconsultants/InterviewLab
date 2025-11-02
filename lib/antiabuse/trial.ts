@@ -1,10 +1,12 @@
 import { createClient } from '@/lib/supabase-server';
+import { isSuperAdmin } from '@/lib/super-admin';
 
 const SEVEN_DAYS_IN_MS = 7 * 24 * 60 * 60 * 1000;
 
 /**
  * Checks if a user or device is allowed to start a new complimentary assessment.
  * Policy: 1 assessment per 7 days, checked against both user ID and device hash.
+ * Super admins bypass this restriction.
  * @returns {Promise<{
  *   allowed: boolean;
  *   reason: 'USER_RATE_LIMITED' | 'DEVICE_RATE_LIMITED' | 'OK';
@@ -26,6 +28,12 @@ export async function checkTrialAllowance(): Promise<{
     // For anonymous users, we can only check by device.
     // The device binding must have happened before this check.
     return { allowed: true, reason: 'OK' }; // Placeholder for now
+  }
+
+  // Super admins bypass rate limiting
+  const superAdmin = await isSuperAdmin(user.id);
+  if (superAdmin) {
+    return { allowed: true, reason: 'OK' };
   }
 
   // Check for recent trials by user_id (free tier sessions)
