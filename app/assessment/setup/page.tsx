@@ -182,13 +182,19 @@ export default function AssessmentSetupPage() {
         <div className="container mx-auto px-4 py-12 md:py-20 relative z-10">
           <div className="max-w-2xl mx-auto">
             {/* Header */}
-            <div className="text-center mb-12">
+            <div className="text-center mb-8">
               <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">
-                Complimentary Interview Assessment
+                Ready to Practice Like It&apos;s Real?
               </h1>
-              <p className="text-lg text-slate-600 dark:text-slate-400">
-                Experience a personalized mock interview tailored to your role.
-                No credit card required.
+              <p className="text-lg md:text-xl text-slate-700 dark:text-slate-300 mb-6">
+                Upload your CV to get interview questions based on YOUR actual
+                experience and background.
+              </p>
+              {/* Introduction Paragraph */}
+              <p className="text-base text-slate-600 dark:text-slate-400 max-w-xl mx-auto">
+                You&apos;ll get 3 questions tailored specifically to your
+                background and the role you&apos;re targeting. This takes 2
+                minutes to set up.
               </p>
             </div>
 
@@ -215,7 +221,7 @@ export default function AssessmentSetupPage() {
                 {/* CV Upload */}
                 <div className="space-y-2 mb-6">
                   <Label className="text-base font-semibold">
-                    CV/Resume <span className="text-red-500">*</span>
+                    Your CV/Resume <span className="text-red-500">*</span>
                   </Label>
                   <FileDrop
                     onFileSelect={setCvFile}
@@ -239,10 +245,33 @@ export default function AssessmentSetupPage() {
                     ]}
                     maxSizeMB={10}
                   />
-                  <p className="text-sm text-slate-500 dark:text-slate-400">
-                    Your CV helps us create a personalized interview experience
-                    tailored to your background.
-                  </p>
+                  <div className="text-sm space-y-2">
+                    <p className="font-semibold text-slate-700 dark:text-slate-300">
+                      Why we need this:
+                    </p>
+                    <ul className="space-y-1.5 text-slate-600 dark:text-slate-400">
+                      <li className="flex items-start gap-2">
+                        <span className="text-cyan-600 mt-0.5">→</span>
+                        <span>
+                          Questions tailored to YOUR specific projects and tools
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-cyan-600 mt-0.5">→</span>
+                        <span>Feedback based on YOUR experience level</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-cyan-600 mt-0.5">→</span>
+                        <span>
+                          Interview difficulty matched to YOUR actual role
+                        </span>
+                      </li>
+                    </ul>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 pt-2">
+                      Privacy: Your CV is encrypted and never shared. Delete
+                      anytime.
+                    </p>
+                  </div>
                 </div>
 
                 {/* Job Description */}
@@ -251,7 +280,14 @@ export default function AssessmentSetupPage() {
                     htmlFor="jobDescription"
                     className="text-base font-semibold"
                   >
-                    Job Description (Optional)
+                    Job Description{' '}
+                    <span className="text-slate-600 dark:text-slate-400 font-normal">
+                      (Optional -{' '}
+                      <span className="text-cyan-600 dark:text-cyan-400 font-semibold">
+                        Highly Recommended
+                      </span>
+                      )
+                    </span>
                   </Label>
                   <textarea
                     id="jobDescription"
@@ -262,9 +298,10 @@ export default function AssessmentSetupPage() {
                     rows={6}
                     className="w-full px-3 py-2 text-base border rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500 dark:bg-gray-800 dark:border-gray-700"
                   />
-                  <p className="text-sm text-slate-500 dark:text-slate-400">
-                    Providing details helps us create a more accurate interview
-                    simulation.
+                  <p className="text-sm text-slate-600 dark:text-slate-400">
+                    Add this if you&apos;re preparing for a specific role.
+                    We&apos;ll tailor questions to match that job&apos;s
+                    requirements.
                   </p>
                 </div>
 
@@ -302,7 +339,7 @@ export default function AssessmentSetupPage() {
                 >
                   {isSubmitting
                     ? 'Starting Your Interview...'
-                    : 'Start Free Assessment'}
+                    : 'Start My Personalized Interview'}
                 </Button>
                 {(!turnstileToken || !cvFile) && (
                   <p className="text-sm text-center text-amber-600 dark:text-amber-400 mt-2">
@@ -314,9 +351,8 @@ export default function AssessmentSetupPage() {
                   </p>
                 )}
 
-                <p className="text-xs text-center text-slate-500 dark:text-slate-400 mt-4">
-                  One complimentary assessment per week. No credit card
-                  required.
+                <p className="text-sm text-center text-slate-600 dark:text-slate-400 mt-3">
+                  Takes 10-15 minutes. You can pause anytime.
                 </p>
               </div>
             </form>
