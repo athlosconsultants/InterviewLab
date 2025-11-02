@@ -22,6 +22,7 @@ import {
 import { Metadata } from 'next';
 import { createClient } from '@/lib/supabase-server';
 import { QuickTryWidget } from '@/components/landing/QuickTryWidget';
+import { PrefetchLinks } from '@/components/PrefetchLinks';
 
 export const metadata: Metadata = {
   title:
@@ -68,6 +69,9 @@ export default async function Home() {
   }
   return (
     <main className="min-h-screen bg-gradient-to-b from-cyan-50 via-white via-slate-50 to-white">
+      {/* Prefetch critical pages for faster navigation */}
+      <PrefetchLinks />
+
       {/* Hero Section */}
       <section className="relative overflow-hidden min-h-[100svh] md:min-h-[70vh] lg:min-h-[80vh]">
         {/* Background Image Layer - Mobile-specific optimized images for mobile, desktop image for larger screens */}
@@ -208,106 +212,106 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Why This Works Section - Weak vs Strong Comparison */}
+      {/* Why This Works Section - Premium Redesign */}
       <section className="py-24 bg-white">
         <div className="container mx-auto px-6">
           <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold mb-4">
+            <h2 className="text-3xl sm:text-4xl font-bold mb-4 text-slate-900">
               See What Most People Miss
             </h2>
-            <p className="text-lg text-muted-foreground">
-              Our AI catches the mistakes friends won&apos;t tell you about
+            <p className="text-lg text-slate-600">
+              Most answers lose points—here&apos;s why
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
-            {/* Weak Answer Column */}
-            <div className="bg-white rounded-2xl p-8 shadow-lg border-2 border-red-200">
-              <div className="mb-4">
-                <span className="inline-block px-3 py-1 bg-red-100 text-red-700 text-sm font-semibold rounded-full">
-                  ❌ WEAK ANSWER
-                </span>
-              </div>
-
-              <p className="text-sm font-semibold text-slate-700 mb-4">
-                &quot;Tell me about a time you failed.&quot;
-              </p>
-
-              <div className="bg-slate-50 rounded-lg p-6 mb-4">
-                <p className="text-sm text-slate-700 leading-relaxed">
-                  I&apos;m a hard worker. I&apos;m very passionate about this
-                  role. I always give 110% and I&apos;m a team player. I really
-                  want this job because I think it would be a great opportunity
-                  for growth.
+          {/* Single Card with Before/After Design */}
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-gradient-to-br from-white to-slate-50 rounded-2xl p-8 md:p-10 border border-slate-200 shadow-sm mb-8">
+              <div className="mb-8">
+                <p className="text-base md:text-lg font-semibold text-slate-900 mb-6">
+                  &quot;Tell me about a time you failed.&quot;
                 </p>
               </div>
 
-              <div className="space-y-2">
-                <p className="text-sm text-red-600 flex items-start gap-2">
-                  <span>❌</span>
-                  <span>No specific example</span>
-                </p>
-                <p className="text-sm text-red-600 flex items-start gap-2">
-                  <span>❌</span>
-                  <span>
-                    Generic clichés (&quot;110%&quot;, &quot;team player&quot;)
+              {/* Before (Common Mistakes) */}
+              <div className="mb-8 bg-slate-50 rounded-xl p-6 border border-slate-200">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-3 h-3 rounded-full bg-slate-400"></div>
+                  <span className="text-sm font-bold text-slate-600 uppercase tracking-wide">
+                    Common Answer
                   </span>
+                </div>
+                <p className="text-base text-slate-700 leading-relaxed mb-4 italic">
+                  &quot;I&apos;m a hard worker. I&apos;m passionate. I give 110%
+                  and I&apos;m a team player.&quot;
                 </p>
-                <p className="text-sm text-red-600 flex items-start gap-2">
-                  <span>❌</span>
-                  <span>No measurable results</span>
+                <div className="space-y-2">
+                  <div className="flex items-start gap-3 text-sm text-slate-600">
+                    <span className="text-slate-400 mt-0.5">→</span>
+                    <span>Misses the question entirely</span>
+                  </div>
+                  <div className="flex items-start gap-3 text-sm text-slate-600">
+                    <span className="text-slate-400 mt-0.5">→</span>
+                    <span>Generic phrases everyone uses</span>
+                  </div>
+                  <div className="flex items-start gap-3 text-sm text-slate-600">
+                    <span className="text-slate-400 mt-0.5">→</span>
+                    <span>Zero measurable outcomes</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* After (What Works) */}
+              <div className="bg-gradient-to-br from-cyan-50 to-blue-50 rounded-xl p-6 border-2 border-cyan-200">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-3 h-3 rounded-full bg-cyan-500"></div>
+                  <span className="text-sm font-bold text-cyan-700 uppercase tracking-wide">
+                    What Actually Works
+                  </span>
+                </div>
+                <p className="text-base text-slate-800 leading-relaxed mb-4 font-medium">
+                  &quot;At my last internship, I missed a deadline by two weeks.
+                  I told my manager immediately, we redistributed tasks, and I
+                  stayed late. We launched only 3 days late, and I learned to
+                  build in 20% buffer time.&quot;
                 </p>
-                <p className="text-sm text-red-600 flex items-start gap-2">
-                  <span>❌</span>
-                  <span>Doesn&apos;t actually answer the question</span>
-                </p>
+                <div className="space-y-2">
+                  <div className="flex items-start gap-3 text-sm text-cyan-700">
+                    <span className="text-cyan-500 mt-0.5">✓</span>
+                    <span className="font-medium">
+                      Clear situation & action
+                    </span>
+                  </div>
+                  <div className="flex items-start gap-3 text-sm text-cyan-700">
+                    <span className="text-cyan-500 mt-0.5">✓</span>
+                    <span className="font-medium">
+                      Specific numbers (2 weeks → 3 days)
+                    </span>
+                  </div>
+                  <div className="flex items-start gap-3 text-sm text-cyan-700">
+                    <span className="text-cyan-500 mt-0.5">✓</span>
+                    <span className="font-medium">Shows learning & growth</span>
+                  </div>
+                </div>
               </div>
             </div>
 
-            {/* Strong Answer Column */}
-            <div className="bg-white rounded-2xl p-8 shadow-lg border-2 border-green-200">
-              <div className="mb-4">
-                <span className="inline-block px-3 py-1 bg-green-100 text-green-700 text-sm font-semibold rounded-full">
-                  ✅ STRONG ANSWER
-                </span>
-              </div>
-
-              <p className="text-sm font-semibold text-slate-700 mb-4">
-                &quot;Tell me about a time you failed.&quot;
-              </p>
-
-              <div className="bg-slate-50 rounded-lg p-6 mb-4">
-                <p className="text-sm text-slate-700 leading-relaxed">
-                  At my last internship, I misestimated a project timeline by
-                  two weeks, which delayed our product launch. I immediately
-                  notified my manager, worked with the team to redistribute
-                  tasks, and stayed late for a week to catch up. We launched
-                  only 3 days behind schedule, and I learned to build in 20%
-                  buffer time for estimates.
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <p className="text-sm text-green-600 flex items-start gap-2">
-                  <span>✅</span>
-                  <span>Clear situation (missed timeline)</span>
-                </p>
-                <p className="text-sm text-green-600 flex items-start gap-2">
-                  <span>✅</span>
-                  <span>Owned the mistake</span>
-                </p>
-                <p className="text-sm text-green-600 flex items-start gap-2">
-                  <span>✅</span>
-                  <span>Specific actions taken</span>
-                </p>
-                <p className="text-sm text-green-600 flex items-start gap-2">
-                  <span>✅</span>
-                  <span>Quantified outcome (3 days vs 14 days)</span>
-                </p>
-                <p className="text-sm text-green-600 flex items-start gap-2">
-                  <span>✅</span>
-                  <span>Shows learning and growth</span>
-                </p>
+            {/* Trust Signal: Data Point */}
+            <div className="bg-slate-50 rounded-xl p-6 mb-8 border border-slate-200">
+              <div className="flex items-center justify-center gap-8">
+                <div className="text-center">
+                  <p className="text-4xl font-bold text-cyan-600 mb-1">73%</p>
+                  <p className="text-sm text-slate-600">
+                    of candidates use generic phrases
+                  </p>
+                </div>
+                <div className="w-px h-16 bg-slate-300"></div>
+                <div className="text-center">
+                  <p className="text-4xl font-bold text-cyan-600 mb-1">9/10</p>
+                  <p className="text-sm text-slate-600">
+                    forget to quantify results
+                  </p>
+                </div>
               </div>
             </div>
           </div>

@@ -15,6 +15,7 @@ import {
 import { Footer } from '@/components/Footer';
 import { createClient } from '@/lib/supabase-client';
 import { QuickTryWidget } from '@/components/landing/QuickTryWidget';
+import { PrefetchLinks } from '@/components/PrefetchLinks';
 
 /**
  * Mobile Landing Page - Updated with Rory's feedback
@@ -40,6 +41,9 @@ export default function MobileLandingPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white via-slate-50 to-white pb-24">
+      {/* Prefetch critical pages for faster navigation */}
+      <PrefetchLinks />
+
       {/* Hero Section - Mobile Optimized with Mobile-specific Background */}
       <section className="relative overflow-hidden min-h-[100svh] px-4 pt-12 pb-8">
         {/* Background Image Layer - Mobile-specific optimized images */}
