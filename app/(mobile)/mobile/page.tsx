@@ -47,21 +47,21 @@ export default function MobileLandingPage() {
       {/* Hero Section - Mobile Optimized with Mobile-specific Background */}
       <section className="relative overflow-hidden min-h-[100svh] px-4 pt-12 pb-8">
         {/* Background Image Layer - Mobile-specific optimized images */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none -z-10">
+        <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
           {/* Mobile Background - WebP with JPG fallback */}
-          <picture className="absolute inset-0">
+          <picture className="absolute inset-0 block w-full h-full">
             <source type="image/webp" srcSet="/Images/mobile-bg-v2.webp" />
             <img
               src="/Images/mobile-bg-v2.jpg"
               alt=""
-              className="w-full h-full object-cover object-center"
+              className="absolute inset-0 w-full h-full object-cover object-center block"
               loading="eager"
             />
           </picture>
 
           {/* Translucent Gradient Overlay - Shows background image while maintaining readability */}
           <div
-            className="absolute inset-0"
+            className="absolute inset-0 z-10"
             style={{
               background:
                 'linear-gradient(180deg, rgba(224, 242, 254, 0.45) 0%, rgba(186, 230, 253, 0.50) 50%, rgba(224, 242, 254, 0.55) 100%)',
