@@ -4,14 +4,7 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import {
-  Loader2,
-  Send,
-  Mic,
-  Type,
-  AccessibilityIcon,
-  ArrowRight,
-} from 'lucide-react';
+import { Loader2, Send, Mic, Type, ArrowRight } from 'lucide-react';
 import {
   initializeInterview,
   submitInterviewAnswer,
@@ -24,9 +17,6 @@ import { QuestionBubble } from '../QuestionBubble';
 import { TimerRing } from '../TimerRing';
 import { ReplayButton } from '../ReplayButton';
 import { AudioRecorder } from '../AudioRecorder';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import { UpgradeDialog } from '../UpgradeDialog';
 import { useQuestionReveal } from '@/hooks/useQuestionReveal';
 import { trackEvent } from '@/lib/analytics'; // T110: Analytics tracking
 
@@ -50,7 +40,6 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
   const [answerMode, setAnswerMode] = useState<'text' | 'audio'>('text');
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [accessibilityMode, setAccessibilityMode] = useState(false);
-  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   const [introText, setIntroText] = useState<string | null>(null);
   const [showWelcomeScreen, setShowWelcomeScreen] = useState(false); // T124: Welcome screen state
 
@@ -330,19 +319,10 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
             toast.success('Interview complete', {
               description: 'Well done.',
             });
-            // Show upgrade dialog ONLY for free plan users
-            const planTier = (result.data as any).planTier || 'free';
-            if (planTier === 'free') {
-              setShowUpgradeDialog(true);
-            } else {
-              // Pro users: redirect directly to report
-              toast.info('View your detailed report', {
-                description: 'Click below to see your results',
-              });
-              setTimeout(() => {
-                router.push(`/report/${sessionId}`);
-              }, 1500);
-            }
+            // Redirect all users directly to report
+            setTimeout(() => {
+              router.push(`/report/${sessionId}`);
+            }, 1000);
             return;
           }
 
@@ -568,22 +548,6 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
                 Stage {currentStage} of {stagesPlanned}: {stageName}
               </p>
             )}
-          </div>
-          <div className="flex items-center gap-2 sm:gap-2.5 flex-shrink-0">
-            <AccessibilityIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground flex-shrink-0" />
-            <Switch
-              id="accessibility-mode"
-              checked={accessibilityMode}
-              onCheckedChange={setAccessibilityMode}
-              className="scale-90 sm:scale-100"
-            />
-            <Label
-              htmlFor="accessibility-mode"
-              className="text-xs sm:text-sm cursor-pointer whitespace-nowrap"
-            >
-              <span className="hidden sm:inline">No Timer/Reveals</span>
-              <span className="sm:hidden">No Timer</span>
-            </Label>
           </div>
         </div>
       </div>
@@ -890,13 +854,6 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
           )}
         </div>
       )}
-
-      {/* Upgrade Dialog */}
-      <UpgradeDialog
-        open={showUpgradeDialog}
-        onClose={() => setShowUpgradeDialog(false)}
-        onViewReport={() => router.push(`/report/${sessionId}`)}
-      />
     </div>
   );
 }

@@ -85,10 +85,10 @@ export function QuestionBubble({
           <span className="text-xs font-semibold text-slate-600 uppercase tracking-wide">
             Question {questionNumber}
           </span>
-          <span className="inline-flex items-center rounded-full bg-gradient-to-[135deg] from-cyan-500 to-blue-600 px-3 py-1 text-xs font-semibold text-white">
+          <span className="inline-flex items-center rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 px-3 py-1 text-xs font-semibold text-white shadow-sm">
             {question.category}
           </span>
-          <span className="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-900">
+          <span className="inline-flex items-center rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 px-3 py-1 text-xs font-semibold text-white shadow-sm">
             {question.difficulty}
           </span>
           <Button
