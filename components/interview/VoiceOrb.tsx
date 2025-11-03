@@ -28,13 +28,13 @@ export function VoiceOrb({ state, size = 'lg' }: VoiceOrbProps) {
     lg: 'w-48 h-48',
   };
 
-  // Design system colors - matching design.json voiceOrb states
+  // Design system colors - matching landing page blue palette
   const stateColors = {
-    idle: 'bg-gradient-to-[135deg] from-cyan-500/20 to-blue-600/40',
-    ready: 'bg-gradient-to-[135deg] from-cyan-500/20 to-blue-600/40',
-    speaking: 'bg-gradient-to-[135deg] from-cyan-500 to-cyan-600',
-    listening: 'bg-gradient-to-[135deg] from-blue-500 to-blue-600',
-    thinking: 'bg-gradient-to-[135deg] from-slate-400 to-slate-500',
+    idle: 'bg-gradient-to-[135deg] from-cyan-400/30 to-blue-500/40',
+    ready: 'bg-gradient-to-[135deg] from-cyan-500 to-blue-600', // Active blue
+    speaking: 'bg-gradient-to-[135deg] from-cyan-600 to-blue-700', // Darker blue when speaking
+    listening: 'bg-gradient-to-[135deg] from-cyan-400 to-blue-500', // Lighter blue when listening
+    thinking: 'bg-gradient-to-[135deg] from-cyan-500/60 to-blue-600/60', // Semi-transparent blue
   };
 
   return (

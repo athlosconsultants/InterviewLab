@@ -170,7 +170,13 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
           }
 
           // Find the current unanswered question
-          const unansweredIndex = result.data.turns?.findIndex(
+          // Only count actual interview questions, not small talk/confirmation
+          const actualQuestions =
+            result.data.turns?.filter(
+              (t: Turn) =>
+                (t as any).turn_type === 'question' || !(t as any).turn_type
+            ) || [];
+          const unansweredIndex = actualQuestions.findIndex(
             (t: Turn) => !t.answer_text
           );
           if (unansweredIndex !== undefined && unansweredIndex >= 0) {
@@ -417,7 +423,14 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
             // Add new turn to state
             setTurns((prev) => [...prev, newTurn]);
             setCurrentTurnId(nextData.turnId);
-            setQuestionNumber((prev) => prev + 1);
+            // Only increment question number for actual interview questions, not small talk/bridges
+            // Check if this is an actual interview question
+            if (
+              !(newTurn as any).turn_type ||
+              (newTurn as any).turn_type === 'question'
+            ) {
+              setQuestionNumber((prev) => prev + 1);
+            }
 
             // T91: Update stage information
             if (nextData.currentStage) {
@@ -426,9 +439,13 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
               );
               setCurrentStage(nextData.currentStage);
             }
-            if (nextData.stagesPlanned)
+            if (nextData.stagesPlanned) {
               setStagesPlanned(nextData.stagesPlanned);
-            if (nextData.stageName) setStageName(nextData.stageName);
+            }
+            // Always update stage name when provided
+            if (nextData.stageName) {
+              setStageName(nextData.stageName);
+            }
 
             // T113: Ensure smooth transition with dynamic timing (max 1.5s total)
             if (remainingTime > 0) {
@@ -754,35 +771,35 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
               })()}
 
               <form onSubmit={handleSubmit} className="space-y-4">
-                {/* Answer Mode Toggle */}
-                <div className="flex items-center gap-2 mb-4">
+                {/* Answer Mode Toggle - Single Dynamic Button */}
+                <div className="flex items-center justify-start mb-4">
                   <Button
                     type="button"
-                    variant={answerMode === 'text' ? 'default' : 'outline'}
+                    variant="outline"
                     size="sm"
                     onClick={() => {
-                      setAnswerMode('text');
-                      setAudioBlob(null);
+                      if (answerMode === 'text') {
+                        setAnswerMode('audio');
+                        setAnswer('');
+                      } else {
+                        setAnswerMode('text');
+                        setAudioBlob(null);
+                      }
                     }}
                     disabled={isSubmitting}
                     className="gap-2"
                   >
-                    <Type className="h-4 w-4" />
-                    Text
-                  </Button>
-                  <Button
-                    type="button"
-                    variant={answerMode === 'audio' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => {
-                      setAnswerMode('audio');
-                      setAnswer('');
-                    }}
-                    disabled={isSubmitting}
-                    className="gap-2"
-                  >
-                    <Mic className="h-4 w-4" />
-                    Voice
+                    {answerMode === 'text' ? (
+                      <>
+                        <Mic className="h-4 w-4" />
+                        Speak Instead
+                      </>
+                    ) : (
+                      <>
+                        <Type className="h-4 w-4" />
+                        Type Instead
+                      </>
+                    )}
                   </Button>
                 </div>
 
@@ -805,6 +822,8 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
                       <Button
                         type="submit"
                         disabled={isSubmitting || !answer.trim()}
+                        size="lg"
+                        className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-md hover:shadow-lg transition-all"
                       >
                         {isSubmitting ? (
                           <>
@@ -833,6 +852,8 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
                       <Button
                         type="submit"
                         disabled={isSubmitting || !audioBlob}
+                        size="lg"
+                        className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-md hover:shadow-lg transition-all"
                       >
                         {isSubmitting ? (
                           <>
