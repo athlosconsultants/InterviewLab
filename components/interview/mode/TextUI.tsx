@@ -39,7 +39,7 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
   const [timerSec, setTimerSec] = useState(90);
   const [answerMode, setAnswerMode] = useState<'text' | 'audio'>('text');
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
-  const [accessibilityMode, setAccessibilityMode] = useState(false);
+  const [accessibilityMode, setAccessibilityMode] = useState(true); // Always show questions
   const [introText, setIntroText] = useState<string | null>(null);
   const [showWelcomeScreen, setShowWelcomeScreen] = useState(false); // T124: Welcome screen state
 
@@ -641,12 +641,12 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
                       {/* T93: Countdown Display */}
                       {countdown !== null && (
                         <div className="flex justify-start">
-                          <div className="max-w-[85%] rounded-lg bg-gradient-to-r from-primary/20 to-primary/10 p-8 border-2 border-primary/30">
+                          <div className="max-w-[85%] rounded-xl bg-gradient-to-br from-cyan-50 to-blue-50 p-8 border-2 border-cyan-200 shadow-md">
                             <div className="flex flex-col items-center justify-center">
-                              <p className="text-sm font-medium text-muted-foreground mb-2">
+                              <p className="text-sm font-semibold text-slate-700 mb-3">
                                 Question {index + 1} starting in...
                               </p>
-                              <div className="text-6xl font-bold text-primary animate-pulse">
+                              <div className="text-6xl font-bold bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent animate-pulse">
                                 {countdown}
                               </div>
                             </div>
@@ -687,27 +687,27 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
               );
             })()}
 
-          {/* T120: Analyzing Answer Transition - Apple-style minimalist animation */}
+          {/* T120: Analyzing Answer Transition - Landing page color palette */}
           {isAnalyzing && (
             <div className="flex justify-center py-12 animate-in fade-in duration-500">
-              <div className="flex flex-col items-center space-y-3">
-                {/* Animated dots */}
+              <div className="flex flex-col items-center space-y-4">
+                {/* Animated dots with cyan-blue gradient */}
                 <div className="flex items-center space-x-1.5">
                   <div
-                    className="h-2 w-2 rounded-full bg-gray-400 animate-pulse-slow"
+                    className="h-2.5 w-2.5 rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 animate-pulse-slow"
                     style={{ animationDelay: '0ms' }}
                   />
                   <div
-                    className="h-2 w-2 rounded-full bg-gray-400 animate-pulse-slow"
+                    className="h-2.5 w-2.5 rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 animate-pulse-slow"
                     style={{ animationDelay: '150ms' }}
                   />
                   <div
-                    className="h-2 w-2 rounded-full bg-gray-400 animate-pulse-slow"
+                    className="h-2.5 w-2.5 rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 animate-pulse-slow"
                     style={{ animationDelay: '300ms' }}
                   />
                 </div>
-                {/* Subtle text */}
-                <span className="text-sm font-light text-gray-500">
+                {/* Styled text matching landing page */}
+                <span className="text-sm font-semibold text-slate-700">
                   Thinking
                 </span>
               </div>
