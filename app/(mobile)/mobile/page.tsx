@@ -16,6 +16,7 @@ import { Footer } from '@/components/Footer';
 import { createClient } from '@/lib/supabase-client';
 import { QuickTryWidget } from '@/components/landing/QuickTryWidget';
 import { PrefetchLinks } from '@/components/PrefetchLinks';
+import { PremiumLandingView } from '@/components/landing/PremiumLandingView';
 
 /**
  * Mobile Landing Page - Updated with Rory's feedback
@@ -24,6 +25,12 @@ import { PrefetchLinks } from '@/components/PrefetchLinks';
 export default function MobileLandingPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasActivePass, setHasActivePass] = useState(false);
+  const [passDetails, setPassDetails] = useState<{
+    tier: string;
+    expiresAt: string | null;
+    isSuperAdmin: boolean;
+  } | null>(null);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -32,12 +39,48 @@ export default function MobileLandingPage() {
         data: { user },
       } = await supabase.auth.getUser();
       setIsAuthenticated(!!user);
+
+      // Check for premium pass if user is authenticated
+      if (user) {
+        try {
+          const response = await fetch('/api/user/entitlement');
+          if (response.ok) {
+            const data = await response.json();
+            if (data.isActive && data.tier) {
+              setHasActivePass(true);
+              setPassDetails({
+                tier: data.tier,
+                expiresAt: data.expiresAt,
+                isSuperAdmin: data.isSuperAdmin || false,
+              });
+            }
+          }
+        } catch (error) {
+          console.error('Failed to check entitlement:', error);
+        }
+      }
+
       setIsLoading(false);
     };
     checkAuth();
   }, []);
 
   const ctaHref = isAuthenticated ? '/assessment/setup' : '/sign-in';
+
+  // Show premium landing view for users with active passes
+  if (!isLoading && hasActivePass && passDetails) {
+    return (
+      <>
+        <PrefetchLinks />
+        <PremiumLandingView
+          tier={passDetails.tier}
+          expiresAt={passDetails.expiresAt}
+          isSuperAdmin={passDetails.isSuperAdmin}
+        />
+        <Footer />
+      </>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white via-slate-50 to-white pb-24">

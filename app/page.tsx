@@ -23,6 +23,7 @@ import { Metadata } from 'next';
 import { createClient } from '@/lib/supabase-server';
 import { QuickTryWidget } from '@/components/landing/QuickTryWidget';
 import { PrefetchLinks } from '@/components/PrefetchLinks';
+import { PremiumLandingView } from '@/components/landing/PremiumLandingView';
 
 export const metadata: Metadata = {
   title:
@@ -54,6 +55,8 @@ export default async function Home() {
 
   let hasActivePass = false;
   let passType: string | null = null;
+  let expiresAt: string | null = null;
+  let isSuperAdmin = false;
 
   if (user) {
     // Check for active time-based pass (not credit-based)
@@ -65,8 +68,27 @@ export default async function Home() {
       const entitlement = await getUserEntitlements(user.id);
       hasActivePass = true;
       passType = entitlement.tier;
+      expiresAt = entitlement.expiresAt;
+      isSuperAdmin = entitlement.isSuperAdmin || false;
     }
   }
+
+  // If user has active pass, show premium landing view
+  if (hasActivePass && passType) {
+    return (
+      <>
+        <PrefetchLinks />
+        <PremiumLandingView
+          tier={passType}
+          expiresAt={expiresAt}
+          isSuperAdmin={isSuperAdmin}
+        />
+        <Footer />
+      </>
+    );
+  }
+
+  // Default landing page for non-premium users
   return (
     <main className="min-h-screen bg-gradient-to-b from-cyan-50 via-white via-slate-50 to-white">
       {/* Prefetch critical pages for faster navigation */}
