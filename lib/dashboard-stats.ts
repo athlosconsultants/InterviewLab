@@ -1,6 +1,12 @@
 import { createClient } from '@/lib/supabase-server';
 import { startOfDay, differenceInDays } from 'date-fns';
 
+export interface CategoryScore {
+  name: string;
+  score: number;
+  trend: 'improving' | 'declining' | 'stable';
+}
+
 export interface DashboardStats {
   totalInterviews: number;
   averageScore: number;
@@ -20,6 +26,12 @@ export interface DashboardStats {
     progress: number;
     remainingMinutes: number;
   } | null;
+  categoryScores: {
+    communication: CategoryScore;
+    problemSolving: CategoryScore;
+    leadership: CategoryScore;
+  };
+  practicedToday: boolean;
 }
 
 /**
@@ -50,6 +62,12 @@ export async function calculateDashboardStats(
       totalPracticeTimeHours: 0,
       recentSessions: [],
       incompleteSession: null,
+      categoryScores: {
+        communication: { name: 'Communication', score: 0, trend: 'stable' },
+        problemSolving: { name: 'Problem-Solving', score: 0, trend: 'stable' },
+        leadership: { name: 'Leadership', score: 0, trend: 'stable' },
+      },
+      practicedToday: false,
     };
   }
 
@@ -66,6 +84,17 @@ export async function calculateDashboardStats(
   }> = [];
   let incompleteSession: any = null;
 
+  // Category scores tracking
+  const categoryScoresData: {
+    communication: number[];
+    problemSolving: number[];
+    leadership: number[];
+  } = {
+    communication: [],
+    problemSolving: [],
+    leadership: [],
+  };
+
   // Process each session
   for (const session of sessions || []) {
     if (session.status === 'feedback') {
@@ -77,9 +106,29 @@ export async function calculateDashboardStats(
         .single();
 
       if (report?.feedback) {
-        const overallScore = (report.feedback as any).overall?.score || 0;
+        const feedback = report.feedback as any;
+        const overallScore = feedback.overall?.score || 0;
         totalScore += overallScore;
         totalInterviews++;
+
+        // Extract category scores
+        if (feedback.dimensions) {
+          if (feedback.dimensions.communication) {
+            categoryScoresData.communication.push(
+              feedback.dimensions.communication.score || 0
+            );
+          }
+          if (feedback.dimensions.technical_competency) {
+            categoryScoresData.problemSolving.push(
+              feedback.dimensions.technical_competency.score || 0
+            );
+          }
+          if (feedback.dimensions.leadership_impact) {
+            categoryScoresData.leadership.push(
+              feedback.dimensions.leadership_impact.score || 0
+            );
+          }
+        }
 
         completedSessionsWithScores.push({
           id: session.id,
@@ -204,6 +253,63 @@ export async function calculateDashboardStats(
     .slice(0, 5)
     .map(({ date, ...rest }) => rest);
 
+  // Calculate category scores and trends
+  const calculateCategoryStats = (
+    scores: number[],
+    name: string
+  ): CategoryScore => {
+    if (scores.length === 0) {
+      return { name, score: 0, trend: 'stable' };
+    }
+
+    const avgScore = parseFloat(
+      (scores.reduce((sum, s) => sum + s, 0) / scores.length / 10).toFixed(1)
+    );
+
+    // Determine trend (compare recent half vs older half)
+    let trend: 'improving' | 'declining' | 'stable' = 'stable';
+    if (scores.length >= 4) {
+      const midpoint = Math.floor(scores.length / 2);
+      const recentScores = scores.slice(0, midpoint);
+      const olderScores = scores.slice(midpoint);
+
+      const recentAvg =
+        recentScores.reduce((sum, s) => sum + s, 0) / recentScores.length;
+      const olderAvg =
+        olderScores.reduce((sum, s) => sum + s, 0) / olderScores.length;
+
+      const diff = recentAvg - olderAvg;
+      if (diff > 5) {
+        trend = 'improving';
+      } else if (diff < -5) {
+        trend = 'declining';
+      }
+    }
+
+    return { name, score: avgScore, trend };
+  };
+
+  const categoryScores = {
+    communication: calculateCategoryStats(
+      categoryScoresData.communication,
+      'Communication'
+    ),
+    problemSolving: calculateCategoryStats(
+      categoryScoresData.problemSolving,
+      'Problem-Solving'
+    ),
+    leadership: calculateCategoryStats(
+      categoryScoresData.leadership,
+      'Leadership'
+    ),
+  };
+
+  // Check if practiced today
+  const today = startOfDay(new Date());
+  const practicedToday = completedSessionsWithScores.some(
+    (s) => startOfDay(s.date).getTime() === today.getTime()
+  );
+
   return {
     totalInterviews,
     averageScore,
@@ -211,5 +317,7 @@ export async function calculateDashboardStats(
     totalPracticeTimeHours,
     recentSessions,
     incompleteSession,
+    categoryScores,
+    practicedToday,
   };
 }

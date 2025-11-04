@@ -17,6 +17,10 @@ import {
 import { useEffect, useState } from 'react';
 import { DashboardStats } from '@/lib/dashboard-stats';
 import { formatDistanceToNow } from 'date-fns';
+import { PerformanceCard } from '@/components/dashboard/PerformanceCard';
+import { RecommendedPracticeCard } from '@/components/dashboard/RecommendedPracticeCard';
+import { AchievementSection } from '@/components/dashboard/AchievementSection';
+import { SubscriptionCard } from '@/components/dashboard/SubscriptionCard';
 
 interface PremiumLandingViewProps {
   tier: string;
@@ -330,6 +334,28 @@ export function PremiumLandingView({
             </div>
           </section>
         )}
+
+        {/* Phase 2: Engagement Features */}
+        {stats.totalInterviews > 0 && (
+          <>
+            {/* Performance Breakdown */}
+            <PerformanceCard categoryScores={stats.categoryScores} />
+
+            {/* Recommended Practice */}
+            <RecommendedPracticeCard stats={stats} />
+
+            {/* Achievements & Streak */}
+            <AchievementSection stats={stats} />
+          </>
+        )}
+
+        {/* Subscription Management */}
+        <SubscriptionCard
+          tier={tier}
+          expiresAt={expiresAt}
+          isSuperAdmin={isSuperAdmin}
+          totalInterviews={stats.totalInterviews}
+        />
       </div>
     </main>
   );
