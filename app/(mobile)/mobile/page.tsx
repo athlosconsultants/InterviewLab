@@ -17,6 +17,7 @@ import { createClient } from '@/lib/supabase-client';
 import { QuickTryWidget } from '@/components/landing/QuickTryWidget';
 import { PrefetchLinks } from '@/components/PrefetchLinks';
 import { PremiumLandingView } from '@/components/landing/PremiumLandingView';
+import { DashboardStats } from '@/lib/dashboard-stats';
 
 /**
  * Mobile Landing Page - Updated with Rory's feedback
@@ -30,6 +31,8 @@ export default function MobileLandingPage() {
     tier: string;
     expiresAt: string | null;
     isSuperAdmin: boolean;
+    stats: DashboardStats;
+    userName: string;
   } | null>(null);
 
   useEffect(() => {
@@ -40,18 +43,20 @@ export default function MobileLandingPage() {
       } = await supabase.auth.getUser();
       setIsAuthenticated(!!user);
 
-      // Check for premium pass if user is authenticated
+      // Check for premium pass and fetch dashboard data if user is authenticated
       if (user) {
         try {
-          const response = await fetch('/api/user/entitlement');
+          const response = await fetch('/api/user/dashboard-data');
           if (response.ok) {
             const data = await response.json();
-            if (data.isActive && data.tier) {
+            if (data.hasActivePass) {
               setHasActivePass(true);
               setPassDetails({
                 tier: data.tier,
                 expiresAt: data.expiresAt,
                 isSuperAdmin: data.isSuperAdmin || false,
+                stats: data.stats,
+                userName: data.userName,
               });
             }
           }
@@ -67,7 +72,7 @@ export default function MobileLandingPage() {
 
   const ctaHref = isAuthenticated ? '/assessment/setup' : '/sign-in';
 
-  // Show premium landing view for users with active passes
+  // Show premium dashboard for users with active passes
   if (!isLoading && hasActivePass && passDetails) {
     return (
       <>
@@ -76,6 +81,8 @@ export default function MobileLandingPage() {
           tier={passDetails.tier}
           expiresAt={passDetails.expiresAt}
           isSuperAdmin={passDetails.isSuperAdmin}
+          stats={passDetails.stats}
+          userName={passDetails.userName}
         />
         <Footer />
       </>

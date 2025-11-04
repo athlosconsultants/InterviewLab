@@ -2,24 +2,41 @@
 
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { Clock, Zap, TrendingUp, Target, ArrowRight } from 'lucide-react';
+import {
+  Clock,
+  Zap,
+  TrendingUp,
+  Target,
+  ArrowRight,
+  BarChart3,
+  Star,
+  Flame,
+  PlayCircle,
+  ChevronRight,
+} from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { DashboardStats } from '@/lib/dashboard-stats';
+import { formatDistanceToNow } from 'date-fns';
 
 interface PremiumLandingViewProps {
   tier: string;
   expiresAt: string | null;
   isSuperAdmin?: boolean;
+  stats: DashboardStats;
+  userName: string;
 }
 
 /**
- * Premium user landing view
- * Shows time remaining, motivational prompts, and direct access to premium interviews
+ * Premium user dashboard
+ * Shows personalized stats, quick access to interviews, recent sessions, and subscription status
  * Replaces the default landing page for logged-in premium users
  */
 export function PremiumLandingView({
   tier,
   expiresAt,
   isSuperAdmin = false,
+  stats,
+  userName,
 }: PremiumLandingViewProps) {
   const [timeRemaining, setTimeRemaining] = useState<string>('');
   const [mounted, setMounted] = useState(false);
@@ -76,165 +93,243 @@ export function PremiumLandingView({
     }
   };
 
-  // Motivational messages that rotate
-  const motivationalMessages = [
-    'Every practice session brings you closer to your dream job.',
-    "Confidence comes from preparation. You're doing the work.",
-    'The more you practice, the more natural it feels.',
-    "You're investing in your future. Keep going.",
-    "Great answers don't happen by accident—they're practiced.",
-  ];
-
-  const randomMessage = mounted
-    ? motivationalMessages[
-        Math.floor(Math.random() * motivationalMessages.length)
-      ]
-    : motivationalMessages[0];
+  // Time-aware greeting
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour >= 5 && hour < 12) return 'Good morning';
+    if (hour >= 12 && hour < 17) return 'Good afternoon';
+    return 'Good evening';
+  };
 
   if (!mounted) {
     return null; // Prevent hydration mismatch
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-cyan-50 via-white to-slate-50">
-      <div className="mx-auto max-w-5xl px-4 md:px-6 py-10 md:py-16 space-y-8 md:space-y-12">
-        {/* Welcome Header */}
-        <div className="text-center space-y-4">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-cyan-500/10 to-blue-600/10 border border-cyan-200">
-            <Zap className="h-4 w-4 text-cyan-600" />
-            <span className="text-sm font-semibold text-cyan-700">
-              {getTierDisplay()} Active
-            </span>
-          </div>
-          <h1 className="text-3xl md:text-5xl font-bold bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">
-            Welcome Back!
-          </h1>
-          <p className="text-lg md:text-xl text-slate-600 max-w-2xl mx-auto">
-            Your practice environment is ready. Let&apos;s make today&apos;s
-            session count.
-          </p>
-        </div>
-
-        {/* Time Remaining Card (if not lifetime/super admin) */}
-        {!isSuperAdmin && expiresAt && (
-          <div className="rounded-xl border-2 border-cyan-200 bg-gradient-to-br from-cyan-50 to-blue-50 p-6 md:p-8">
-            <div className="flex items-center justify-between flex-wrap gap-4">
-              <div className="flex items-center gap-3">
-                <div className="h-12 w-12 rounded-full bg-white flex items-center justify-center shadow-sm">
-                  <Clock className="h-6 w-6 text-cyan-600" />
-                </div>
-                <div>
-                  <p className="text-sm text-slate-600">
-                    Time Remaining on Your Pass
-                  </p>
-                  <p className="text-2xl md:text-3xl font-bold text-slate-900">
-                    {timeRemaining}
-                  </p>
-                </div>
-              </div>
-              <Button
-                asChild
-                variant="outline"
-                size="sm"
-                className="border-cyan-600 text-cyan-700 hover:bg-cyan-50"
+    <main className="min-h-screen bg-[#F5F9FA]">
+      <div className="mx-auto max-w-6xl px-4 md:px-6 py-8 md:py-12 space-y-8 md:space-y-10">
+        {/* Header Section with Greeting and Subscription Badge */}
+        <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-slate-200">
+          <div>
+            <h1 className="text-3xl md:text-4xl font-bold text-[#1E293B] mb-2">
+              {getGreeting()}, {userName}! 🎯
+            </h1>
+            <div className="flex items-center gap-2 mt-2">
+              <span
+                className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold text-white ${
+                  timeRemaining === 'Expired' ? 'bg-red-500' : 'bg-green-500'
+                }`}
               >
-                <Link href="/pricing">Extend Access</Link>
-              </Button>
+                <Zap className="h-3 w-3 mr-1" />
+                {getTierDisplay()}{' '}
+                {timeRemaining === 'Expired' ? 'Expired' : 'Active'}
+              </span>
+              {!isSuperAdmin && tier !== 'lifetime' && timeRemaining && (
+                <span className="text-sm text-[#64748B]">
+                  {timeRemaining} left
+                </span>
+              )}
             </div>
           </div>
-        )}
+        </header>
 
-        {/* Motivational Quote */}
-        <div className="text-center py-6">
-          <p className="text-lg md:text-xl italic text-slate-700 max-w-3xl mx-auto">
-            &ldquo;{randomMessage}&rdquo;
-          </p>
-        </div>
+        {/* Quick Stats Cards - 4 columns */}
+        <section className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+          {/* Total Interviews */}
+          <div className="flex flex-col items-center justify-center p-4 md:p-6 bg-white rounded-xl shadow-sm border border-slate-200 text-center">
+            <div className="flex items-center justify-center w-12 h-12 rounded-full bg-cyan-500 mb-3">
+              <BarChart3 className="h-6 w-6 text-white" />
+            </div>
+            <p className="text-3xl font-bold text-[#1E293B] mb-1">
+              {stats.totalInterviews}
+            </p>
+            <p className="text-sm text-[#64748B]">Interviews Completed</p>
+          </div>
 
-        {/* Primary CTA - Start Premium Interview */}
-        <div className="rounded-2xl border-2 border-slate-200 bg-white p-8 md:p-10 shadow-lg text-center space-y-6">
-          <div className="space-y-3">
-            <h2 className="text-2xl md:text-3xl font-bold text-slate-900">
+          {/* Average Score */}
+          <div className="flex flex-col items-center justify-center p-4 md:p-6 bg-white rounded-xl shadow-sm border border-slate-200 text-center">
+            <div className="flex items-center justify-center w-12 h-12 rounded-full bg-green-500 mb-3">
+              <Star className="h-6 w-6 text-white" />
+            </div>
+            <p className="text-3xl font-bold text-[#1E293B] mb-1">
+              {stats.averageScore}/10
+            </p>
+            <p className="text-sm text-[#64748B]">Average Score</p>
+          </div>
+
+          {/* Practice Streak */}
+          <div className="flex flex-col items-center justify-center p-4 md:p-6 bg-white rounded-xl shadow-sm border border-slate-200 text-center">
+            <div className="flex items-center justify-center w-12 h-12 rounded-full bg-orange-500 mb-3">
+              <Flame className="h-6 w-6 text-white" />
+            </div>
+            <p className="text-3xl font-bold text-[#1E293B] mb-1">
+              {stats.practiceStreak}
+            </p>
+            <p className="text-sm text-[#64748B]">Day Streak</p>
+          </div>
+
+          {/* Total Practice Time */}
+          <div className="flex flex-col items-center justify-center p-4 md:p-6 bg-white rounded-xl shadow-sm border border-slate-200 text-center">
+            <div className="flex items-center justify-center w-12 h-12 rounded-full bg-blue-500 mb-3">
+              <Clock className="h-6 w-6 text-white" />
+            </div>
+            <p className="text-3xl font-bold text-[#1E293B] mb-1">
+              {stats.totalPracticeTimeHours}h
+            </p>
+            <p className="text-sm text-[#64748B]">Practice Time</p>
+          </div>
+        </section>
+
+        {/* Primary CTA: Start Interview Section */}
+        <section className="bg-white rounded-xl shadow-lg border border-slate-200 p-6 md:p-8 space-y-6">
+          {/* Continue Incomplete Interview (if exists) */}
+          {stats.incompleteSession && (
+            <div className="pb-6 border-b border-slate-200 space-y-4">
+              <h3 className="text-xl font-semibold text-[#1E293B]">
+                Continue where you left off?
+              </h3>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 bg-[#F5F9FA] p-4 rounded-lg border border-slate-200">
+                <div className="flex-1">
+                  <h4 className="font-medium text-[#1E293B]">
+                    {stats.incompleteSession.role} at{' '}
+                    {stats.incompleteSession.company}
+                  </h4>
+                  <div className="flex items-center gap-2 text-sm text-[#64748B] mt-1">
+                    <span>{stats.incompleteSession.progress}% complete</span>
+                    <span>•</span>
+                    <span>
+                      ~{stats.incompleteSession.remainingMinutes} min remaining
+                    </span>
+                  </div>
+                  {/* Simple progress bar */}
+                  <div className="mt-2 h-2 w-full bg-slate-200 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-blue-500 transition-all"
+                      style={{ width: `${stats.incompleteSession.progress}%` }}
+                    />
+                  </div>
+                </div>
+                <div className="flex gap-3 flex-shrink-0">
+                  <Button
+                    asChild
+                    size="sm"
+                    className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white"
+                  >
+                    <Link href={`/interview/${stats.incompleteSession.id}`}>
+                      Continue →
+                    </Link>
+                  </Button>
+                  <Button variant="ghost" size="sm" asChild>
+                    <Link href="/setup">Start Fresh</Link>
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* New Interview Section */}
+          <div className="space-y-4">
+            <h3 className="text-xl font-semibold text-[#1E293B]">
               Ready to Practice?
-            </h2>
-            <p className="text-base md:text-lg text-slate-600 max-w-2xl mx-auto">
+            </h3>
+            <p className="text-[#64748B] leading-relaxed">
               Start a personalized interview session tailored to your experience
               and target role.
             </p>
-          </div>
-          <Button
-            asChild
-            size="lg"
-            className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-lg hover:shadow-xl text-base md:text-lg px-8 py-6 h-auto"
-          >
-            <Link href="/setup">
-              <Target className="mr-2 h-5 w-5" />
-              Start Premium Interview
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Link>
-          </Button>
-          <p className="text-sm text-slate-500 mt-4">
-            <span className="hidden md:inline">
-              Full interview with unlimited questions, voice mode, and detailed
-              feedback
-            </span>
-            <span className="md:hidden">
+
+            {/* Quick Launch Options */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Button
+                asChild
+                variant="outline"
+                className="justify-start p-4 h-auto text-left"
+              >
+                <Link href="/assessment/setup">
+                  <Zap className="h-5 w-5 mr-3 text-cyan-500 flex-shrink-0" />
+                  <div>
+                    <p className="font-medium text-[#1E293B]">
+                      Quick 3-question warmup
+                    </p>
+                    <p className="text-sm text-[#64748B]">~5 min</p>
+                  </div>
+                  <ChevronRight className="h-4 w-4 ml-auto text-[#64748B]" />
+                </Link>
+              </Button>
+              <Button
+                asChild
+                variant="outline"
+                className="justify-start p-4 h-auto text-left"
+              >
+                <Link href="/setup">
+                  <Target className="h-5 w-5 mr-3 text-green-500 flex-shrink-0" />
+                  <div>
+                    <p className="font-medium text-[#1E293B]">
+                      Full interview session
+                    </p>
+                    <p className="text-sm text-[#64748B]">~15-20 min</p>
+                  </div>
+                  <ChevronRight className="h-4 w-4 ml-auto text-[#64748B]" />
+                </Link>
+              </Button>
+            </div>
+
+            {/* Main CTA Button */}
+            <Button
+              asChild
+              size="lg"
+              className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-md hover:shadow-lg transition-all mt-4"
+            >
+              <Link href="/setup">
+                <PlayCircle className="h-5 w-5 mr-2" />
+                Start Premium Interview →
+              </Link>
+            </Button>
+
+            <p className="text-sm text-[#64748B] text-center mt-4">
               Unlimited questions • Voice mode • Detailed feedback
-            </span>
-          </p>
-        </div>
-
-        {/* Quick Stats / Features */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
-          <div className="rounded-lg border border-slate-200 bg-white p-6 text-center">
-            <div className="h-12 w-12 rounded-full bg-cyan-100 mx-auto mb-3 flex items-center justify-center">
-              <Zap className="h-6 w-6 text-cyan-600" />
-            </div>
-            <h3 className="font-semibold text-slate-900 mb-1">
-              Unlimited Practice
-            </h3>
-            <p className="text-sm text-slate-600">
-              As many sessions as you need to feel confident
             </p>
           </div>
+        </section>
 
-          <div className="rounded-lg border border-slate-200 bg-white p-6 text-center">
-            <div className="h-12 w-12 rounded-full bg-blue-100 mx-auto mb-3 flex items-center justify-center">
-              <TrendingUp className="h-6 w-6 text-blue-600" />
+        {/* Recent Interview Sessions */}
+        {stats.recentSessions.length > 0 && (
+          <section className="bg-white rounded-xl shadow-lg border border-slate-200 p-6 md:p-8">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-semibold text-[#1E293B]">
+                Recent Practice Sessions
+              </h3>
             </div>
-            <h3 className="font-semibold text-slate-900 mb-1">
-              Adaptive Difficulty
-            </h3>
-            <p className="text-sm text-slate-600">
-              Questions get harder as you improve
-            </p>
-          </div>
-
-          <div className="rounded-lg border border-slate-200 bg-white p-6 text-center">
-            <div className="h-12 w-12 rounded-full bg-green-100 mx-auto mb-3 flex items-center justify-center">
-              <Target className="h-6 w-6 text-green-600" />
+            <div className="space-y-4">
+              {stats.recentSessions.map((session) => (
+                <div
+                  key={session.id}
+                  className="flex items-center justify-between p-4 bg-[#F5F9FA] rounded-lg border border-slate-200"
+                >
+                  <div className="flex-1">
+                    <h4 className="font-medium text-[#1E293B]">
+                      {session.role} @ {session.company}
+                    </h4>
+                    <div className="flex items-center gap-2 text-sm text-[#64748B] mt-1">
+                      <span>
+                        {formatDistanceToNow(new Date(session.completedAt), {
+                          addSuffix: true,
+                        })}
+                      </span>
+                      <span>•</span>
+                      <span className="flex items-center gap-1">
+                        <Star className="h-3 w-3" />
+                        {session.overallScore}/10
+                      </span>
+                    </div>
+                  </div>
+                  <Button variant="ghost" size="sm" asChild>
+                    <Link href={`/report/${session.id}`}>View Details →</Link>
+                  </Button>
+                </div>
+              ))}
             </div>
-            <h3 className="font-semibold text-slate-900 mb-1">
-              Detailed Feedback
-            </h3>
-            <p className="text-sm text-slate-600">
-              Know exactly what to improve after each answer
-            </p>
-          </div>
-        </div>
-
-        {/* Secondary Actions */}
-        <div className="flex flex-col sm:flex-row gap-3 justify-center">
-          <Button
-            asChild
-            variant="outline"
-            className="border-slate-300 text-slate-700 hover:bg-slate-50"
-          >
-            <Link href="/assessment/setup">
-              Try Quick 3-Question Assessment
-            </Link>
-          </Button>
-        </div>
+          </section>
+        )}
       </div>
     </main>
   );

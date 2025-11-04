@@ -73,8 +73,12 @@ export default async function Home() {
     }
   }
 
-  // If user has active pass, show premium landing view
-  if (hasActivePass && passType) {
+  // If user has active pass, show premium dashboard
+  if (hasActivePass && passType && user) {
+    const { calculateDashboardStats } = await import('@/lib/dashboard-stats');
+    const stats = await calculateDashboardStats(user.id);
+    const userName = user.email?.split('@')[0] || 'there';
+
     return (
       <>
         <PrefetchLinks />
@@ -82,6 +86,8 @@ export default async function Home() {
           tier={passType}
           expiresAt={expiresAt}
           isSuperAdmin={isSuperAdmin}
+          stats={stats}
+          userName={userName}
         />
         <Footer />
       </>
