@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase-server';
 import { redirect } from 'next/navigation';
 import { generateInterviewFeedback } from '@/lib/scoring';
 import type { InterviewFeedback } from '@/lib/scoring';
-import { ReportView } from '@/components/results/ReportView';
+import { ReportViewRedesigned } from '@/components/results/ReportViewRedesigned';
 
 export default async function ReportPage({
   params,
@@ -130,7 +130,7 @@ export default async function ReportPage({
   }
 
   return (
-    <ReportView
+    <ReportViewRedesigned
       session={session}
       turns={turns}
       feedback={feedback}
