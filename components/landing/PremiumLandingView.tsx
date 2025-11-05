@@ -97,7 +97,7 @@ export function PremiumLandingView({
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-blue-50/30 via-white to-white">
+    <main className="premium-dashboard min-h-screen bg-gradient-to-b from-blue-50/30 via-white to-white">
       <div className="mx-auto max-w-2xl px-6 md:px-8 py-12 md:py-16 flex flex-col min-h-screen justify-between">
         {/* STATUS & WELCOME SECTION (25% of viewport) */}
         <div className="space-y-2">

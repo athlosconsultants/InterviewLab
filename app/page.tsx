@@ -104,7 +104,7 @@ export default async function Home() {
 
   // Default landing page for non-premium users
   return (
-    <main className="min-h-screen bg-gradient-to-b from-cyan-50 via-white via-slate-50 to-white">
+    <main className="free-landing min-h-screen bg-gradient-to-b from-cyan-50 via-white via-slate-50 to-white">
       {/* Prefetch critical pages for faster navigation */}
       <PrefetchLinks />
 
