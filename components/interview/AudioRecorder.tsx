@@ -237,11 +237,12 @@ export function AudioRecorder({
     <div className="space-y-4">
       {/* Recording Controls - Auto-starts, only shows Pause/Resume/Stop */}
       {!audioBlob && isRecording && (
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           {!isPaused ? (
             <Button
               type="button"
-              variant="outline"
+              variant="tertiary"
+              size="sm"
               onClick={pauseRecording}
               disabled={disabled}
               className="gap-2"
@@ -252,7 +253,8 @@ export function AudioRecorder({
           ) : (
             <Button
               type="button"
-              variant="outline"
+              variant="tertiary"
+              size="sm"
               onClick={resumeRecording}
               disabled={disabled}
               className="gap-2"
@@ -264,6 +266,7 @@ export function AudioRecorder({
           <Button
             type="button"
             variant="destructive"
+            size="sm"
             onClick={stopRecording}
             disabled={disabled}
             className="gap-2"
@@ -287,8 +290,8 @@ export function AudioRecorder({
           <div className="flex items-center gap-2 rounded-md border p-3">
             <Button
               type="button"
-              variant="ghost"
-              size="sm"
+              variant="tertiary"
+              size="xs"
               onClick={playRecording}
               className="gap-2"
             >
@@ -309,8 +312,8 @@ export function AudioRecorder({
             </span>
             <Button
               type="button"
-              variant="ghost"
-              size="sm"
+              variant="tertiary"
+              size="xs"
               onClick={resetRecording}
               className="ml-auto"
             >

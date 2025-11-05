@@ -92,8 +92,8 @@ export function QuestionBubble({
             {question.difficulty}
           </span>
           <Button
-            variant="ghost"
-            size="icon"
+            variant="tertiary"
+            size="xs"
             onClick={handlePlayAudio}
             disabled={isLoading}
             className="ml-auto"

@@ -129,7 +129,7 @@ export function RecommendedPracticeCard({
                 <p className="text-xs text-[#94A3B8]">{rec.metadata}</p>
               )}
             </div>
-            <Button variant="ghost" size="sm" asChild className="flex-shrink-0">
+            <Button variant="tertiary" size="sm" asChild className="flex-shrink-0">
               <Link href={rec.href}>{rec.ctaText} →</Link>
             </Button>
           </div>

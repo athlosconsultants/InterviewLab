@@ -22,7 +22,7 @@ export function ReplayButton({
   return (
     <div className="flex items-center gap-2">
       <Button
-        variant="outline"
+        variant="tertiary"
         size="sm"
         onClick={onReplay}
         disabled={disabled || isMaxedOut}

@@ -145,8 +145,8 @@ export function FileDrop({
           </div>
           <Button
             type="button"
-            variant="ghost"
-            size="sm"
+            variant="tertiary"
+            size="xs"
             onClick={handleRemoveFile}
           >
             <X className="h-4 w-4" />

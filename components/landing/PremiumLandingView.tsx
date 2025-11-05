@@ -326,7 +326,7 @@ export function PremiumLandingView({
                       </span>
                     </div>
                   </div>
-                  <Button variant="ghost" size="sm" asChild>
+                  <Button variant="tertiary" size="xs" asChild>
                     <Link href={`/report/${session.id}`}>View Details →</Link>
                   </Button>
                 </div>

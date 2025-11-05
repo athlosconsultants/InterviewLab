@@ -172,8 +172,8 @@ export function FileDropMultiple({
               </div>
               <Button
                 type="button"
-                variant="ghost"
-                size="sm"
+                variant="tertiary"
+                size="xs"
                 onClick={() => handleRemoveFile(index)}
               >
                 <X className="h-4 w-4" />
