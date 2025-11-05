@@ -32,6 +32,7 @@ export function AudioRecorder({
   const audioChunksRef = useRef<Blob[]>([]);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const audioElementRef = useRef<HTMLAudioElement | null>(null);
+  const reRecordTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Auto-start recording on mount (with optional delay)
   // Only auto-start if:
@@ -76,6 +77,9 @@ export function AudioRecorder({
     return () => {
       if (timerRef.current) {
         clearInterval(timerRef.current);
+      }
+      if (reRecordTimeoutRef.current) {
+        clearTimeout(reRecordTimeoutRef.current);
       }
       if (audioUrl) {
         URL.revokeObjectURL(audioUrl);
@@ -254,6 +258,33 @@ export function AudioRecorder({
     setIsPlaying(false);
   };
 
+  // Re-record with 1.5 second delay before restarting
+  const reRecordWithDelay = () => {
+    console.log('[AudioRecorder] Re-record clicked - clearing old recording...');
+    
+    // Clear any existing re-record timeout
+    if (reRecordTimeoutRef.current) {
+      clearTimeout(reRecordTimeoutRef.current);
+      reRecordTimeoutRef.current = null;
+    }
+    
+    // Clean up old recording
+    resetRecording();
+    
+    // Show feedback to user
+    toast.info('Re-recording...', {
+      description: 'Starting in 1.5 seconds',
+    });
+    
+    // Wait 1.5 seconds, then start new recording
+    console.log('[AudioRecorder] Waiting 1.5s before starting new recording...');
+    reRecordTimeoutRef.current = setTimeout(() => {
+      console.log('[AudioRecorder] Delay complete - starting new recording');
+      startRecording();
+      reRecordTimeoutRef.current = null;
+    }, 1500);
+  };
+
   const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -341,7 +372,7 @@ export function AudioRecorder({
               type="button"
               variant="tertiary"
               size="xs"
-              onClick={resetRecording}
+              onClick={reRecordWithDelay}
               className="ml-auto"
             >
               Re-record
