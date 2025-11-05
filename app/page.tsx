@@ -77,7 +77,15 @@ export default async function Home() {
   if (hasActivePass && passType && user) {
     const { calculateDashboardStats } = await import('@/lib/dashboard-stats');
     const stats = await calculateDashboardStats(user.id);
-    const userName = user.email?.split('@')[0] || 'there';
+    
+    // Check if user has uploaded CV
+    const { data: cvDocs } = await supabase
+      .from('documents')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('type', 'cv')
+      .limit(1);
+    const hasCv = cvDocs && cvDocs.length > 0;
 
     return (
       <>
@@ -87,7 +95,7 @@ export default async function Home() {
           expiresAt={expiresAt}
           isSuperAdmin={isSuperAdmin}
           stats={stats}
-          userName={userName}
+          hasCv={hasCv}
         />
         <Footer />
       </>

@@ -32,7 +32,7 @@ export default function MobileLandingPage() {
     expiresAt: string | null;
     isSuperAdmin: boolean;
     stats: DashboardStats;
-    userName: string;
+    hasCv: boolean;
   } | null>(null);
 
   useEffect(() => {
@@ -56,7 +56,7 @@ export default function MobileLandingPage() {
                 expiresAt: data.expiresAt,
                 isSuperAdmin: data.isSuperAdmin || false,
                 stats: data.stats,
-                userName: data.userName,
+                hasCv: data.hasCv,
               });
             }
           }
@@ -82,7 +82,7 @@ export default function MobileLandingPage() {
           expiresAt={passDetails.expiresAt}
           isSuperAdmin={passDetails.isSuperAdmin}
           stats={passDetails.stats}
-          userName={passDetails.userName}
+          hasCv={passDetails.hasCv}
         />
         <Footer />
       </>

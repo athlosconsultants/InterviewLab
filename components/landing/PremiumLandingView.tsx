@@ -2,16 +2,17 @@
 
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { FileText, BarChart3, Settings, HelpCircle, Pencil } from 'lucide-react';
+import { FileText, BarChart3, Pencil } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { DashboardStats } from '@/lib/dashboard-stats';
+import { CvUploadModal } from '@/components/dashboard/CvUploadModal';
 
 interface PremiumLandingViewProps {
   tier: string;
   expiresAt: string | null;
   isSuperAdmin?: boolean;
   stats: DashboardStats;
-  userName: string;
+  hasCv: boolean;
 }
 
 /**
@@ -30,10 +31,11 @@ export function PremiumLandingView({
   expiresAt,
   isSuperAdmin = false,
   stats,
-  userName,
+  hasCv,
 }: PremiumLandingViewProps) {
   const [timeRemaining, setTimeRemaining] = useState<string>('');
   const [mounted, setMounted] = useState(false);
+  const [showCvUpload, setShowCvUpload] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -100,7 +102,7 @@ export function PremiumLandingView({
         {/* STATUS & WELCOME SECTION (25% of viewport) */}
         <div className="space-y-2">
           <h1 className="text-2xl md:text-3xl font-light text-slate-800 tracking-tight">
-            {getGreeting()}, {userName}
+            {getGreeting()}
           </h1>
           <p className="text-xs text-slate-500 font-light tracking-wide">
             {getTierDisplay()}
@@ -169,7 +171,7 @@ export function PremiumLandingView({
               variant="outline"
               className="h-20 font-semibold hover:border-cyan-500 hover:bg-cyan-50/50 transition-colors"
             >
-              <Link href="/report">
+              <Link href="/dashboard/reports">
                 <BarChart3 className="h-5 w-5 mr-2 text-slate-500" />
                 View Reports
                 {stats.recentSessions.length > 0 && (
@@ -188,18 +190,18 @@ export function PremiumLandingView({
           <div className="flex items-center justify-between text-sm">
             <div className="flex items-center gap-2 text-slate-600">
               <FileText className="h-4 w-4" />
-              <span className="text-xs font-light">CV on file ✓</span>
+              <span className="text-xs font-light">
+                {hasCv ? 'CV on file ✓' : 'No CV uploaded'}
+              </span>
             </div>
             <Button
-              asChild
               variant="ghost"
               size="sm"
               className="h-auto py-1 px-2 text-xs text-slate-500 hover:text-slate-700"
+              onClick={() => setShowCvUpload(true)}
             >
-              <Link href="/setup">
-                <Pencil className="h-3 w-3 mr-1" />
-                Update
-              </Link>
+              <Pencil className="h-3 w-3 mr-1" />
+              {hasCv ? 'Update' : 'Upload'}
             </Button>
           </div>
 
@@ -215,6 +217,15 @@ export function PremiumLandingView({
           </div>
         </div>
       </div>
+
+      {/* CV Upload Modal */}
+      {showCvUpload && (
+        <CvUploadModal
+          isOpen={showCvUpload}
+          onClose={() => setShowCvUpload(false)}
+          hasCv={hasCv}
+        />
+      )}
     </main>
   );
 }

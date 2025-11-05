@@ -28,7 +28,15 @@ export async function GET() {
 
   // Calculate dashboard stats
   const stats = await calculateDashboardStats(user.id);
-  const userName = user.email?.split('@')[0] || 'there';
+  
+  // Check if user has uploaded CV
+  const { data: cvDocs } = await supabase
+    .from('documents')
+    .select('id')
+    .eq('user_id', user.id)
+    .eq('type', 'cv')
+    .limit(1);
+  const hasCv = cvDocs && cvDocs.length > 0;
 
   return NextResponse.json({
     hasActivePass: true,
@@ -36,6 +44,6 @@ export async function GET() {
     expiresAt: entitlement.expiresAt,
     isSuperAdmin: entitlement.isSuperAdmin || false,
     stats,
-    userName,
+    hasCv,
   });
 }
