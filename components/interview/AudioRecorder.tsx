@@ -8,11 +8,13 @@ import { toast } from 'sonner';
 interface AudioRecorderProps {
   onRecordingComplete: (audioBlob: Blob) => void;
   disabled?: boolean;
+  delayMs?: number; // Optional delay before auto-starting recording
 }
 
 export function AudioRecorder({
   onRecordingComplete,
   disabled,
+  delayMs = 0,
 }: AudioRecorderProps) {
   const [isRecording, setIsRecording] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -27,13 +29,20 @@ export function AudioRecorder({
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const audioElementRef = useRef<HTMLAudioElement | null>(null);
 
-  // Auto-start recording on mount
+  // Auto-start recording on mount (with optional delay)
   useEffect(() => {
     if (!disabled && !isRecording && !audioBlob) {
-      startRecording();
+      if (delayMs > 0) {
+        const timer = setTimeout(() => {
+          startRecording();
+        }, delayMs);
+        return () => clearTimeout(timer);
+      } else {
+        startRecording();
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [delayMs]);
 
   // Cleanup on unmount
   useEffect(() => {

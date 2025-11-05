@@ -1103,6 +1103,7 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
                       setAudioBlob(blob);
                       setOrbState('idle');
                     }}
+                    delayMs={1500}
                   />
                 ) : (
                   <Textarea
