@@ -27,6 +27,14 @@ export function AudioRecorder({
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const audioElementRef = useRef<HTMLAudioElement | null>(null);
 
+  // Auto-start recording on mount
+  useEffect(() => {
+    if (!disabled && !isRecording && !audioBlob) {
+      startRecording();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {
@@ -218,66 +226,49 @@ export function AudioRecorder({
 
   return (
     <div className="space-y-4">
-      {/* Recording Controls */}
-      {!audioBlob && (
+      {/* Recording Controls - Auto-starts, only shows Pause/Resume/Stop */}
+      {!audioBlob && isRecording && (
         <div className="flex items-center gap-4">
-          {!isRecording ? (
+          {!isPaused ? (
             <Button
               type="button"
               variant="outline"
-              onClick={startRecording}
+              onClick={pauseRecording}
               disabled={disabled}
               className="gap-2"
             >
-              <Mic className="h-4 w-4" />
-              Record
+              <Pause className="h-4 w-4" />
+              Pause
             </Button>
           ) : (
-            <>
-              {!isPaused ? (
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={pauseRecording}
-                  disabled={disabled}
-                  className="gap-2"
-                >
-                  <Pause className="h-4 w-4" />
-                  Pause
-                </Button>
-              ) : (
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={resumeRecording}
-                  disabled={disabled}
-                  className="gap-2"
-                >
-                  <Play className="h-4 w-4" />
-                  Resume
-                </Button>
-              )}
-              <Button
-                type="button"
-                variant="destructive"
-                onClick={stopRecording}
-                disabled={disabled}
-                className="gap-2"
-              >
-                <Square className="h-4 w-4" />
-                Stop
-              </Button>
-            </>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={resumeRecording}
+              disabled={disabled}
+              className="gap-2"
+            >
+              <Play className="h-4 w-4" />
+              Resume
+            </Button>
           )}
+          <Button
+            type="button"
+            variant="destructive"
+            onClick={stopRecording}
+            disabled={disabled}
+            className="gap-2"
+          >
+            <Square className="h-4 w-4" />
+            Stop
+          </Button>
 
-          {isRecording && (
-            <div className="flex items-center gap-2">
-              <div className="h-3 w-3 rounded-full bg-red-500 animate-pulse" />
-              <span className="text-sm font-mono">
-                {formatTime(recordingTime)}
-              </span>
-            </div>
-          )}
+          <div className="flex items-center gap-2 ml-auto">
+            <div className="h-3 w-3 rounded-full bg-red-500 animate-pulse" />
+            <span className="text-sm font-mono">
+              {formatTime(recordingTime)}
+            </span>
+          </div>
         </div>
       )}
 
