@@ -85,7 +85,7 @@ export default async function Home() {
       .eq('user_id', user.id)
       .eq('type', 'cv')
       .limit(1);
-    const hasCv = cvDocs && cvDocs.length > 0;
+    const hasCv = !!(cvDocs && cvDocs.length > 0);
 
     return (
       <>
