@@ -13,12 +13,6 @@ export async function middleware(request: NextRequest) {
     const isMobile = isMobileUserAgent(userAgent);
     const { pathname } = request.nextUrl;
 
-    // Redirect mobile users visiting root to /mobile
-    if (isMobile && pathname === '/') {
-      const redirectUrl = new URL('/mobile', request.url);
-      return NextResponse.redirect(redirectUrl);
-    }
-
     let supabaseResponse = NextResponse.next({
       request,
     });
@@ -60,8 +54,58 @@ export async function middleware(request: NextRequest) {
       data: { user },
     } = await supabase.auth.getUser();
 
+    // T200: Premium user detection and redirect
+    // If user visits root (/ or /mobile), check if they're premium and redirect to /dashboard
+    if (user && (pathname === '/' || pathname === '/mobile')) {
+      try {
+        const { data: passes } = await supabase
+          .from('access_passes')
+          .select('tier, expires_at')
+          .eq('user_id', user.id)
+          .or(`expires_at.gte.${new Date().toISOString()},tier.eq.lifetime`)
+          .limit(1);
+        
+        if (passes && passes.length > 0) {
+          // Premium user - redirect to dashboard (preserves mobile/desktop context)
+          const dashboardUrl = new URL('/dashboard', request.url);
+          if (isMobile) {
+            dashboardUrl.searchParams.set('view', 'mobile');
+          }
+          return NextResponse.redirect(dashboardUrl);
+        }
+      } catch (error) {
+        console.error('[Middleware] Error checking premium status:', error);
+        // Continue to page if check fails
+      }
+    }
+
+    // If non-premium user tries to access dashboard, redirect to home
+    if (pathname.startsWith('/dashboard') && user) {
+      try {
+        const { data: passes } = await supabase
+          .from('access_passes')
+          .select('tier')
+          .eq('user_id', user.id)
+          .or(`expires_at.gte.${new Date().toISOString()},tier.eq.lifetime`)
+          .limit(1);
+        
+        if (!passes || passes.length === 0) {
+          // Not premium - redirect to home
+          return NextResponse.redirect(new URL('/', request.url));
+        }
+      } catch (error) {
+        console.error('[Middleware] Error checking dashboard access:', error);
+      }
+    }
+
+    // Redirect mobile users to /mobile (unless they're premium - already handled above)
+    if (isMobile && pathname === '/' && !user) {
+      const redirectUrl = new URL('/mobile', request.url);
+      return NextResponse.redirect(redirectUrl);
+    }
+
     // Protected routes that require authentication
-    const protectedPaths = ['/setup', '/interview', '/report'];
+    const protectedPaths = ['/setup', '/interview', '/report', '/dashboard'];
     const isProtectedRoute = protectedPaths.some((path) =>
       request.nextUrl.pathname.startsWith(path)
     );
@@ -72,8 +116,23 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(redirectUrl);
     }
 
-    // Redirect to home if authenticated user tries to access sign-in
+    // Redirect to dashboard if authenticated premium user tries to access sign-in
     if (request.nextUrl.pathname.startsWith('/sign-in') && user) {
+      try {
+        const { data: passes } = await supabase
+          .from('access_passes')
+          .select('tier')
+          .eq('user_id', user.id)
+          .or(`expires_at.gte.${new Date().toISOString()},tier.eq.lifetime`)
+          .limit(1);
+        
+        if (passes && passes.length > 0) {
+          return NextResponse.redirect(new URL('/dashboard', request.url));
+        }
+      } catch (error) {
+        console.error('[Middleware] Error checking sign-in redirect:', error);
+      }
+      // Default to home for non-premium users
       const redirectUrl = new URL('/', request.url);
       return NextResponse.redirect(redirectUrl);
     }

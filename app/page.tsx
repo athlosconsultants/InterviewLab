@@ -23,7 +23,6 @@ import { Metadata } from 'next';
 import { createClient } from '@/lib/supabase-server';
 import { QuickTryWidget } from '@/components/landing/QuickTryWidget';
 import { PrefetchLinks } from '@/components/PrefetchLinks';
-import { PremiumLandingView } from '@/components/landing/PremiumLandingView';
 
 export const metadata: Metadata = {
   title:
@@ -46,63 +45,35 @@ export const metadata: Metadata = {
   },
 };
 
+/**
+ * Free Landing Page
+ * Premium users are redirected to /dashboard via middleware
+ * This page only serves free/unauthenticated users
+ */
+export const dynamic = 'force-dynamic';
+
 export default async function Home() {
-  // T102: Check if user is logged in and has active pass
+  // T200: Auth check for CTAs only (premium users redirected via middleware)
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
+  // Check if logged-in user has active pass (for CTA customization only)
   let hasActivePass = false;
   let passType: string | null = null;
-  let expiresAt: string | null = null;
-  let isSuperAdmin = false;
 
   if (user) {
-    // Check for active time-based pass (not credit-based)
-    const { isEntitled, getUserEntitlements } = await import(
-      '@/lib/entitlements'
-    );
+    const { isEntitled, getUserEntitlements } = await import('@/lib/entitlements');
     const entitled = await isEntitled(user.id);
     if (entitled) {
       const entitlement = await getUserEntitlements(user.id);
       hasActivePass = true;
       passType = entitlement.tier;
-      expiresAt = entitlement.expiresAt;
-      isSuperAdmin = entitlement.isSuperAdmin || false;
     }
   }
 
-  // If user has active pass, show premium dashboard
-  if (hasActivePass && passType && user) {
-    const { calculateDashboardStats } = await import('@/lib/dashboard-stats');
-    const stats = await calculateDashboardStats(user.id);
-    
-    // Check if user has uploaded CV
-    const { data: cvDocs } = await supabase
-      .from('documents')
-      .select('id')
-      .eq('user_id', user.id)
-      .eq('type', 'cv')
-      .limit(1);
-    const hasCv = !!(cvDocs && cvDocs.length > 0);
-
-    return (
-      <>
-        <PrefetchLinks />
-        <PremiumLandingView
-          tier={passType}
-          expiresAt={expiresAt}
-          isSuperAdmin={isSuperAdmin}
-          stats={stats}
-          hasCv={hasCv}
-        />
-        <Footer />
-      </>
-    );
-  }
-
-  // Default landing page for non-premium users
+  // Free landing page (premium users never reach here due to middleware redirect)
   return (
     <main className="free-landing min-h-screen bg-gradient-to-b from-cyan-50 via-white via-slate-50 to-white">
       {/* Prefetch critical pages for faster navigation */}
