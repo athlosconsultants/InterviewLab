@@ -551,17 +551,17 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
   }
 
   return (
-    <div className="mx-auto w-full max-w-4xl p-4 space-y-6">
+    <div className="mx-auto w-full max-w-4xl p-3 md:p-4 space-y-4">
       {/* Header */}
-      <div className="border-b pb-4">
+      <div className="border-b pb-2">
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
-            <h1 className="text-2xl font-bold truncate">{jobTitle}</h1>
-            <p className="text-muted-foreground truncate">{company}</p>
+            <h1 className="text-lg font-bold truncate">{jobTitle}</h1>
+            <p className="text-xs text-muted-foreground truncate">{company}</p>
             {/* T123: Removed question counter for greater immersion */}
             {/* T91: Display stage information for multi-stage interviews */}
             {stagesPlanned > 1 && stageName && (
-              <p className="text-sm font-medium text-primary mt-2">
+              <p className="text-xs font-medium text-primary mt-1">
                 Stage {currentStage} of {stagesPlanned}: {stageName}
               </p>
             )}
@@ -618,8 +618,8 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
                     index > 0 &&
                     (isSpecialTurn || accessibilityMode || questionVisible) && (
                       <div className="flex justify-start">
-                        <div className="max-w-[75%] rounded-lg bg-muted/50 p-4 border-l-2 border-primary/40">
-                          <p className="text-sm italic text-muted-foreground leading-relaxed">
+                        <div className="max-w-[75%] rounded-lg bg-muted/50 p-2 border-l-2 border-primary/40">
+                          <p className="text-xs italic text-muted-foreground leading-relaxed">
                             {currentQuestion.bridge_text}
                           </p>
                         </div>
@@ -630,13 +630,13 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
                   {isSpecialTurn ? (
                     <div className="flex justify-start">
                       <div
-                        className={`max-w-[85%] rounded-lg p-5 border-l-4 ${
+                        className={`max-w-[85%] rounded-lg p-3 border-l-4 ${
                           isConfirmation
                             ? 'bg-green-50 dark:bg-green-950/30 border-green-500'
                             : 'bg-amber-50 dark:bg-amber-950/30 border-amber-500'
                         }`}
                       >
-                        <div className="mb-2">
+                        <div className="mb-1">
                           <span
                             className={`text-xs font-semibold uppercase tracking-wide ${
                               isConfirmation
@@ -647,7 +647,7 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
                             {isConfirmation ? 'Ready Check' : 'Warm-up'}
                           </span>
                         </div>
-                        <p className="text-base leading-relaxed text-foreground">
+                        <p className="text-sm leading-relaxed text-foreground">
                           {currentQuestion.question.text}
                         </p>
                       </div>
@@ -658,12 +658,12 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
                       {/* T93: Countdown Display */}
                       {countdown !== null && (
                         <div className="flex justify-start">
-                          <div className="max-w-[85%] rounded-xl bg-gradient-to-br from-cyan-50 to-blue-50 p-8 border-2 border-cyan-200 shadow-md">
+                          <div className="max-w-[85%] rounded-xl bg-gradient-to-br from-cyan-50 to-blue-50 p-4 border-2 border-cyan-200 shadow-md">
                             <div className="flex flex-col items-center justify-center">
-                              <p className="text-sm font-semibold text-slate-700 mb-3">
+                              <p className="text-xs font-semibold text-slate-700 mb-1">
                                 Question {index + 1} starting in...
                               </p>
-                              <div className="text-6xl font-bold bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent animate-pulse">
+                              <div className="text-4xl font-bold bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent animate-pulse">
                                 {countdown}
                               </div>
                             </div>
@@ -706,25 +706,25 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
 
           {/* T120: Analyzing Answer Transition - Landing page color palette */}
           {isAnalyzing && (
-            <div className="flex justify-center py-12 animate-in fade-in duration-500">
-              <div className="flex flex-col items-center space-y-4">
+            <div className="flex justify-center py-6 animate-in fade-in duration-500">
+              <div className="flex flex-col items-center space-y-2">
                 {/* Animated dots with cyan-blue gradient */}
                 <div className="flex items-center space-x-1.5">
                   <div
-                    className="h-2.5 w-2.5 rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 animate-pulse-slow"
+                    className="h-2 w-2 rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 animate-pulse-slow"
                     style={{ animationDelay: '0ms' }}
                   />
                   <div
-                    className="h-2.5 w-2.5 rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 animate-pulse-slow"
+                    className="h-2 w-2 rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 animate-pulse-slow"
                     style={{ animationDelay: '150ms' }}
                   />
                   <div
-                    className="h-2.5 w-2.5 rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 animate-pulse-slow"
+                    className="h-2 w-2 rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 animate-pulse-slow"
                     style={{ animationDelay: '300ms' }}
                   />
                 </div>
                 {/* Styled text matching landing page */}
-                <span className="text-sm font-semibold text-slate-700">
+                <span className="text-xs font-semibold text-slate-700">
                   Thinking
                 </span>
               </div>
@@ -733,7 +733,7 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
 
           {/* Answer Input */}
           {currentQuestion && !isAnalyzing && (
-            <div className="sticky bottom-0 bg-background border-t pt-4">
+            <div className="sticky bottom-0 bg-background border-t pt-2">
               {/* T106: Timer and Replay Controls - Only for actual interview questions */}
               {(() => {
                 const turnType = (currentQuestion as any).turn_type;
@@ -742,7 +742,7 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
 
                 return (
                   !isSpecialTurn && (
-                    <div className="mb-4 flex items-center justify-between">
+                    <div className="mb-2 flex items-center justify-between">
                       <ReplayButton
                         replayCount={revealCount}
                         replayCap={maxReveals}

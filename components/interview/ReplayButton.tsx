@@ -20,19 +20,19 @@ export function ReplayButton({
   const isMaxedOut = replaysRemaining <= 0;
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-1.5">
       <Button
         variant="tertiary"
-        size="sm"
+        size="xs"
         onClick={onReplay}
         disabled={disabled || isMaxedOut}
-        className="gap-2"
+        className="gap-1.5"
       >
-        <RotateCcw className="h-4 w-4" />
+        <RotateCcw className="h-3 w-3" />
         Replay Question
       </Button>
       <span
-        className={`text-xs ${isMaxedOut ? 'text-destructive' : 'text-muted-foreground'}`}
+        className={`text-[10px] ${isMaxedOut ? 'text-destructive' : 'text-muted-foreground'}`}
       >
         {replaysRemaining > 0 ? (
           <>

@@ -941,7 +941,7 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
 
   return (
     <>
-      <div className="mx-auto w-full max-w-4xl p-4 space-y-8">
+      <div className="mx-auto w-full max-w-4xl p-3 md:p-4 space-y-4">
         {/* T124: Welcome Screen for Voice Mode */}
         {showWelcomeScreen && introText && (
           <div className="flex flex-col items-center justify-center min-h-[70vh] space-y-8 px-4">
@@ -993,27 +993,27 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
         {!showWelcomeScreen && (
           <>
             {/* Header */}
-            <div className="border-b pb-4">
+            <div className="border-b pb-2">
               <div className="flex items-start justify-between">
                 <div>
-                  <h1 className="text-2xl font-bold">{jobTitle}</h1>
-                  <p className="text-muted-foreground">{company}</p>
+                  <h1 className="text-lg font-bold">{jobTitle}</h1>
+                  <p className="text-xs text-muted-foreground">{company}</p>
                   {stagesPlanned > 1 && (
-                    <p className="text-sm text-primary mt-2">
+                    <p className="text-xs text-primary mt-1">
                       Stage {currentStage} of {stagesPlanned}: {stageName}
                     </p>
                   )}
                 </div>
                 {/* T123: Removed question counter for greater immersion */}
                 <div className="text-right">
-                  <p className="text-sm text-muted-foreground">Voice Mode</p>
+                  <p className="text-xs text-muted-foreground">Voice Mode</p>
                 </div>
               </div>
             </div>
 
             {/* Voice Orb */}
-            <div className="flex flex-col items-center justify-center py-12">
-              <div className="flex items-center gap-6">
+            <div className="flex flex-col items-center justify-center py-4">
+              <div className="flex items-center gap-3">
                 <VoiceOrb state={orbState} size="lg" />
 
                 {/* T126: Countdown Timer (only during main interview questions) */}
@@ -1044,7 +1044,7 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
               )}
 
               {currentQuestion && !needsUserInteraction && (
-                <div className="mt-8 flex items-center gap-3">
+                <div className="mt-3 flex items-center gap-3">
                   <Button
                     variant="outline"
                     size="sm"
@@ -1071,9 +1071,9 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
 
             {/* Answer Input */}
             {currentQuestion && !isSubmitting && !needsUserInteraction && (
-              <div className="border rounded-lg p-6 space-y-4 bg-card">
+              <div className="border rounded-lg p-4 space-y-2 bg-card">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold">Your Answer</h3>
+                  <h3 className="text-base font-semibold">Your Answer</h3>
                   {/* T164: Only show Text toggle in voice mode - Record button handles voice input */}
                   {answerMode === 'text' && (
                     <Button

@@ -23,9 +23,9 @@ export function VoiceOrb({ state, size = 'lg' }: VoiceOrbProps) {
   }, [state]);
 
   const sizeClasses = {
-    sm: 'w-24 h-24',
-    md: 'w-32 h-32',
-    lg: 'w-48 h-48',
+    sm: 'w-20 h-20',
+    md: 'w-24 h-24',
+    lg: 'w-28 h-28',
   };
 
   // Design system colors - matching landing page blue palette
@@ -38,7 +38,7 @@ export function VoiceOrb({ state, size = 'lg' }: VoiceOrbProps) {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center gap-4">
+    <div className="flex flex-col items-center justify-center gap-2">
       {/* Orb container */}
       <div className="relative flex items-center justify-center">
         {/* Outer glow rings */}
@@ -102,7 +102,7 @@ export function VoiceOrb({ state, size = 'lg' }: VoiceOrbProps) {
       </div>
 
       {/* State indicator - below the orb */}
-      <p className="text-sm font-medium text-slate-600">
+      <p className="text-xs font-medium text-slate-600">
         {state === 'idle' && 'Ready'}
         {state === 'ready' && 'Ready'}
         {state === 'speaking' && 'Speaking...'}

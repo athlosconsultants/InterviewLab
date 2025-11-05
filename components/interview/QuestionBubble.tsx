@@ -80,15 +80,15 @@ export function QuestionBubble({
 
   return (
     <div className="flex justify-start">
-      <div className="max-w-[80%] rounded-xl bg-slate-50 border border-slate-200 p-6 shadow-sm">
-        <div className="mb-3 flex items-center gap-2 flex-wrap">
-          <span className="text-xs font-semibold text-slate-600 uppercase tracking-wide">
+      <div className="max-w-[80%] rounded-xl bg-slate-50 border border-slate-200 p-3 shadow-sm">
+        <div className="mb-2 flex items-center gap-1.5 flex-wrap">
+          <span className="text-[10px] font-semibold text-slate-600 uppercase tracking-wide">
             Question {questionNumber}
           </span>
-          <span className="inline-flex items-center rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 px-3 py-1 text-xs font-semibold text-white shadow-sm">
+          <span className="inline-flex items-center rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 px-2 py-0.5 text-[10px] font-semibold text-white shadow-sm">
             {question.category}
           </span>
-          <span className="inline-flex items-center rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 px-3 py-1 text-xs font-semibold text-white shadow-sm">
+          <span className="inline-flex items-center rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 px-2 py-0.5 text-[10px] font-semibold text-white shadow-sm">
             {question.difficulty}
           </span>
           <Button
@@ -100,15 +100,15 @@ export function QuestionBubble({
             aria-label={isPlaying ? 'Pause audio' : 'Play audio'}
           >
             {isLoading ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <Loader2 className="h-3 w-3 animate-spin" />
             ) : isPlaying ? (
-              <Pause className="h-4 w-4" />
+              <Pause className="h-3 w-3" />
             ) : (
-              <Volume2 className="h-4 w-4" />
+              <Volume2 className="h-3 w-3" />
             )}
           </Button>
         </div>
-        <p className="text-base text-slate-900 leading-relaxed">
+        <p className="text-sm text-slate-900 leading-relaxed">
           {question.text}
         </p>
       </div>

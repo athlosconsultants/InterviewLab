@@ -292,10 +292,10 @@ export function AudioRecorder({
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       {/* Recording Controls - Auto-starts, only shows Pause/Resume/Stop */}
       {!audioBlob && isRecording && (
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           {!isPaused ? (
             <Button
               type="button"
@@ -345,7 +345,7 @@ export function AudioRecorder({
       {/* Playback Controls */}
       {audioBlob && audioUrl && (
         <div className="space-y-2">
-          <div className="flex items-center gap-2 rounded-md border p-3">
+          <div className="flex items-center gap-2 rounded-md border p-2">
             <Button
               type="button"
               variant="tertiary"

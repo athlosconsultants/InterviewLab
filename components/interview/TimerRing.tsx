@@ -77,27 +77,27 @@ export function TimerRing({ timeLimit, onExpire, startTime }: TimerRingProps) {
   return (
     <div className="relative inline-flex items-center justify-center">
       {/* SVG Ring */}
-      <svg className="h-16 w-16 -rotate-90 transform">
+      <svg className="h-12 w-12 -rotate-90 transform">
         {/* Background circle */}
         <circle
-          cx="32"
-          cy="32"
-          r="28"
+          cx="24"
+          cy="24"
+          r="20"
           stroke="currentColor"
-          strokeWidth="6"
+          strokeWidth="4"
           fill="none"
           className="text-slate-200"
         />
         {/* Progress circle */}
         <circle
-          cx="32"
-          cy="32"
-          r="28"
+          cx="24"
+          cy="24"
+          r="20"
           stroke="currentColor"
-          strokeWidth="6"
+          strokeWidth="4"
           fill="none"
-          strokeDasharray={`${2 * Math.PI * 28}`}
-          strokeDashoffset={`${2 * Math.PI * 28 * (1 - percentage / 100)}`}
+          strokeDasharray={`${2 * Math.PI * 20}`}
+          strokeDashoffset={`${2 * Math.PI * 20 * (1 - percentage / 100)}`}
           className={`transition-all duration-1000 ${getStrokeColor()}`}
           strokeLinecap="round"
         />
@@ -105,8 +105,8 @@ export function TimerRing({ timeLimit, onExpire, startTime }: TimerRingProps) {
 
       {/* Time Display */}
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <Clock className={`h-4 w-4 ${getColor()}`} />
-        <span className={`text-xs font-bold ${getColor()}`}>
+        <Clock className={`h-3 w-3 ${getColor()}`} />
+        <span className={`text-[10px] font-bold ${getColor()}`}>
           {formatTime(timeRemaining)}
         </span>
       </div>
