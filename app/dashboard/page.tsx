@@ -53,8 +53,8 @@ export default async function DashboardPage() {
     <>
       <PrefetchLinks />
       <PremiumLandingView
-        tier={entitlement.tier}
-        expiresAt={entitlement.expiresAt}
+        tier={entitlement.tier || 'premium'}
+        expiresAt={entitlement.expiresAt || null}
         isSuperAdmin={entitlement.isSuperAdmin || false}
         stats={stats}
         hasCv={hasCv}
