@@ -9,12 +9,16 @@ interface AudioRecorderProps {
   onRecordingComplete: (audioBlob: Blob) => void;
   disabled?: boolean;
   delayMs?: number; // Optional delay before auto-starting recording
+  autoStart?: boolean; // Whether to auto-start recording (only for main interview questions)
+  orbState?: 'idle' | 'speaking' | 'listening' | 'thinking'; // Current orb state
 }
 
 export function AudioRecorder({
   onRecordingComplete,
   disabled,
   delayMs = 0,
+  autoStart = true, // Default to true for backward compatibility
+  orbState = 'idle',
 }: AudioRecorderProps) {
   const [isRecording, setIsRecording] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -30,19 +34,42 @@ export function AudioRecorder({
   const audioElementRef = useRef<HTMLAudioElement | null>(null);
 
   // Auto-start recording on mount (with optional delay)
+  // Only auto-start if:
+  // 1. autoStart is true (only for main interview questions)
+  // 2. Orb is idle (not speaking or thinking)
+  // 3. Not already recording and no audio blob
   useEffect(() => {
-    if (!disabled && !isRecording && !audioBlob) {
+    if (
+      autoStart &&
+      orbState === 'idle' &&
+      !disabled &&
+      !isRecording &&
+      !audioBlob
+    ) {
       if (delayMs > 0) {
+        console.log(
+          `[AudioRecorder] Auto-start enabled. Waiting ${delayMs}ms before recording...`
+        );
         const timer = setTimeout(() => {
+          console.log('[AudioRecorder] Delay complete. Starting recording...');
           startRecording();
         }, delayMs);
         return () => clearTimeout(timer);
       } else {
+        console.log('[AudioRecorder] Auto-starting recording immediately...');
         startRecording();
       }
+    } else if (!autoStart) {
+      console.log(
+        '[AudioRecorder] Auto-start disabled (warm-up/confirmation question)'
+      );
+    } else if (orbState !== 'idle') {
+      console.log(
+        `[AudioRecorder] Auto-start blocked - orb is ${orbState} (must be idle)`
+      );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [delayMs]);
+  }, [delayMs, autoStart, orbState]);
 
   // Cleanup on unmount
   useEffect(() => {

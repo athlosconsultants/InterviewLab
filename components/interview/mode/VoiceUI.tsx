@@ -1104,6 +1104,12 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
                       setOrbState('idle');
                     }}
                     delayMs={1500}
+                    autoStart={
+                      currentQuestion
+                        ? (currentQuestion as any).turn_type === 'question'
+                        : false
+                    }
+                    orbState={orbState}
                   />
                 ) : (
                   <Textarea
