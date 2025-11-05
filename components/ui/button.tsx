@@ -5,21 +5,25 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0',
+  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0',
   {
     variants: {
       variant: {
+        // Primary button: Solid blue gradient background with white text
         default:
-          'bg-gradient-to-[135deg] from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-md hover:shadow-lg active:scale-[0.98]',
-        destructive:
-          'bg-gradient-to-[135deg] from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-md hover:shadow-lg active:scale-[0.98]',
+          'bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-md hover:shadow-lg active:scale-[0.98]',
+        // Secondary button: Blue gradient border (2-3px) with white background and dark text
         outline:
-          'border-2 border-cyan-600 bg-transparent text-cyan-700 hover:bg-gradient-to-[135deg] hover:from-cyan-500 hover:to-blue-600 hover:text-white hover:border-transparent shadow-sm hover:shadow-md active:scale-[0.98] font-bold',
+          'bg-white text-slate-800 hover:text-slate-900 shadow-sm hover:shadow-md active:scale-[0.98] relative [background:linear-gradient(white,white)_padding-box,linear-gradient(to_right,#06b6d4,#2563eb)_border-box] border-2 border-transparent',
+        // Deprecated variants - all map to outline (secondary style) for backwards compatibility
         secondary:
-          'bg-slate-200 text-slate-900 hover:bg-slate-300 border border-slate-300 shadow-sm hover:shadow-md active:scale-[0.98]',
+          'bg-white text-slate-800 hover:text-slate-900 shadow-sm hover:shadow-md active:scale-[0.98] relative [background:linear-gradient(white,white)_padding-box,linear-gradient(to_right,#06b6d4,#2563eb)_border-box] border-2 border-transparent',
         ghost:
-          'hover:bg-cyan-50 hover:text-cyan-600 active:scale-[0.98] text-slate-700 shadow-none',
-        link: 'text-cyan-600 underline-offset-4 hover:underline hover:text-cyan-700 font-semibold shadow-none',
+          'bg-white text-slate-800 hover:text-slate-900 shadow-sm hover:shadow-md active:scale-[0.98] relative [background:linear-gradient(white,white)_padding-box,linear-gradient(to_right,#06b6d4,#2563eb)_border-box] border-2 border-transparent',
+        link:
+          'bg-white text-slate-800 hover:text-slate-900 shadow-sm hover:shadow-md active:scale-[0.98] relative [background:linear-gradient(white,white)_padding-box,linear-gradient(to_right,#06b6d4,#2563eb)_border-box] border-2 border-transparent',
+        destructive:
+          'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-md hover:shadow-lg active:scale-[0.98]',
       },
       size: {
         default: 'min-h-[44px] px-6 py-2.5 text-base',
