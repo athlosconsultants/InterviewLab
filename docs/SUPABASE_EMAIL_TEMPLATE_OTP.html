@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your InterviewLab Sign In Code</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background: linear-gradient(135deg, #f8fafc 0%, #e0f2fe 50%, #f8fafc 100%); min-height: 100vh;">
+  
+  <!-- Background Gradient Orbs (subtle, email-safe) -->
+  <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="position: relative;">
+    <tr>
+      <td style="padding: 40px 20px;">
+        
+        <!-- Email Card Container -->
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="max-width: 600px; margin: 0 auto; background: white; border-radius: 20px; box-shadow: 0 10px 40px rgba(6, 182, 212, 0.15); overflow: hidden;">
+          
+          <!-- Gradient Header with Logo -->
+          <tr>
+            <td style="background: linear-gradient(135deg, #06b6d4 0%, #2563eb 100%); padding: 48px 32px; text-align: center; position: relative;">
+              
+              <!-- Logo Container with Glow -->
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                <tr>
+                  <td align="center" style="padding-bottom: 24px;">
+                    <div style="background: white; width: 80px; height: 80px; border-radius: 20px; display: inline-block; box-shadow: 0 8px 24px rgba(255, 255, 255, 0.3); padding: 16px;">
+                      <img src="https://theinterviewlab.io/logo.png" alt="InterviewLab" width="48" height="48" style="display: block; margin: 0 auto;" />
+                    </div>
+                  </td>
+                </tr>
+              </table>
+              
+              <!-- Header Text -->
+              <h1 style="color: white; margin: 0; font-size: 32px; font-weight: 700; letter-spacing: -0.5px; line-height: 1.2;">
+                Your Sign In Code
+              </h1>
+              <p style="color: rgba(255,255,255,0.95); margin: 12px 0 0 0; font-size: 18px; font-weight: 500;">
+                Welcome back to InterviewLab
+              </p>
+            </td>
+          </tr>
+          
+          <!-- Main Content Area -->
+          <tr>
+            <td style="padding: 48px 32px;">
+              
+              <!-- Instructions Text -->
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                <tr>
+                  <td style="padding-bottom: 32px;">
+                    <p style="color: #1f2937; margin: 0; font-size: 16px; line-height: 1.6; text-align: center;">
+                      Enter this code on the sign-in page to access your account:
+                    </p>
+                  </td>
+                </tr>
+              </table>
+              
+              <!-- OTP Code Display Card -->
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom: 32px;">
+                <tr>
+                  <td style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border: 3px solid #06b6d4; border-radius: 16px; padding: 32px; text-align: center;">
+                    
+                    <!-- Code Label -->
+                    <div style="font-size: 14px; color: #0891b2; margin-bottom: 16px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;">
+                      Verification Code
+                    </div>
+                    
+                    <!-- The Actual OTP Code -->
+                    <div style="font-size: 64px; font-weight: 800; color: #2563eb; letter-spacing: 16px; font-family: 'SF Mono', Monaco, Consolas, 'Courier New', monospace; line-height: 1; margin: 8px 0;">
+                      {{ .Token }}
+                    </div>
+                    
+                  </td>
+                </tr>
+              </table>
+              
+              <!-- Security/Expiration Note -->
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 12px; padding: 20px; border: 2px solid #fbbf24;">
+                <tr>
+                  <td>
+                    <p style="color: #92400e; margin: 0; font-size: 14px; line-height: 1.6; text-align: center; font-weight: 600;">
+                      ⏰ This code expires in <strong>5 minutes</strong> for your security
+                    </p>
+                  </td>
+                </tr>
+              </table>
+              
+            </td>
+          </tr>
+          
+          <!-- Footer Section -->
+          <tr>
+            <td style="background: #f9fafb; padding: 32px; text-align: center; border-top: 1px solid #e5e7eb;">
+              
+              <!-- Didn't Request Message -->
+              <p style="color: #6b7280; margin: 0 0 16px 0; font-size: 14px; line-height: 1.6;">
+                If you didn't request this code, you can safely ignore this email.
+              </p>
+              
+              <!-- Support Contact -->
+              <p style="color: #9ca3af; margin: 0; font-size: 13px;">
+                Need help? Contact 
+                <a href="mailto:support@theinterviewlab.io" style="color: #06b6d4; text-decoration: none; font-weight: 600;">
+                  support@theinterviewlab.io
+                </a>
+              </p>
+              
+              <!-- Copyright -->
+              <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid #e5e7eb;">
+                <p style="color: #9ca3af; margin: 0; font-size: 12px;">
+                  © 2025 InterviewLab. All rights reserved.
+                </p>
+              </div>
+              
+            </td>
+          </tr>
+          
+        </table>
+        
+      </td>
+    </tr>
+  </table>
+  
+</body>
+</html>
+

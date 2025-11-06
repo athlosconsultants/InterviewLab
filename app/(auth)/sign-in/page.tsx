@@ -3,10 +3,8 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { createClient } from '@/lib/supabase-client';
-import { isInAppBrowser, getInAppBrowserName } from '@/lib/browser-detection';
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { AlertCircle } from 'lucide-react';
 import Image from 'next/image';
 import { useDevice } from '@/hooks/useDevice';
 import { bindDevice } from '@/app/assessment/setup/actions';
@@ -16,8 +14,6 @@ function SignInForm() {
   const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
-  const [isInApp, setIsInApp] = useState(false);
-  const [browserName, setBrowserName] = useState<string | null>(null);
   const [otpSent, setOtpSent] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
   const router = useRouter();
@@ -25,21 +21,14 @@ function SignInForm() {
   const { fingerprint, isLoading: isFingerprintLoading } = useDevice();
 
   useEffect(() => {
-    const inApp = isInAppBrowser();
-    setIsInApp(inApp);
-    if (inApp) {
-      setBrowserName(getInAppBrowserName());
-    }
-
     // Check for error messages from URL params (e.g., from callback redirect)
     const error = searchParams?.get('error');
     const urlMessage = searchParams?.get('message');
     const urlEmail = searchParams?.get('email');
 
     if (error === 'use_code') {
-      // User clicked magic link in problematic browser - show OTP input
+      // Show OTP input if redirected with error
       setOtpSent(true);
-      setIsInApp(true); // Force in-app mode
       if (urlEmail) {
         setEmail(decodeURIComponent(urlEmail));
       }
@@ -57,41 +46,21 @@ function SignInForm() {
     setMessage('');
 
     const supabase = createClient();
-    const redirectUrl = searchParams?.get('redirect') || '/';
 
-    if (isInApp) {
-      // Use OTP for in-app browsers
-      const { error } = await supabase.auth.signInWithOtp({
-        email,
-        options: {
-          shouldCreateUser: true,
-        },
-      });
+    // Always use OTP-only authentication
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        shouldCreateUser: true,
+      },
+    });
 
-      if (error) {
-        setMessage(error.message);
-      } else {
-        setOtpSent(true);
-        setEmailSent(true);
-        setMessage('Check your email for the 6-digit code!');
-      }
+    if (error) {
+      setMessage(error.message);
     } else {
-      // Use magic link for standard browsers, but still send with shouldCreateUser
-      // so the email will include both magic link AND 6-digit code
-      const { error } = await supabase.auth.signInWithOtp({
-        email,
-        options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectUrl)}`,
-          shouldCreateUser: true,
-        },
-      });
-
-      if (error) {
-        setMessage(error.message);
-      } else {
-        setEmailSent(true);
-        setMessage('Check your email for the login link!');
-      }
+      setOtpSent(true);
+      setEmailSent(true);
+      setMessage('Check your email for your 6-digit code!');
     }
 
     setLoading(false);
@@ -200,26 +169,9 @@ function SignInForm() {
             Sign In
           </h1>
           <p className="text-muted-foreground">
-            {isInApp
-              ? 'Enter your email to receive a verification code'
-              : 'Sign in or create an account with your email'}
+            Enter your email to receive a verification code
           </p>
         </div>
-
-        {isInApp && browserName && (
-          <div className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/20 dark:to-cyan-950/20 border-2 border-blue-300 dark:border-blue-800 rounded-xl p-4 flex gap-3 shadow-sm">
-            <AlertCircle className="w-5 h-5 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
-            <div className="text-sm text-blue-900 dark:text-blue-100">
-              <p className="font-semibold mb-1">
-                You&apos;re using {browserName}
-              </p>
-              <p>
-                We&apos;ll send you a 6-digit code instead of a magic link for
-                better compatibility.
-              </p>
-            </div>
-          </div>
-        )}
 
         {message && (
           <div
@@ -252,26 +204,8 @@ function SignInForm() {
               className="w-full h-12 text-base font-semibold bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 shadow-lg"
               disabled={loading || emailSent}
             >
-              {loading
-                ? 'Sending...'
-                : isInApp
-                  ? 'Send Verification Code'
-                  : 'Send Magic Link'}
+              {loading ? 'Sending...' : 'Send Verification Code'}
             </Button>
-
-            {emailSent && !isInApp && (
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full h-12 text-base font-semibold border-2"
-                onClick={() => {
-                  setOtpSent(true);
-                  setMessage('Enter the 6-digit code from your email below');
-                }}
-              >
-                I have a 6-digit code instead
-              </Button>
-            )}
           </form>
         ) : (
           <form onSubmit={handleVerifyOtp} className="space-y-4">

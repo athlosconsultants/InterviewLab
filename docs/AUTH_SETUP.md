@@ -6,12 +6,11 @@ This project implements robust Supabase authentication with automatic fallback f
 
 ## Features
 
-- **Smart Browser Detection**: Automatically detects in-app browsers
-- **Dual Auth Methods**:
-  - Magic links for standard browsers
-  - 6-digit OTP codes for in-app browsers
+- **OTP-Only Authentication**: Secure 6-digit code verification for all users
+- **Universal Compatibility**: Works in all browsers (standard and in-app)
 - **Robust Fallback**: Multiple strategies in callback route
 - **User-Friendly Errors**: Helpful guidance when auth fails
+- **Branded Email**: Professional email template with InterviewLab branding
 
 ## Supabase Email Template Configuration
 
@@ -19,36 +18,38 @@ This project implements robust Supabase authentication with automatic fallback f
 
 You must configure your Supabase email templates to support both magic links and OTP codes.
 
-#### 1. Magic Link / OTP Email Template
+#### 1. OTP Email Template
 
 Go to: **Supabase Dashboard → Authentication → Email Templates → Magic Link**
 
-**We have created a professional, branded email template for you!**
+**We have created a professional, branded OTP-only email template for you!**
 
-📧 **Full template location**: `docs/SUPABASE_EMAIL_TEMPLATE.html`
+📧 **Full template location**: `docs/SUPABASE_EMAIL_TEMPLATE_OTP.html`
 
 The template includes:
 
-- ✨ Beautiful gradient design matching the landing page
-- 🎨 Professional branding with logo and colors
+- ✨ Beautiful cyan-to-blue gradient design matching the app
+- 🎨 InterviewLab branding with logo
 - 📱 Mobile-responsive layout
-- 🔐 Clear separation between magic link and OTP code
-- 💡 User instructions for which method to use
-- 🎯 Optimized for both standard and in-app browsers
+- 🔐 Large, clear 6-digit code display
+- ⏰ Security notes and expiration warning
+- 💼 Professional styling with gradient orb background
 
 **To use it:**
 
-1. Open `docs/SUPABASE_EMAIL_TEMPLATE.html`
+1. Open `docs/SUPABASE_EMAIL_TEMPLATE_OTP.html`
 2. Copy the entire HTML content
 3. Paste it into your Supabase Magic Link email template
-4. Save and test!
+4. Update the logo URL: Replace `https://theinterviewlab.io/logo.png` with your actual hosted logo URL
+5. Save and test!
 
 #### 2. Email Template Variables
 
-- `{{ .ConfirmationURL }}` - Magic link for standard browsers
-- `{{ .Token }}` - 6-digit OTP code for in-app browsers
+- `{{ .Token }}` - 6-digit OTP code (required)
 - `{{ .SiteURL }}` - Your site URL
 - `{{ .TokenHash }}` - Token hash (for advanced use)
+
+**Note**: `{{ .ConfirmationURL }}` (magic link) is not used in the OTP-only template.
 
 ### Template Customization Tips
 
@@ -60,21 +61,21 @@ The template includes:
 
 ## Auth Flow
 
-### Standard Browser Flow
+### OTP Authentication Flow (Universal)
 
 1. User enters email on `/sign-in`
-2. Receives email with magic link
-3. Clicks link → redirected to `/auth/callback`
-4. Callback route exchanges code for session
-5. User redirected to app
+2. System sends email with 6-digit OTP code
+3. User receives branded email with code
+4. User enters code in verification UI
+5. Code verified via Supabase
+6. Device fingerprint bound to account
+7. Session created, user redirected to app
 
-### In-App Browser Flow
-
-1. User enters email on `/sign-in` (in-app detected)
-2. Receives email with 6-digit OTP code
-3. Enters code in verification UI
-4. Code verified client-side
-5. Session created, user redirected to app
+**Benefits of OTP-Only:**
+- Works reliably in all browsers (standard and in-app)
+- No magic link callback complexity
+- Better security with short-lived codes
+- Consistent user experience
 
 ### Callback Route Strategies
 
@@ -144,12 +145,12 @@ The auth implementation uses PKCE (Proof Key for Code Exchange) automatically vi
 
 ## Troubleshooting
 
-### Magic Links Not Working
+### Email Deliverability Issues
 
-1. Check Supabase email template includes `{{ .ConfirmationURL }}`
-2. Verify `emailRedirectTo` points to `/auth/callback`
-3. Check Site URL in Supabase settings
-4. Ensure redirect URL is whitelisted
+1. Check Supabase email settings are configured
+2. Verify sender email is authenticated
+3. Check spam/junk folders
+4. Ensure email template includes `{{ .Token }}`
 
 ### OTP Codes Not Working
 
@@ -158,11 +159,12 @@ The auth implementation uses PKCE (Proof Key for Code Exchange) automatically vi
 3. Check for typos in 6-digit code
 4. Ensure code hasn't expired (5 minutes)
 
-### In-App Browser Not Detected
+### Session Issues
 
-1. Check user agent in console: `navigator.userAgent`
-2. Update detection patterns in `lib/browser-detection.ts`
-3. Clear browser cache and test again
+1. Check cookies are enabled
+2. Verify Supabase URL and anon key are correct
+3. Clear browser cookies and try again
+4. Check device fingerprint binding completes
 
 ### Callback Errors
 
