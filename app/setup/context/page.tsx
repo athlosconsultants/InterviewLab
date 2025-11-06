@@ -162,8 +162,8 @@ export default function SetupContextPage() {
         <div className="max-w-2xl mx-auto">
           {/* Header */}
           <div className="text-center mb-8">
-            <h1 className="text-2xl md:text-3xl font-light text-slate-800 tracking-tight mb-2">
-              🎯 Tell Us About the Role
+            <h1 className="text-2xl md:text-3xl font-bold text-slate-800 tracking-tight mb-2">
+              Interview Details
             </h1>
             <p className="text-base text-slate-600">
               Share some context to personalize your interview questions

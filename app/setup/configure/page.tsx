@@ -94,8 +94,8 @@ export default function SetupConfigurePage() {
         <div className="max-w-2xl mx-auto">
           {/* Header */}
           <div className="text-center mb-8">
-            <h1 className="text-2xl md:text-3xl font-light text-slate-800 tracking-tight mb-2">
-              🎯 Customize Your Interview
+            <h1 className="text-2xl md:text-3xl font-bold text-slate-800 tracking-tight mb-2">
+              Customize Your Interview
             </h1>
             <p className="text-base text-slate-600">
               Configure your practice session exactly how you want it

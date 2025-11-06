@@ -102,8 +102,8 @@ export function RoleContextForm({
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Job Title */}
       <div className="space-y-2">
-        <Label htmlFor="jobTitle" className="text-sm font-medium">
-          What role? <span className="text-red-500">*</span>
+        <Label htmlFor="jobTitle" className="text-sm font-semibold tracking-wide uppercase text-slate-800">
+          Job Title <span className="text-red-500">*</span>
         </Label>
         <Input
           id="jobTitle"
@@ -138,8 +138,8 @@ export function RoleContextForm({
 
       {/* Company */}
       <div className="space-y-2">
-        <Label htmlFor="company" className="text-sm font-medium">
-          At which company? <span className="text-red-500">*</span>
+        <Label htmlFor="company" className="text-sm font-semibold tracking-wide uppercase text-slate-800">
+          Company <span className="text-red-500">*</span>
         </Label>
         <Input
           id="company"
@@ -186,7 +186,7 @@ export function RoleContextForm({
 
       {/* Location */}
       <div className="space-y-2">
-        <Label htmlFor="location" className="text-sm font-medium">
+        <Label htmlFor="location" className="text-sm font-semibold tracking-wide uppercase text-slate-800">
           Location
         </Label>
         <Input
@@ -208,8 +208,8 @@ export function RoleContextForm({
 
       {/* CV Upload or Status */}
       <div className="space-y-2">
-        <Label className="text-sm font-medium">
-          📎 Your CV/Resume {!hasCvOnFile && <span className="text-red-500">*</span>}
+        <Label className="text-sm font-semibold tracking-wide uppercase text-slate-800">
+          CV/Resume {!hasCvOnFile && <span className="text-red-500">*</span>}
         </Label>
         <CvStatusDisplay
           cvMetadata={cvMetadata}
@@ -229,8 +229,8 @@ export function RoleContextForm({
 
       {/* Job Description */}
       <div className="space-y-2">
-        <Label htmlFor="jobDescription" className="text-sm font-medium">
-          📋 Job Description
+        <Label htmlFor="jobDescription" className="text-sm font-semibold tracking-wide uppercase text-slate-800">
+          Job Description
         </Label>
         <Textarea
           ref={textareaRef}

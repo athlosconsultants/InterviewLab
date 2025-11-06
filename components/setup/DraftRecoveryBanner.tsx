@@ -50,7 +50,7 @@ export function DraftRecoveryBanner({ onRestore }: DraftRecoveryBannerProps) {
         </div>
         <div className="flex-1">
           <h3 className="text-sm font-semibold text-blue-900 mb-1">
-            📝 Draft Saved
+            Draft Saved
           </h3>
           <p className="text-sm text-blue-800 mb-3">
             We saved your interview setup from <strong>{getDraftAge(draft)}</strong>.

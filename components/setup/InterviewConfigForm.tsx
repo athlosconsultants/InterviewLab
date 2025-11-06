@@ -47,50 +47,50 @@ export function InterviewConfigForm({
     <div className="space-y-8">
       {/* Interview Mode */}
       <div className="space-y-4">
-        <h2 className="text-base font-semibold text-slate-800">Interview Mode</h2>
+        <h2 className="text-sm font-semibold text-slate-800 tracking-wide uppercase">Interview Mode</h2>
         <div className="flex gap-3">
           <button
             type="button"
             onClick={() => setMode('text')}
             disabled={!isPremium && mode !== 'text'}
-            className={`flex-1 flex items-center justify-center gap-2 min-h-[56px] rounded-lg border-2 p-4 transition-all ${
+            className={`flex-1 flex items-center justify-center gap-2 min-h-[56px] rounded-lg border-2 p-4 transition-all font-medium ${
               mode === 'text'
-                ? 'border-blue-600 bg-blue-600/10'
-                : 'border-slate-200 hover:border-blue-300'
+                ? 'border-transparent bg-gradient-to-br from-cyan-500 to-blue-600 text-white shadow-lg'
+                : 'border-slate-200 bg-white text-slate-700 hover:border-cyan-500'
             } ${!isPremium && mode !== 'text' ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             <Type className="h-5 w-5" />
-            <span className="font-medium">Text</span>
+            <span>Text</span>
           </button>
           <button
             type="button"
             onClick={() => isPremium && setMode('voice')}
             disabled={!isPremium}
-            className={`flex-1 flex items-center justify-center gap-2 min-h-[56px] rounded-lg border-2 p-4 transition-all ${
+            className={`flex-1 flex items-center justify-center gap-2 min-h-[56px] rounded-lg border-2 p-4 transition-all font-medium ${
               mode === 'voice'
-                ? 'border-blue-600 bg-blue-600/10'
-                : 'border-slate-200 hover:border-blue-300'
+                ? 'border-transparent bg-gradient-to-br from-cyan-500 to-blue-600 text-white shadow-lg'
+                : 'border-slate-200 bg-white text-slate-700 hover:border-cyan-500'
             } ${!isPremium ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             <Mic className="h-5 w-5" />
-            <span className="font-medium">Voice</span>
+            <span>Voice</span>
             {!isPremium && (
-              <span className="ml-1 text-xs bg-amber-100 text-amber-800 px-2 py-0.5 rounded">
+              <span className="ml-1 text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded">
                 Premium
               </span>
             )}
           </button>
         </div>
         {showHints && initialConfig?.mode && (
-          <p className="text-sm italic text-slate-600">
-            (Last used: {initialConfig.mode === 'voice' ? 'Voice' : 'Text'})
+          <p className="text-sm text-slate-500">
+            Last used: {initialConfig.mode === 'voice' ? 'Voice' : 'Text'}
           </p>
         )}
       </div>
 
       {/* Interview Depth */}
       <div className="space-y-4">
-        <h2 className="text-base font-semibold text-slate-800">Interview Depth</h2>
+        <h2 className="text-sm font-semibold text-slate-800 tracking-wide uppercase">Interview Depth</h2>
         <div className="flex gap-3">
           {([1, 2, 3] as const).map((stage) => (
             <button
@@ -100,13 +100,13 @@ export function InterviewConfigForm({
               disabled={!isPremium && stage > 1}
               className={`flex-1 flex items-center justify-center min-h-[56px] rounded-lg border-2 p-3 transition-all ${
                 stages === stage
-                  ? 'border-blue-600 bg-blue-600/10'
-                  : 'border-slate-200 hover:border-blue-300'
+                  ? 'border-transparent bg-gradient-to-br from-cyan-500 to-blue-600 text-white shadow-lg'
+                  : 'border-slate-200 bg-white text-slate-700 hover:border-cyan-500'
               } ${!isPremium && stage > 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               <span className="text-2xl font-semibold">{stage}</span>
               {!isPremium && stage > 1 && (
-                <span className="ml-1 text-[10px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded">
+                <span className="ml-1 text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded">
                   Premium
                 </span>
               )}
@@ -119,8 +119,8 @@ export function InterviewConfigForm({
             : 'Free tier includes 1 stage with 3 questions'}
         </p>
         {showHints && initialConfig?.stages && (
-          <p className="text-sm italic text-slate-600">
-            (Last used: {initialConfig.stages})
+          <p className="text-sm text-slate-500">
+            Last used: {initialConfig.stages}
           </p>
         )}
       </div>
@@ -128,7 +128,7 @@ export function InterviewConfigForm({
       {/* Questions Per Stage */}
       {isPremium && (
         <div className="space-y-4">
-          <h2 className="text-base font-semibold text-slate-800">
+          <h2 className="text-sm font-semibold text-slate-800 tracking-wide uppercase">
             Questions Per Stage
           </h2>
           <div className="flex items-center gap-4">
@@ -138,28 +138,26 @@ export function InterviewConfigForm({
               max="10"
               value={questionsPerStage}
               onChange={(e) => setQuestionsPerStage(parseInt(e.target.value))}
-              className="flex-1 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+              className="flex-1 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-cyan-500"
               style={{
-                background: `linear-gradient(to right, rgb(37, 99, 235) 0%, rgb(37, 99, 235) ${((questionsPerStage - 3) / 7) * 100}%, rgb(226, 232, 240) ${((questionsPerStage - 3) / 7) * 100}%, rgb(226, 232, 240) 100%)`,
+                background: `linear-gradient(to right, rgb(6, 182, 212) 0%, rgb(6, 182, 212) ${((questionsPerStage - 3) / 7) * 100}%, rgb(226, 232, 240) ${((questionsPerStage - 3) / 7) * 100}%, rgb(226, 232, 240) 100%)`,
               }}
             />
-            <span className="text-lg font-semibold text-blue-600 min-w-[3ch] text-center">
+            <span className="text-2xl font-semibold text-slate-800 min-w-[3ch] text-center">
               {questionsPerStage}
             </span>
           </div>
           {showHints && initialConfig?.questionsPerStage && (
-            <p className="text-sm italic text-slate-600">
-              (Last used: {initialConfig.questionsPerStage})
+            <p className="text-sm text-slate-500">
+              Last used: {initialConfig.questionsPerStage}
             </p>
           )}
         </div>
       )}
 
       {/* Total Display */}
-      <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-        <p className="text-sm font-medium text-slate-700">
-          📊 Total: ~{totalQuestions} questions, ~{estimatedMinutes} min
-        </p>
+      <div className="text-center text-lg font-medium text-slate-700 pt-4 border-t border-slate-200">
+        Total: ~{totalQuestions} questions, ~{estimatedMinutes} min
       </div>
 
       {/* Action Buttons */}
