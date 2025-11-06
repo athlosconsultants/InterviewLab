@@ -58,14 +58,41 @@ export async function middleware(request: NextRequest) {
     // If user visits root (/ or /mobile), check if they're premium and redirect to /dashboard
     if (user && (pathname === '/' || pathname === '/mobile')) {
       try {
-        const { data: passes } = await supabase
-          .from('access_passes')
-          .select('tier, expires_at')
+        // Check for super admin first (always gets premium access)
+        const SUPER_ADMIN_EMAILS = (process.env.SUPER_ADMIN_EMAILS || '')
+          .split(',')
+          .map((email) => email.trim().toLowerCase())
+          .filter((email) => email.length > 0);
+        
+        const isSuperAdmin = SUPER_ADMIN_EMAILS.length > 0 && 
+          user.email && 
+          SUPER_ADMIN_EMAILS.includes(user.email.toLowerCase());
+        
+        if (isSuperAdmin) {
+          // Super admin - always redirect to dashboard
+          const dashboardUrl = new URL('/dashboard', request.url);
+          if (isMobile) {
+            dashboardUrl.searchParams.set('view', 'mobile');
+          }
+          return NextResponse.redirect(dashboardUrl);
+        }
+        
+        // Check for regular premium entitlements
+        const { data: entitlements } = await supabase
+          .from('entitlements')
+          .select('tier, expires_at, status')
           .eq('user_id', user.id)
-          .or(`expires_at.gte.${new Date().toISOString()},tier.eq.lifetime`)
+          .eq('status', 'active')
+          .order('created_at', { ascending: false })
           .limit(1);
         
-        if (passes && passes.length > 0) {
+        // Check if user has active entitlement that hasn't expired
+        const isPremium = entitlements && entitlements.length > 0 && (
+          entitlements[0].expires_at === null || 
+          new Date(entitlements[0].expires_at) > new Date()
+        );
+        
+        if (isPremium) {
           // Premium user - redirect to dashboard (preserves mobile/desktop context)
           const dashboardUrl = new URL('/dashboard', request.url);
           if (isMobile) {
@@ -82,16 +109,36 @@ export async function middleware(request: NextRequest) {
     // If non-premium user tries to access dashboard, redirect to home
     if (pathname.startsWith('/dashboard') && user) {
       try {
-        const { data: passes } = await supabase
-          .from('access_passes')
-          .select('tier')
-          .eq('user_id', user.id)
-          .or(`expires_at.gte.${new Date().toISOString()},tier.eq.lifetime`)
-          .limit(1);
+        // Check for super admin first (always allowed)
+        const SUPER_ADMIN_EMAILS = (process.env.SUPER_ADMIN_EMAILS || '')
+          .split(',')
+          .map((email) => email.trim().toLowerCase())
+          .filter((email) => email.length > 0);
         
-        if (!passes || passes.length === 0) {
-          // Not premium - redirect to home
-          return NextResponse.redirect(new URL('/', request.url));
+        const isSuperAdmin = SUPER_ADMIN_EMAILS.length > 0 && 
+          user.email && 
+          SUPER_ADMIN_EMAILS.includes(user.email.toLowerCase());
+        
+        if (!isSuperAdmin) {
+          // Check for regular premium entitlements
+          const { data: entitlements } = await supabase
+            .from('entitlements')
+            .select('tier, expires_at, status')
+            .eq('user_id', user.id)
+            .eq('status', 'active')
+            .order('created_at', { ascending: false })
+            .limit(1);
+          
+          // Check if user has active entitlement that hasn't expired
+          const isPremium = entitlements && entitlements.length > 0 && (
+            entitlements[0].expires_at === null || 
+            new Date(entitlements[0].expires_at) > new Date()
+          );
+          
+          if (!isPremium) {
+            // Not premium - redirect to home
+            return NextResponse.redirect(new URL('/', request.url));
+          }
         }
       } catch (error) {
         console.error('[Middleware] Error checking dashboard access:', error);
@@ -119,14 +166,36 @@ export async function middleware(request: NextRequest) {
     // Redirect to dashboard if authenticated premium user tries to access sign-in
     if (request.nextUrl.pathname.startsWith('/sign-in') && user) {
       try {
-        const { data: passes } = await supabase
-          .from('access_passes')
-          .select('tier')
+        // Check for super admin first (always redirect to dashboard)
+        const SUPER_ADMIN_EMAILS = (process.env.SUPER_ADMIN_EMAILS || '')
+          .split(',')
+          .map((email) => email.trim().toLowerCase())
+          .filter((email) => email.length > 0);
+        
+        const isSuperAdmin = SUPER_ADMIN_EMAILS.length > 0 && 
+          user.email && 
+          SUPER_ADMIN_EMAILS.includes(user.email.toLowerCase());
+        
+        if (isSuperAdmin) {
+          return NextResponse.redirect(new URL('/dashboard', request.url));
+        }
+        
+        // Check for regular premium entitlements
+        const { data: entitlements } = await supabase
+          .from('entitlements')
+          .select('tier, expires_at, status')
           .eq('user_id', user.id)
-          .or(`expires_at.gte.${new Date().toISOString()},tier.eq.lifetime`)
+          .eq('status', 'active')
+          .order('created_at', { ascending: false })
           .limit(1);
         
-        if (passes && passes.length > 0) {
+        // Check if user has active entitlement that hasn't expired
+        const isPremium = entitlements && entitlements.length > 0 && (
+          entitlements[0].expires_at === null || 
+          new Date(entitlements[0].expires_at) > new Date()
+        );
+        
+        if (isPremium) {
           return NextResponse.redirect(new URL('/dashboard', request.url));
         }
       } catch (error) {
