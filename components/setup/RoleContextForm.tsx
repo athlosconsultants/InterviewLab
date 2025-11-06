@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -16,6 +16,10 @@ interface RoleContextFormProps {
   cvMetadata?: CvMetadata;
   showHints?: boolean;
   isSubmitting?: boolean;
+  suggestions?: {
+    roles: string[];
+    companies: string[];
+  };
 }
 
 interface FormErrors {
@@ -31,6 +35,7 @@ export function RoleContextForm({
   cvMetadata,
   showHints = false,
   isSubmitting = false,
+  suggestions,
 }: RoleContextFormProps) {
   const [jobTitle, setJobTitle] = useState(initialContext?.jobTitle || '');
   const [company, setCompany] = useState(initialContext?.company || '');
@@ -38,8 +43,19 @@ export function RoleContextForm({
   const [jobDescription, setJobDescription] = useState(initialContext?.jobDescription || '');
   const [cvFile, setCvFile] = useState<File | null>(null);
   const [errors, setErrors] = useState<FormErrors>({});
+  
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const hasCvOnFile = !!cvMetadata;
+  
+  // Auto-expand textarea as user types
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.style.height = 'auto';
+      textarea.style.height = `${textarea.scrollHeight}px`;
+    }
+  }, [jobDescription]);
 
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
@@ -103,7 +119,15 @@ export function RoleContextForm({
           autoComplete="organization-title"
           autoCapitalize="words"
           enterKeyHint="next"
+          list={suggestions?.roles && suggestions.roles.length > 0 ? "role-suggestions" : undefined}
         />
+        {suggestions?.roles && suggestions.roles.length > 0 && (
+          <datalist id="role-suggestions">
+            {suggestions.roles.map((role, index) => (
+              <option key={index} value={role} />
+            ))}
+          </datalist>
+        )}
         {showHints && initialContext?.jobTitle && (
           <p className="text-sm italic text-slate-600">(From last interview)</p>
         )}
@@ -131,7 +155,15 @@ export function RoleContextForm({
           autoComplete="organization"
           autoCapitalize="words"
           enterKeyHint="next"
+          list={suggestions?.companies && suggestions.companies.length > 0 ? "company-suggestions" : undefined}
         />
+        {suggestions?.companies && suggestions.companies.length > 0 && (
+          <datalist id="company-suggestions">
+            {suggestions.companies.map((comp, index) => (
+              <option key={index} value={comp} />
+            ))}
+          </datalist>
+        )}
         {showHints && initialContext?.company && (
           <p className="text-sm italic text-slate-600">(From last interview)</p>
         )}
@@ -201,13 +233,15 @@ export function RoleContextForm({
           📋 Job Description
         </Label>
         <Textarea
+          ref={textareaRef}
           id="jobDescription"
           placeholder="Paste key requirements or URL..."
           value={jobDescription}
           onChange={(e) => setJobDescription(e.target.value)}
-          rows={6}
-          className="text-base resize-vertical"
+          rows={4}
+          className="text-base resize-y min-h-[120px] max-h-[400px] overflow-y-auto"
           disabled={isSubmitting}
+          enterKeyHint="done"
         />
         <p className="text-xs text-slate-500">
           Optional: Paste the job description or key requirements to get more

@@ -1,10 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { RoleContextForm } from '@/components/setup/RoleContextForm';
 import { uploadFile } from '@/lib/upload-client';
 import { createSession } from '@/app/setup/actions';
+import { extractSuggestions } from '@/lib/interview-profile';
+import { clearDraft, createDebouncedSave, loadDraft } from '@/utils/draftManager';
 import { toast } from 'sonner';
 import type { InterviewConfig, RoleContext, InterviewProfile } from '@/lib/schema';
 
@@ -14,6 +16,9 @@ export default function SetupContextPage() {
   const [config, setConfig] = useState<InterviewConfig | null>(null);
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Create debounced save function
+  const debouncedSaveRef = useRef(createDebouncedSave(500));
 
   useEffect(() => {
     async function init() {
@@ -117,6 +122,9 @@ export default function SetupContextPage() {
 
       // Clear config from sessionStorage
       sessionStorage.removeItem('interviewConfig');
+      
+      // Clear draft on successful submission
+      clearDraft();
 
       // Redirect to interview
       router.push(`/interview/${sessionId}`);
@@ -150,7 +158,7 @@ export default function SetupContextPage() {
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-white via-slate-50 to-white">
-      <div className="container mx-auto px-4 py-12 md:py-16">
+      <div className="container mx-auto px-4 py-12 md:py-16 pb-24 md:pb-16">
         <div className="max-w-2xl mx-auto">
           {/* Header */}
           <div className="text-center mb-8">
@@ -171,6 +179,7 @@ export default function SetupContextPage() {
               cvMetadata={profile?.cvFile}
               showHints={!!profile?.lastInterview}
               isSubmitting={isSubmitting}
+              suggestions={extractSuggestions(profile)}
             />
           </div>
         </div>

@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { InterviewConfigForm } from '@/components/setup/InterviewConfigForm';
+import { DraftRecoveryBanner } from '@/components/setup/DraftRecoveryBanner';
+import { loadDraft, saveDraft, clearDraft, createDebouncedSave, type InterviewDraft } from '@/utils/draftManager';
 import type { InterviewConfig, InterviewProfile } from '@/lib/schema';
 import { createClient } from '@/lib/supabase-client';
 
@@ -51,7 +53,24 @@ export default function SetupConfigurePage() {
   const handleContinue = (config: InterviewConfig) => {
     // Store config in sessionStorage for Screen 2
     sessionStorage.setItem('interviewConfig', JSON.stringify(config));
+    
+    // Also save to draft for auto-save
+    saveDraft({
+      screenOneConfig: config,
+      roleContext: {}, // Will be filled in Screen 2
+    });
+    
     router.push('/setup/context');
+  };
+
+  const handleRestoreDraft = (draft: InterviewDraft) => {
+    // If draft has roleContext data, go directly to Screen 2
+    if (draft.roleContext.jobTitle || draft.roleContext.company) {
+      sessionStorage.setItem('interviewConfig', JSON.stringify(draft.screenOneConfig));
+      router.push('/setup/context');
+    }
+    // Otherwise, just prefill Screen 1 with the config
+    // The InterviewConfigForm will handle this via initialConfig prop
   };
 
   const handleBack = () => {
@@ -71,7 +90,7 @@ export default function SetupConfigurePage() {
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-white via-slate-50 to-white">
-      <div className="container mx-auto px-4 py-12 md:py-16">
+      <div className="container mx-auto px-4 py-12 md:py-16 pb-24 md:pb-16">
         <div className="max-w-2xl mx-auto">
           {/* Header */}
           <div className="text-center mb-8">
@@ -82,6 +101,9 @@ export default function SetupConfigurePage() {
               Configure your practice session exactly how you want it
             </p>
           </div>
+
+          {/* Draft Recovery Banner */}
+          <DraftRecoveryBanner onRestore={handleRestoreDraft} />
 
           {/* Form Card */}
           <div className="bg-white rounded-2xl p-6 md:p-8 shadow-lg border border-slate-200">
