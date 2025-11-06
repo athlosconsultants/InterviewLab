@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { FileDrop } from '@/components/forms/FileDrop';
+import { CvStatusDisplay } from './CvStatusDisplay';
 import { ArrowRight } from 'lucide-react';
 import type { RoleContext, CvMetadata } from '@/lib/schema';
 
@@ -179,32 +179,19 @@ export function RoleContextForm({
         <Label className="text-sm font-medium">
           📎 Your CV/Resume {!hasCvOnFile && <span className="text-red-500">*</span>}
         </Label>
-        {hasCvOnFile ? (
-          <div className="p-4 bg-green-50 rounded-lg border border-green-200">
-            <p className="text-sm text-slate-700">
-              ✓ Using CV on file (uploaded{' '}
-              {calculateTimeAgo(cvMetadata.uploadDate)})
-            </p>
-            <p className="text-xs text-slate-500 mt-1">
-              {cvMetadata.filename}
-            </p>
-          </div>
-        ) : (
-          <FileDrop
-            onFileSelect={(file) => {
-              setCvFile(file);
-              if (errors.cv) setErrors({ ...errors, cv: undefined });
-            }}
-            currentFile={cvFile}
-            acceptedTypes={[
-              'application/pdf',
-              'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-              'application/msword',
-            ]}
-            acceptedExtensions={['.pdf', '.doc', '.docx']}
-            maxSizeMB={10}
-          />
-        )}
+        <CvStatusDisplay
+          cvMetadata={cvMetadata}
+          onFileSelect={(file) => {
+            setCvFile(file);
+            if (errors.cv) setErrors({ ...errors, cv: undefined });
+          }}
+          currentFile={cvFile}
+          onCvUpdate={(newCvKey) => {
+            // Update the cvFileKey in context for submission
+            // The component will reload the page after update
+          }}
+          disabled={isSubmitting}
+        />
         {errors.cv && <p className="text-sm text-red-500">{errors.cv}</p>}
       </div>
 
@@ -267,20 +254,5 @@ export function RoleContextForm({
       </div>
     </form>
   );
-}
-
-// Helper function to calculate time ago
-function calculateTimeAgo(dateString: string): string {
-  const uploadDate = new Date(dateString);
-  const now = new Date();
-  const diffMs = now.getTime() - uploadDate.getTime();
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
-  if (diffDays === 0) return 'today';
-  if (diffDays === 1) return '1d ago';
-  if (diffDays < 7) return `${diffDays}d ago';
-  if (diffDays < 30) return `${Math.floor(diffDays / 7)}w ago`;
-  if (diffDays < 90) return `${Math.floor(diffDays / 30)}mo ago`;
-  return `${Math.floor(diffDays / 30)}mo ago`;
 }
 
