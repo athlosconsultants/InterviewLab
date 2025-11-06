@@ -235,7 +235,7 @@ export function RoleContextForm({
         <Textarea
           ref={textareaRef}
           id="jobDescription"
-          placeholder="Paste key requirements or URL..."
+          placeholder="Paste key requirements, responsibilities, or the full job description..."
           value={jobDescription}
           onChange={(e) => setJobDescription(e.target.value)}
           rows={4}
@@ -244,8 +244,7 @@ export function RoleContextForm({
           enterKeyHint="done"
         />
         <p className="text-xs text-slate-500">
-          Optional: Paste the job description or key requirements to get more
-          tailored questions
+          Optional: Add the job description to get questions tailored to the specific role requirements
         </p>
       </div>
 
