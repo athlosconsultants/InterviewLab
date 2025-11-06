@@ -557,3 +557,56 @@ export interface EntitlementHistoryEntry {
   metadata: Json;
   created_at: string;
 }
+
+// ========================================
+// Interview Profile System (Setup Redesign)
+// ========================================
+
+// CV metadata stored in user profile
+export interface CvMetadata {
+  filename: string;
+  uploadDate: string;
+  s3Key: string;
+  fileSize: number; // bytes
+}
+
+// Last interview configuration and context
+export interface LastInterview {
+  jobTitle: string;
+  company: string;
+  location?: string;
+  jobDescription?: string;
+  mode: InterviewMode;
+  stages: number;
+  questionsPerStage: number;
+  completedAt: string;
+}
+
+// Interview profile for smart prefilling
+export interface InterviewProfile {
+  userId: string;
+  cvFile?: CvMetadata;
+  lastInterview?: LastInterview;
+  interviewHistory?: Array<{
+    jobTitle: string;
+    company: string;
+    location?: string;
+    completedAt: string;
+  }>;
+}
+
+// Configuration from Screen 1
+export interface InterviewConfig {
+  mode: InterviewMode;
+  stages: 1 | 2 | 3;
+  questionsPerStage: number; // 3-10
+}
+
+// Context from Screen 2
+export interface RoleContext {
+  jobTitle: string;
+  company: string;
+  location?: string;
+  cvFileKey?: string; // S3 reference
+  jobDescription?: string;
+}
