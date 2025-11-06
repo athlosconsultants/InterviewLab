@@ -111,8 +111,8 @@ export default function SetupConfigurePage() {
               onContinue={handleContinue}
               onBack={handleBack}
               initialConfig={profile?.lastInterview ? {
-                mode: profile.lastInterview.mode,
-                stages: profile.lastInterview.stages,
+                mode: profile.lastInterview.mode as 'text' | 'voice',
+                stages: profile.lastInterview.stages as 1 | 2 | 3,
                 questionsPerStage: profile.lastInterview.questionsPerStage,
               } : undefined}
               showHints={!!profile?.lastInterview}
