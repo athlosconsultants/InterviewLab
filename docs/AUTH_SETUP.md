@@ -40,10 +40,10 @@ The template includes:
 1. Open `docs/SUPABASE_EMAIL_TEMPLATE_OTP.html`
 2. Copy the entire HTML content
 3. Paste it into your Supabase Magic Link email template
-4. Ensure your Supabase Site URL is set to `https://theinterviewlab.io`
+4. Update the email subject to: `Your InterviewLab Sign In Code`
 5. Save and test!
 
-**Note:** The template uses `{{ .SiteURL }}/logo.png` which will automatically resolve to `https://theinterviewlab.io/logo.png`
+**Note:** The template uses the direct URL `https://theinterviewlab.io/logo.png` for the logo
 
 #### 2. Email Template Variables
 
