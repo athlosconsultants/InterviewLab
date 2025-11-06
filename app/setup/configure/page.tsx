@@ -110,7 +110,11 @@ export default function SetupConfigurePage() {
             <InterviewConfigForm
               onContinue={handleContinue}
               onBack={handleBack}
-              initialConfig={profile?.lastInterview}
+              initialConfig={profile?.lastInterview ? {
+                mode: profile.lastInterview.mode,
+                stages: profile.lastInterview.stages,
+                questionsPerStage: profile.lastInterview.questionsPerStage,
+              } : undefined}
               showHints={!!profile?.lastInterview}
               isPremium={isPremium}
             />
