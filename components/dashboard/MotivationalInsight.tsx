@@ -20,16 +20,16 @@ const ICONS = [Lightbulb, Sparkles, Target, TrendingUp];
 
 export function MotivationalInsight() {
   const [fact, setFact] = useState('');
-  const [Icon, setIcon] = useState(Lightbulb);
+  const [iconIndex, setIconIndex] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
     // Select random fact and icon on mount
     const randomFact = MOTIVATIONAL_FACTS[Math.floor(Math.random() * MOTIVATIONAL_FACTS.length)];
-    const randomIcon = ICONS[Math.floor(Math.random() * ICONS.length)];
+    const randomIconIndex = Math.floor(Math.random() * ICONS.length);
     
     setFact(randomFact);
-    setIcon(randomIcon);
+    setIconIndex(randomIconIndex);
     
     // Trigger fade-in animation
     setTimeout(() => setIsVisible(true), 100);
@@ -55,11 +55,16 @@ export function MotivationalInsight() {
       <div className="relative z-10 flex items-start gap-3">
         {/* Icon */}
         <div className="flex-shrink-0 mt-0.5">
-          <Icon 
-            className="h-5 w-5 text-cyan-600" 
-            strokeWidth={2}
-            aria-hidden="true"
-          />
+          {(() => {
+            const IconComponent = ICONS[iconIndex];
+            return (
+              <IconComponent 
+                className="h-5 w-5 text-cyan-600" 
+                strokeWidth={2}
+                aria-hidden="true"
+              />
+            );
+          })()}
         </div>
         
         {/* Content */}
