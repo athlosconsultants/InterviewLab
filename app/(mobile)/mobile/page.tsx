@@ -241,17 +241,17 @@ export default function MobileLandingPage() {
             </p>
             <div className="space-y-1.5">
               <div className="flex items-start gap-2 text-xs text-cyan-700">
-                <span className="text-cyan-500 mt-0.5">✓</span>
+                <span className="text-cyan-500 mt-0.5">•</span>
                 <span className="font-medium">Clear situation & action</span>
               </div>
               <div className="flex items-start gap-2 text-xs text-cyan-700">
-                <span className="text-cyan-500 mt-0.5">✓</span>
+                <span className="text-cyan-500 mt-0.5">•</span>
                 <span className="font-medium">
                   Specific numbers (2 weeks → 3 days)
                 </span>
               </div>
               <div className="flex items-start gap-2 text-xs text-cyan-700">
-                <span className="text-cyan-500 mt-0.5">✓</span>
+                <span className="text-cyan-500 mt-0.5">•</span>
                 <span className="font-medium">Shows learning & growth</span>
               </div>
             </div>

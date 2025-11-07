@@ -93,7 +93,7 @@ function SignInForm() {
         console.log('Binding device...');
         try {
           await bindDevice(fingerprint);
-          console.log('✅ Device bound successfully.');
+          console.log('Device bound successfully.');
         } catch (bindError) {
           console.error('Failed to bind device:', bindError);
           // Don't block login if binding fails, just log it.
@@ -113,7 +113,7 @@ function SignInForm() {
         return;
       }
 
-      console.log('✅ Session established:', {
+      console.log('Session established:', {
         email: sessionData.session.user.email,
         accessToken: sessionData.session.access_token.substring(0, 20) + '...',
         expiresAt: sessionData.session.expires_at,

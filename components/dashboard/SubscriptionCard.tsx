@@ -1,6 +1,6 @@
 'use client';
 
-import { Award, Clock, TrendingUp } from 'lucide-react';
+import { Award, Clock, TrendingUp, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
@@ -168,13 +168,13 @@ export function SubscriptionCard({
 
           <div className="space-y-2 p-4 bg-cyan-50 rounded-lg border border-cyan-200">
             <p className="text-sm text-cyan-900 flex items-center gap-2">
-              <span>✓</span> Unlimited interviews forever
+              <Check className="h-4 w-4 flex-shrink-0" /> Unlimited interviews forever
             </p>
             <p className="text-sm text-cyan-900 flex items-center gap-2">
-              <span>✓</span> Every promotion, job change, career pivot
+              <Check className="h-4 w-4 flex-shrink-0" /> Every promotion, job change, career pivot
             </p>
             <p className="text-sm text-cyan-900 flex items-center gap-2">
-              <span>✓</span> Used by professionals across 50+ industries
+              <Check className="h-4 w-4 flex-shrink-0" /> Used by professionals across 50+ industries
             </p>
           </div>
         </div>

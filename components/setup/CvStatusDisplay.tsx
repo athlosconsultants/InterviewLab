@@ -152,14 +152,14 @@ export function CvStatusDisplay({
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1">
             <p className="text-sm text-slate-700 font-medium">
-              ✓ Using CV on file (uploaded {timeAgo})
+              Using CV on file (uploaded {timeAgo})
             </p>
             <p className="text-xs text-slate-500 mt-1">
               {cvMetadata.filename}
             </p>
             {isCvOld && (
               <p className="text-xs text-amber-700 mt-2">
-                💡 Consider updating - this CV is over 3 months old
+                Consider updating - this CV is over 3 months old
               </p>
             )}
           </div>

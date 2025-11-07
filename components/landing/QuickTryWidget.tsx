@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { previewQuestions } from '@/lib/previewQuestions';
 import { analyzeAnswer, type FeedbackPoint } from '@/lib/preview-feedback';
 import { track } from '@/lib/analytics';
+import { CheckCircle2, XCircle, Lightbulb } from 'lucide-react';
 
 // T65: Updated roles to match API
 const ROLES = [
@@ -113,11 +114,11 @@ export function QuickTryWidget() {
   const getIcon = (type: FeedbackPoint['type']) => {
     switch (type) {
       case 'positive':
-        return '✅';
+        return <CheckCircle2 className="h-4 w-4 text-green-600 flex-shrink-0" />;
       case 'negative':
-        return '❌';
+        return <XCircle className="h-4 w-4 text-red-600 flex-shrink-0" />;
       case 'suggestion':
-        return '💡';
+        return <Lightbulb className="h-4 w-4 text-amber-600 flex-shrink-0" />;
     }
   };
 

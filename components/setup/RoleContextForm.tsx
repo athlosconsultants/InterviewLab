@@ -252,7 +252,7 @@ export function RoleContextForm({
       {hasCvOnFile && showHints && (
         <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
           <p className="text-sm text-slate-700">
-            ℹ️ Interviewing for same role? Just tap Start below
+            Interviewing for same role? Just tap Start below
           </p>
         </div>
       )}

@@ -97,7 +97,7 @@ export function AchievementSection({ stats }: AchievementSectionProps) {
                     }
                   >
                     {stats.practicedToday
-                      ? "Today's goal complete ✓"
+                      ? "Today's goal complete"
                       : 'Practice today to maintain streak'}
                   </span>
                 </div>
@@ -152,7 +152,7 @@ export function AchievementSection({ stats }: AchievementSectionProps) {
                 {achievement.name}
               </span>
               {achievement.earned && (
-                <span className="text-xs text-green-600 mt-1">✓ Earned</span>
+                <span className="text-xs text-green-600 mt-1">Earned</span>
               )}
             </div>
           ))}

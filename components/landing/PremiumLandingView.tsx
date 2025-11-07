@@ -191,7 +191,7 @@ export function PremiumLandingView({
             <div className="flex items-center gap-2 text-slate-600">
               <FileText className="h-4 w-4" />
               <span className="text-xs font-light">
-                {hasCv ? 'CV on file ✓' : 'No CV uploaded'}
+                {hasCv ? 'CV on file' : 'No CV uploaded'}
               </span>
             </div>
             <Button
