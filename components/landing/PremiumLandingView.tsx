@@ -6,6 +6,7 @@ import { FileText, BarChart3, Pencil } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { DashboardStats } from '@/lib/dashboard-stats';
 import { CvUploadModal } from '@/components/dashboard/CvUploadModal';
+import { MotivationalInsight } from '@/components/dashboard/MotivationalInsight';
 
 interface PremiumLandingViewProps {
   tier: string;
@@ -113,6 +114,11 @@ export function PremiumLandingView({
               </>
             )}
           </p>
+        </div>
+
+        {/* MOTIVATIONAL INSIGHT */}
+        <div className="mt-4 mb-4">
+          <MotivationalInsight />
         </div>
 
         {/* PRIMARY ACTION ZONE (40% of viewport) */}
