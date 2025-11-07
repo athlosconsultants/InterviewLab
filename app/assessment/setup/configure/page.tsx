@@ -31,7 +31,7 @@ export default function AssessmentConfigurePage() {
           {/* Header */}
           <div className="text-center mb-8">
             <h1 className="text-2xl md:text-3xl font-light text-slate-800 tracking-tight mb-2">
-              🎯 Free 3-Question Assessment
+              Free 3-Question Assessment
             </h1>
             <p className="text-base text-slate-600">
               Text-based practice with personalized feedback
