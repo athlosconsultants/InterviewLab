@@ -15,8 +15,8 @@ interface PrefetchOptions {
  */
 export function usePremiumPrefetch({ sessionId, enableCaching = true }: PrefetchOptions = {}) {
   const router = useRouter();
-  const prefetchedRef = useRef(false);
-  const cacheTimerRef = useRef<NodeJS.Timeout>();
+  const prefetchedRef = useRef<boolean>(false);
+  const cacheTimerRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
   useEffect(() => {
     // Prevent duplicate prefetching
