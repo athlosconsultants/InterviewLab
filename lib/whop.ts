@@ -131,22 +131,25 @@ export async function verifyWhopMembership(
 
 /**
  * Map Whop product/plan to our PassTier system
- * You'll need to update this mapping based on your Whop product configuration
+ * Updated with actual Whop product IDs
  */
 export function mapWhopPlanToTier(productId: string, planId: string): '48h' | '7d' | '30d' | 'lifetime' {
-  // TODO: Update this mapping based on your actual Whop product/plan IDs
-  // For now, we'll use a simple mapping
-  
-  // Example mapping (update with your actual IDs):
-  const planMappings: Record<string, '48h' | '7d' | '30d' | 'lifetime'> = {
-    // 'plan_xxxxx': '48h',
-    // 'plan_yyyyy': '7d',
-    // 'plan_zzzzz': '30d',
-    // 'plan_aaaaa': 'lifetime',
+  // Map both product IDs and plan IDs for flexibility
+  const productMappings: Record<string, '48h' | '7d' | '30d' | 'lifetime'> = {
+    // Product IDs (if each tier is a separate product)
+    'prod_jDt4y7WIAHML0': '48h',      // 48-hour pass
+    'prod_xT6VjeAQ2isxv': '7d',       // 7-day pass
+    'prod_LbtjUWWQ2FqqT': '30d',      // 30-day pass
+    'prod_6Qht7KNk8j5C8': 'lifetime', // Lifetime access
   };
 
-  // Default to 30d if no mapping found
-  return planMappings[planId] || '30d';
+  const planMappings: Record<string, '48h' | '7d' | '30d' | 'lifetime'> = {
+    // Plan IDs (if multiple plans within one product)
+    // Add your plan IDs here when you get them, format: 'plan_xxxxx': '48h',
+  };
+
+  // Check plan ID first, then product ID, then default to 30d
+  return planMappings[planId] || productMappings[productId] || '30d';
 }
 
 /**

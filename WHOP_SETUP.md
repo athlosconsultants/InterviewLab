@@ -133,27 +133,36 @@ This adds:
 
 ---
 
-### Step 5: Update Plan Mapping (Important!)
+### Step 5: Verify Product/Plan Mapping
 
-Open `/lib/whop.ts` and update the `mapWhopPlanToTier` function with your actual Whop Plan IDs:
+The Product IDs have been configured in `/lib/whop.ts`:
 
 ```typescript
-export function mapWhopPlanToTier(productId: string, planId: string): '48h' | '7d' | '30d' | 'lifetime' {
-  const planMappings: Record<string, '48h' | '7d' | '30d' | 'lifetime'> = {
-    'plan_ABC123': '48h',       // Replace with your actual 48h plan ID
-    'plan_DEF456': '7d',        // Replace with your actual 7d plan ID
-    'plan_GHI789': '30d',       // Replace with your actual 30d plan ID
-    'plan_JKL012': 'lifetime',  // Replace with your actual lifetime plan ID
-  };
-
-  return planMappings[planId] || '30d'; // Default to 30d if no mapping found
-}
+// Current configuration:
+'prod_jDt4y7WIAHML0': '48h',      // 48-hour pass
+'prod_xT6VjeAQ2isxv': '7d',       // 7-day pass
+'prod_LbtjUWWQ2FqqT': '30d',      // 30-day pass
+'prod_6Qht7KNk8j5C8': 'lifetime', // Lifetime access
 ```
 
-**How to find your Plan IDs:**
+**If you have Plan IDs (starting with `plan_`):**
+
+If your Whop products have multiple plans within them, you may need to add Plan IDs. Open `/lib/whop.ts` and add them to the `planMappings` section:
+
+```typescript
+const planMappings: Record<string, '48h' | '7d' | '30d' | 'lifetime'> = {
+  'plan_xxxxx': '48h',       // Your 48h plan ID (if applicable)
+  'plan_yyyyy': '7d',        // Your 7d plan ID (if applicable)
+  'plan_zzzzz': '30d',       // Your 30d plan ID (if applicable)
+  'plan_aaaaa': 'lifetime',  // Your lifetime plan ID (if applicable)
+};
+```
+
+**How to find Plan IDs (if needed):**
 1. Go to your Whop product page
-2. Click on each plan
-3. Look at the URL or the plan details to find the Plan ID
+2. Click on a specific plan/pricing tier
+3. Look at the URL - it will contain `plan_xxxxx`
+4. Or use browser DevTools → Network tab when loading the product page
 
 ---
 
