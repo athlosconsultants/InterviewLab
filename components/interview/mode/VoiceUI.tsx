@@ -1107,6 +1107,7 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
 
                 {answerMode === 'audio' ? (
                   <AudioRecorder
+                    key={currentTurnId} // Force remount when question changes
                     onRecordingComplete={(blob) => {
                       setAudioBlob(blob);
                       setOrbState('idle');
