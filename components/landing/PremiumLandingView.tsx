@@ -99,7 +99,7 @@ export function PremiumLandingView({
 
   return (
     <main className="premium-dashboard min-h-screen bg-gradient-to-b from-blue-50/30 via-white to-white">
-      <div className="mx-auto max-w-2xl px-6 md:px-8 py-12 md:py-16 pb-8 sm:pb-12 flex flex-col min-h-screen justify-between">
+      <div className="mx-auto max-w-2xl md:max-w-[520px] px-6 md:px-8 py-12 md:py-16 pb-10 sm:pb-12 md:pb-16 flex flex-col min-h-screen justify-between">
         {/* STATUS & WELCOME SECTION (25% of viewport) */}
         <div className="space-y-2 py-4">
           <h1 className="text-2xl md:text-3xl font-light text-slate-800 tracking-tight">
@@ -116,8 +116,8 @@ export function PremiumLandingView({
           </p>
         </div>
 
-        {/* MOTIVATIONAL INSIGHT */}
-        <div className="mt-4 mb-4">
+        {/* MOTIVATIONAL INSIGHT - Platform-specific spacing */}
+        <div className="mt-5 mb-8 sm:mt-6 sm:mb-8 md:mt-8 md:mb-10">
           <MotivationalInsight />
         </div>
 
@@ -125,7 +125,7 @@ export function PremiumLandingView({
         <div className="flex-1 flex flex-col justify-center space-y-6 my-6">
           <Button
             asChild
-            className="w-full h-20 md:h-24 text-lg md:text-xl font-semibold bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 active:scale-[0.98] rounded-2xl mb-8"
+            className="w-full h-[84px] sm:h-20 md:h-24 text-lg md:text-xl font-semibold bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-lg hover:shadow-xl md:hover:shadow-2xl transition-all duration-300 active:scale-[0.98] rounded-2xl mb-8"
           >
             <Link href="/setup">
               Start New Interview
@@ -135,14 +135,14 @@ export function PremiumLandingView({
         </div>
 
         {/* SECONDARY ACTIONS (20% of viewport) */}
-        <div className="space-y-6 mt-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-4 space-y-4 sm:space-y-0">
+        <div className="space-y-6 mt-6 md:mt-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-4 md:gap-5 space-y-4 sm:space-y-0">
             {/* Continue Interview (if incomplete session exists) */}
             {stats.incompleteSession ? (
               <Button
                 asChild
                 variant="outline"
-                className="h-auto py-6 flex flex-col items-start space-y-2 hover:border-cyan-500 hover:bg-cyan-50/50 transition-colors"
+                className="h-auto py-6 flex flex-col items-start space-y-2 border-slate-200 hover:border-cyan-500 hover:bg-cyan-50/50 transition-colors rounded-xl"
               >
                 <Link href={`/interview/${stats.incompleteSession.id}`}>
                   <div className="w-full flex items-center justify-between">
@@ -159,23 +159,23 @@ export function PremiumLandingView({
                 </Link>
               </Button>
             ) : (
-              <Button
-                asChild
-                variant="outline"
-                className="h-20 font-semibold hover:border-cyan-500 hover:bg-cyan-50/50 transition-colors"
-              >
-                <Link href="/setup">
-                  <BarChart3 className="h-5 w-5 mr-2 text-slate-500" />
-                  Quick Session
-                </Link>
-              </Button>
+            <Button
+              asChild
+              variant="outline"
+              className="h-20 font-semibold border-slate-200 hover:border-cyan-500 hover:bg-cyan-50/50 transition-colors rounded-xl"
+            >
+              <Link href="/setup">
+                <BarChart3 className="h-5 w-5 mr-2 text-slate-500" />
+                Quick Session
+              </Link>
+            </Button>
             )}
 
             {/* View Reports */}
             <Button
               asChild
               variant="outline"
-              className="h-20 font-semibold hover:border-cyan-500 hover:bg-cyan-50/50 transition-colors"
+              className="h-20 font-semibold border-slate-200 hover:border-cyan-500 hover:bg-cyan-50/50 transition-colors rounded-xl"
             >
               <Link href="/dashboard/reports">
                 <BarChart3 className="h-5 w-5 mr-2 text-slate-500" />
@@ -191,7 +191,7 @@ export function PremiumLandingView({
         </div>
 
         {/* UTILITY FOOTER (15% of viewport) */}
-        <div className="space-y-6 pt-6 mt-4 border-t border-slate-200/50">
+        <div className="space-y-6 pt-6 mt-4 md:mt-6 border-t border-slate-200/50">
           {/* CV Upload Status */}
           <div className="flex items-center justify-between text-sm">
             <div className="flex items-center gap-2 text-slate-600">
