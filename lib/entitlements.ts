@@ -18,6 +18,7 @@ export interface UserEntitlement {
  * Get user's current entitlement status
  * Returns { isActive: true } if user has valid, non-expired access
  * Super admins always return isActive: true
+ * Checks both Stripe and Whop entitlements
  */
 export async function getUserEntitlements(
   userId: string
@@ -35,15 +36,14 @@ export async function getUserEntitlements(
 
   const supabase = await createClient();
 
+  // Fetch all entitlements (both Stripe and Whop) ordered by creation date
   const { data, error } = await supabase
     .from('entitlements')
-    .select('tier, expires_at')
+    .select('tier, expires_at, payment_provider, status')
     .eq('user_id', userId)
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .single();
+    .order('created_at', { ascending: false });
 
-  if (error || !data) {
+  if (error || !data || data.length === 0) {
     return {
       isActive: false,
       tier: null,
@@ -52,15 +52,33 @@ export async function getUserEntitlements(
   }
 
   const now = new Date();
-  const expiresAt = data.expires_at ? new Date(data.expires_at) : null;
 
-  // Check if expired (null expires_at = lifetime = never expires)
-  const isActive = expiresAt === null || expiresAt > now;
+  // Find the first valid (non-expired) entitlement
+  for (const entitlement of data) {
+    // Skip if status is explicitly expired or cancelled
+    if (entitlement.status && ['expired', 'cancelled'].includes(entitlement.status)) {
+      continue;
+    }
 
+    const expiresAt = entitlement.expires_at ? new Date(entitlement.expires_at) : null;
+    
+    // Check if expired (null expires_at = lifetime = never expires)
+    const isActive = expiresAt === null || expiresAt > now;
+
+    if (isActive) {
+      return {
+        isActive: true,
+        tier: entitlement.tier as PassTier,
+        expiresAt: entitlement.expires_at,
+      };
+    }
+  }
+
+  // No valid entitlements found
   return {
-    isActive,
-    tier: data.tier as PassTier,
-    expiresAt: data.expires_at,
+    isActive: false,
+    tier: null,
+    expiresAt: null,
   };
 }
 

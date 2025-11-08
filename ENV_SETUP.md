@@ -82,6 +82,66 @@ openssl rand -base64 32
 # Or use: node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
 ```
 
+### Whop Integration (Optional)
+
+```bash
+WHOP_API_KEY=your-whop-api-key
+WHOP_CLIENT_ID=your-whop-client-id
+WHOP_CLIENT_SECRET=your-whop-client-secret
+WHOP_WEBHOOK_SECRET=your-whop-webhook-secret
+WHOP_COMPANY_ID=your-whop-company-id
+```
+
+**Whop Configuration:**
+
+Whop is an optional payment provider that runs alongside your existing Stripe integration. Users can purchase on Whop and access your app via "Sign in with Whop".
+
+- `WHOP_API_KEY`: Your Whop API key (for verifying memberships)
+- `WHOP_CLIENT_ID`: OAuth Client ID from Whop
+- `WHOP_CLIENT_SECRET`: OAuth Client Secret from Whop
+- `WHOP_WEBHOOK_SECRET`: Secret for verifying webhook signatures
+- `WHOP_COMPANY_ID`: Your Whop company ID
+
+**How to Get Whop Credentials:**
+
+1. **Create a Whop Account:**
+   - Go to [whop.com](https://whop.com)
+   - Sign up or log in
+   - Create a seller account
+
+2. **Create Your Product:**
+   - Go to your Whop dashboard
+   - Create a new product with your desired plans (48h, 7d, 30d, lifetime)
+
+3. **Get API Credentials:**
+   - Go to Settings → Developer → API Keys
+   - Click "Create API Key"
+   - Copy your API key (starts with `whop_`)
+   - Your Company ID is visible in the URL when viewing your dashboard: `https://whop.com/company/{COMPANY_ID}/overview`
+
+4. **Set Up OAuth:**
+   - Go to Settings → Developer → OAuth Apps
+   - Click "Create OAuth App"
+   - Set Redirect URI to: `https://yourdomain.com/whop/callback`
+   - Copy the Client ID and Client Secret
+
+5. **Set Up Webhooks:**
+   - Go to Settings → Developer → Webhooks
+   - Click "Create Webhook"
+   - Set URL to: `https://yourdomain.com/api/whop-webhook`
+   - Select events:
+     - `membership.went_valid` (required)
+     - `membership.went_invalid` (required)
+     - `membership.updated` (recommended)
+     - `membership.deleted` (recommended)
+   - Copy the Webhook Secret
+
+**Important Notes:**
+- Whop runs alongside Stripe - both payment systems work together
+- Users from Whop marketplace use "Sign in with Whop" button
+- Your existing Stripe customers are unaffected
+- Whop memberships automatically sync to your entitlements system
+
 ## How to Get API Keys
 
 ### Supabase
