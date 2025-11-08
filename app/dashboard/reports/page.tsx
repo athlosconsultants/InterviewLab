@@ -94,16 +94,16 @@ export default function ReportsPage() {
                         </span>
                       )}
                       <span className={`px-2 py-0.5 rounded-full text-xs ${
-                        session.status === 'complete' 
+                        session.status === 'feedback' 
                           ? 'bg-green-100 text-green-700'
                           : 'bg-amber-100 text-amber-700'
                       }`}>
-                        {session.status === 'complete' ? 'Completed' : 'In Progress'}
+                        {session.status === 'feedback' ? 'Completed' : 'In Progress'}
                       </span>
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    {session.status === 'complete' ? (
+                    {session.status === 'feedback' ? (
                       <Button variant="outline" asChild size="sm">
                         <Link href={`/report/${session.id}`}>
                           View Report

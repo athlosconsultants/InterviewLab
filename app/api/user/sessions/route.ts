@@ -12,6 +12,7 @@ export async function GET() {
     }
 
     // Fetch user's sessions with reports data
+    // Only show sessions that are running or have feedback (completed)
     const { data: sessions, error: sessionsError } = await supabase
       .from('sessions')
       .select(`
@@ -25,6 +26,7 @@ export async function GET() {
         )
       `)
       .eq('user_id', user.id)
+      .in('status', ['running', 'feedback'])
       .order('created_at', { ascending: false });
 
     if (sessionsError) {
