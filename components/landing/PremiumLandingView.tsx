@@ -276,7 +276,7 @@ export function PremiumLandingView({
                   <Button
                     asChild
                     variant="outline"
-                    className="h-24 py-6 flex flex-col justify-center items-start space-y-2 border-slate-200 hover:border-cyan-500 hover:bg-cyan-50/50 transition-colors rounded-xl"
+                    className="h-auto py-8 flex flex-col items-start space-y-3 border-slate-200 hover:border-cyan-500 hover:bg-cyan-50/50 transition-colors rounded-xl"
                   >
                     <Link href={`/interview/${stats.incompleteSession.id}`}>
                       <div className="w-full flex items-center justify-between">
@@ -296,7 +296,7 @@ export function PremiumLandingView({
                   <Button
                     asChild
                     variant="outline"
-                    className="h-24 text-lg font-semibold border-slate-200 hover:border-cyan-500 hover:bg-cyan-50/50 transition-colors rounded-xl"
+                    className="h-auto py-8 text-lg font-semibold border-slate-200 hover:border-cyan-500 hover:bg-cyan-50/50 transition-colors rounded-xl"
                   >
                     <Link href="/setup">
                       <BarChart3 className="h-6 w-6 mr-3 text-slate-500" />
@@ -308,7 +308,7 @@ export function PremiumLandingView({
                 <Button
                   asChild
                   variant="outline"
-                  className="h-24 text-lg font-semibold border-slate-200 hover:border-cyan-500 hover:bg-cyan-50/50 transition-colors rounded-xl"
+                  className="h-auto py-8 flex flex-col justify-center text-lg font-semibold border-slate-200 hover:border-cyan-500 hover:bg-cyan-50/50 transition-colors rounded-xl"
                 >
                   <Link href="/dashboard/reports">
                     <BarChart3 className="h-6 w-6 mr-3 text-slate-500" />
