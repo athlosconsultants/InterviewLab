@@ -11,20 +11,11 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Fetch user's sessions with reports data
+    // Fetch user's sessions
     // Only show sessions that are running or have feedback (completed)
     const { data: sessions, error: sessionsError } = await supabase
       .from('sessions')
-      .select(`
-        id,
-        job_title,
-        company,
-        created_at,
-        status,
-        reports (
-          overall
-        )
-      `)
+      .select('id, job_title, company, created_at, status')
       .eq('user_id', user.id)
       .in('status', ['running', 'feedback'])
       .order('created_at', { ascending: false });
@@ -32,33 +23,39 @@ export async function GET() {
     if (sessionsError) {
       console.error('Sessions fetch error:', sessionsError);
       return NextResponse.json(
-        { error: 'Failed to fetch sessions' },
+        { error: 'Failed to fetch sessions', details: sessionsError.message },
         { status: 500 }
       );
     }
 
-    console.log('[Sessions API] Found', sessions?.length || 0, 'sessions');
-    if (sessions && sessions.length > 0) {
+    // Fetch reports separately for each session
+    const sessionsWithReports = await Promise.all(
+      (sessions || []).map(async (session: any) => {
+        const { data: report } = await supabase
+          .from('reports')
+          .select('overall')
+          .eq('session_id', session.id)
+          .single();
+        
+        return {
+          ...session,
+          overall_score: report?.overall || null,
+        };
+      })
+    );
+
+    console.log('[Sessions API] Found', sessionsWithReports?.length || 0, 'sessions');
+    if (sessionsWithReports && sessionsWithReports.length > 0) {
       console.log('[Sessions API] Sample session:', {
-        id: sessions[0].id,
-        status: sessions[0].status,
-        hasReport: !!sessions[0].reports?.[0],
+        id: sessionsWithReports[0].id,
+        status: sessionsWithReports[0].status,
+        overall_score: sessionsWithReports[0].overall_score,
       });
     }
 
-    // Transform data to include overall_score
-    const transformedSessions = sessions?.map((session: any) => ({
-      id: session.id,
-      job_title: session.job_title,
-      company: session.company,
-      created_at: session.created_at,
-      status: session.status,
-      overall_score: session.reports?.[0]?.overall || null,
-    })) || [];
-
     return NextResponse.json({
       success: true,
-      sessions: transformedSessions,
+      sessions: sessionsWithReports,
     });
   } catch (error) {
     console.error('API error:', error);
