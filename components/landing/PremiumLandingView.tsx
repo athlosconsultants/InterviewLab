@@ -432,7 +432,7 @@ export function PremiumLandingView({
                   <h3 className="text-sm font-semibold text-slate-800">{stats.practiceStreak}-Day Streak!</h3>
                 </div>
                 <p className="text-sm text-slate-700 mb-3">
-                  You've practiced {stats.practiceStreak} {stats.practiceStreak === 1 ? 'day' : 'days'} in a row. Keep it up!
+                  You&apos;ve practiced {stats.practiceStreak} {stats.practiceStreak === 1 ? 'day' : 'days'} in a row. Keep it up!
                 </p>
                 <div className="flex items-center gap-2 text-xs text-orange-700 font-medium">
                   {stats.practicedToday ? '✓ Practiced today' : 'Practice today to continue your streak'}
