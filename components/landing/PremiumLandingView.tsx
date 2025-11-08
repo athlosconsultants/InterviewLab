@@ -276,7 +276,7 @@ export function PremiumLandingView({
                   <Button
                     asChild
                     variant="outline"
-                    className="h-auto py-8 flex flex-col items-start space-y-3 border-slate-200 hover:border-cyan-500 hover:bg-cyan-50/50 transition-colors rounded-xl"
+                    className="h-24 py-6 flex flex-col justify-center items-start space-y-2 border-slate-200 hover:border-cyan-500 hover:bg-cyan-50/50 transition-colors rounded-xl"
                   >
                     <Link href={`/interview/${stats.incompleteSession.id}`}>
                       <div className="w-full flex items-center justify-between">
