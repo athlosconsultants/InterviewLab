@@ -8,6 +8,8 @@ import { DashboardStats } from '@/lib/dashboard-stats';
 import { CvUploadModal } from '@/components/dashboard/CvUploadModal';
 import { MotivationalInsight } from '@/components/dashboard/MotivationalInsight';
 import { formatDistanceToNow } from 'date-fns';
+import { usePremiumPrefetch } from '@/hooks/usePremiumPrefetch';
+import { usePremiumDataPrefetch } from '@/hooks/usePremiumDataPrefetch';
 
 interface PremiumLandingViewProps {
   tier: string;
@@ -38,6 +40,15 @@ export function PremiumLandingView({
   const [timeRemaining, setTimeRemaining] = useState<string>('');
   const [mounted, setMounted] = useState(false);
   const [showCvUpload, setShowCvUpload] = useState(false);
+
+  // Prefetch all accessible pages for instant navigation
+  usePremiumPrefetch({ 
+    sessionId: stats.incompleteSession?.id,
+    enableCaching: true 
+  });
+  
+  // Prefetch and cache API data
+  usePremiumDataPrefetch();
 
   useEffect(() => {
     setMounted(true);

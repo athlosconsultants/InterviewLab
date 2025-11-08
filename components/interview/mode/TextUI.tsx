@@ -325,6 +325,14 @@ export function TextUI({ sessionId, jobTitle, company }: InterviewUIProps) {
             toast.success('Interview complete', {
               description: 'Well done.',
             });
+            
+            // Invalidate cache since interview is complete
+            if (typeof window !== 'undefined') {
+              import('@/lib/cache-manager').then(({ invalidateCacheOnInterviewComplete }) => {
+                invalidateCacheOnInterviewComplete();
+              });
+            }
+            
             // Redirect all users directly to report
             setTimeout(() => {
               router.push(`/report/${sessionId}`);

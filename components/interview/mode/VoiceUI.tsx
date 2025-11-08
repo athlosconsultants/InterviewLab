@@ -737,6 +737,14 @@ export function VoiceUI({ sessionId, jobTitle, company }: VoiceUIProps) {
               toast.info('View your detailed report', {
                 description: 'Click below to see your results',
               });
+              
+              // Invalidate cache since interview is complete
+              if (typeof window !== 'undefined') {
+                import('@/lib/cache-manager').then(({ invalidateCacheOnInterviewComplete }) => {
+                  invalidateCacheOnInterviewComplete();
+                });
+              }
+              
               setTimeout(() => {
                 router.push(`/report/${sessionId}`);
               }, 1500);

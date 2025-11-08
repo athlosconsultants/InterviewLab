@@ -6,6 +6,7 @@ import { FileDrop } from '@/components/forms/FileDrop';
 import { uploadFile } from '@/lib/upload-client';
 import { toast } from 'sonner';
 import { X } from 'lucide-react';
+import { invalidateCacheOnCvUpload } from '@/lib/cache-manager';
 
 interface CvUploadModalProps {
   isOpen: boolean;
@@ -36,6 +37,9 @@ export function CvUploadModal({ isOpen, onClose, hasCv }: CvUploadModalProps) {
       }
 
       toast.success(hasCv ? 'CV updated successfully' : 'CV uploaded successfully');
+      
+      // Invalidate cache since user data changed
+      invalidateCacheOnCvUpload();
       
       // Refresh the page to show new CV status
       window.location.reload();

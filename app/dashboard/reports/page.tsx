@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { ArrowLeft, Star, Calendar } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import { getCachedData } from '@/hooks/usePremiumDataPrefetch';
 
 interface ReportSession {
   id: string;
@@ -22,11 +23,22 @@ export default function ReportsPage() {
   useEffect(() => {
     async function fetchSessions() {
       try {
+        // Try cache first for instant loading
+        const cachedData = getCachedData('sessions');
+        if (cachedData && cachedData.success) {
+          setSessions(cachedData.sessions);
+          setLoading(false);
+          console.log('[Reports] Loaded from cache (instant)');
+          return;
+        }
+
+        // Fallback to API if no cache
         const response = await fetch('/api/user/sessions');
         const data = await response.json();
         
         if (data.success) {
           setSessions(data.sessions);
+          console.log('[Reports] Loaded from API');
         }
       } catch (error) {
         console.error('Failed to fetch sessions:', error);
