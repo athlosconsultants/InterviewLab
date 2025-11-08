@@ -28,20 +28,25 @@ export default function ReportsPage() {
         if (cachedData && cachedData.success) {
           setSessions(cachedData.sessions);
           setLoading(false);
-          console.log('[Reports] Loaded from cache (instant)');
+          console.log('[Reports] Loaded from cache (instant):', cachedData.sessions.length, 'sessions');
           return;
         }
 
         // Fallback to API if no cache
+        console.log('[Reports] Fetching from API...');
         const response = await fetch('/api/user/sessions');
         const data = await response.json();
         
+        console.log('[Reports] API response:', data);
+        
         if (data.success) {
           setSessions(data.sessions);
-          console.log('[Reports] Loaded from API');
+          console.log('[Reports] Loaded from API:', data.sessions.length, 'sessions');
+        } else {
+          console.error('[Reports] API returned error:', data.error);
         }
       } catch (error) {
-        console.error('Failed to fetch sessions:', error);
+        console.error('[Reports] Failed to fetch sessions:', error);
       } finally {
         setLoading(false);
       }

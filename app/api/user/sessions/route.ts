@@ -37,6 +37,15 @@ export async function GET() {
       );
     }
 
+    console.log('[Sessions API] Found', sessions?.length || 0, 'sessions');
+    if (sessions && sessions.length > 0) {
+      console.log('[Sessions API] Sample session:', {
+        id: sessions[0].id,
+        status: sessions[0].status,
+        hasReport: !!sessions[0].reports?.[0],
+      });
+    }
+
     // Transform data to include overall_score
     const transformedSessions = sessions?.map((session: any) => ({
       id: session.id,
