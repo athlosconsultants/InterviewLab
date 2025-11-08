@@ -200,7 +200,10 @@ export default async function Home() {
               ) : (
                 <>
                   <Link href="/assessment/setup">
-                    <Button size="lg" variant="outline">
+                    <Button 
+                      size="lg"
+                      className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-md hover:shadow-lg transition-all"
+                    >
                       Start My Free 3-Question Assessment →
                     </Button>
                   </Link>
