@@ -246,17 +246,17 @@ export function PremiumLandingView({
       </div>
 
       {/* Desktop Two-Column Layout (>= 1024px) */}
-      <div className="hidden lg:flex mx-auto max-w-7xl px-12 py-16 pb-16 min-h-screen">
-        <div className="flex gap-12 w-full">
+      <div className="hidden lg:flex mx-auto max-w-7xl px-12 py-8 pb-12 min-h-screen">
+        <div className="flex gap-8 w-full">
           
           {/* LEFT COLUMN: Primary Actions */}
-          <div className="flex-1 max-w-[640px] flex flex-col justify-between">
+          <div className="flex-1 max-w-[680px] flex flex-col justify-between">
             {/* STATUS & WELCOME */}
-            <div className="space-y-2 py-4">
-              <h1 className="text-3xl font-light text-slate-800 tracking-tight">
+            <div className="space-y-2 py-2">
+              <h1 className="text-4xl font-light text-slate-800 tracking-tight">
                 {getGreeting()}
               </h1>
-              <p className="text-sm text-slate-500 font-light tracking-wide">
+              <p className="text-base text-slate-500 font-light tracking-wide">
                 {getTierDisplay()}
                 {!isSuperAdmin && tier !== 'lifetime' && timeRemaining && (
                   <>
@@ -268,10 +268,10 @@ export function PremiumLandingView({
             </div>
 
             {/* PRIMARY CTA */}
-            <div className="flex-1 flex flex-col justify-center space-y-6 my-12">
+            <div className="flex-1 flex flex-col justify-center space-y-6 my-8">
               <Button
                 asChild
-                className="w-full h-28 text-2xl font-semibold bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-xl hover:shadow-2xl transition-all duration-300 active:scale-[0.98] rounded-2xl"
+                className="w-full h-32 text-2xl font-semibold bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-xl hover:shadow-2xl transition-all duration-300 active:scale-[0.98] rounded-2xl"
               >
                 <Link href="/setup">
                   Start New Interview
@@ -281,18 +281,18 @@ export function PremiumLandingView({
             </div>
 
             {/* SECONDARY ACTIONS */}
-            <div className="space-y-6">
-              <div className="grid grid-cols-2 gap-6">
+            <div className="space-y-5">
+              <div className="grid grid-cols-2 gap-5">
                 {stats.incompleteSession ? (
                   <Button
                     asChild
                     variant="outline"
-                    className="h-auto py-8 flex flex-col items-start space-y-3 border-slate-200 hover:border-cyan-500 hover:bg-cyan-50/50 transition-colors rounded-xl"
+                    className="h-auto py-6 flex flex-col items-start space-y-2 border-slate-200 hover:border-cyan-500 hover:bg-cyan-50/50 transition-colors rounded-xl"
                   >
                     <Link href={`/interview/${stats.incompleteSession.id}`}>
                       <div className="w-full flex items-center justify-between">
-                        <span className="font-semibold text-slate-800 text-lg">Continue Interview</span>
-                        <span className="text-sm text-slate-500">{stats.incompleteSession.progress}%</span>
+                        <span className="font-semibold text-slate-800 text-base">Continue Interview</span>
+                        <span className="text-xs text-slate-500">{stats.incompleteSession.progress}%</span>
                       </div>
                       <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
                         <div
@@ -300,17 +300,17 @@ export function PremiumLandingView({
                           style={{ width: `${stats.incompleteSession.progress}%` }}
                         />
                       </div>
-                      <span className="text-sm text-slate-500">{stats.incompleteSession.remainingMinutes} min remaining</span>
+                      <span className="text-xs text-slate-500">{stats.incompleteSession.remainingMinutes} min remaining</span>
                     </Link>
                   </Button>
                 ) : (
                   <Button
                     asChild
                     variant="outline"
-                    className="h-auto py-8 text-lg font-semibold border-slate-200 hover:border-cyan-500 hover:bg-cyan-50/50 transition-colors rounded-xl"
+                    className="h-auto py-6 text-base font-semibold border-slate-200 hover:border-cyan-500 hover:bg-cyan-50/50 transition-colors rounded-xl"
                   >
                     <Link href="/setup">
-                      <BarChart3 className="h-6 w-6 mr-3 text-slate-500" />
+                      <BarChart3 className="h-5 w-5 mr-2 text-slate-500" />
                       Quick Session
                     </Link>
                   </Button>
@@ -319,13 +319,13 @@ export function PremiumLandingView({
                 <Button
                   asChild
                   variant="outline"
-                  className="h-auto py-8 flex flex-col justify-center text-lg font-semibold border-slate-200 hover:border-cyan-500 hover:bg-cyan-50/50 transition-colors rounded-xl"
+                  className="h-auto py-6 flex flex-col justify-center text-base font-semibold border-slate-200 hover:border-cyan-500 hover:bg-cyan-50/50 transition-colors rounded-xl"
                 >
                   <Link href="/dashboard/reports">
-                    <BarChart3 className="h-6 w-6 mr-3 text-slate-500" />
+                    <BarChart3 className="h-5 w-5 mr-2 text-slate-500" />
                     View Reports
                     {stats.recentSessions.length > 0 && (
-                      <span className="ml-auto text-sm text-slate-500">
+                      <span className="ml-auto text-xs text-slate-500">
                         {stats.recentSessions[0].overallScore}/10
                       </span>
                     )}
@@ -335,7 +335,7 @@ export function PremiumLandingView({
             </div>
 
             {/* UTILITY FOOTER */}
-            <div className="space-y-6 pt-8 mt-8 border-t border-slate-200/50">
+            <div className="space-y-5 pt-6 mt-6 border-t border-slate-200/50">
               <div className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-2 text-slate-600">
                   <FileText className="h-4 w-4" />
@@ -367,7 +367,7 @@ export function PremiumLandingView({
           </div>
 
           {/* RIGHT COLUMN: Info & Stats */}
-          <div className="w-[420px] flex flex-col space-y-6 py-4">
+          <div className="w-[460px] flex flex-col space-y-5 py-2">
             {/* MOTIVATIONAL INSIGHT */}
             <div>
               <MotivationalInsight />
@@ -375,10 +375,10 @@ export function PremiumLandingView({
 
             {/* QUICK STATS CARD */}
             <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-              <h3 className="text-sm font-semibold text-slate-800 uppercase tracking-wide mb-5">
+              <h3 className="text-base font-semibold text-slate-800 uppercase tracking-wide mb-5">
                 Your Progress
               </h3>
-              <div className="space-y-5">
+              <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="p-2 rounded-lg bg-cyan-50">
@@ -435,14 +435,14 @@ export function PremiumLandingView({
 
             {/* PRACTICE STREAK (if applicable) */}
             {stats.practiceStreak > 0 && (
-              <div className="rounded-xl bg-gradient-to-br from-orange-50 to-amber-50 p-6 border border-orange-100">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="p-2 rounded-lg bg-white">
-                    <Target className="h-5 w-5 text-orange-600" />
+              <div className="rounded-xl bg-gradient-to-br from-orange-50 to-amber-50 p-5 border border-orange-100">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="p-1.5 rounded-lg bg-white">
+                    <Target className="h-4 w-4 text-orange-600" />
                   </div>
                   <h3 className="text-sm font-semibold text-slate-800">{stats.practiceStreak}-Day Streak!</h3>
                 </div>
-                <p className="text-sm text-slate-700 mb-3">
+                <p className="text-xs text-slate-700 mb-2">
                   You&apos;ve practiced {stats.practiceStreak} {stats.practiceStreak === 1 ? 'day' : 'days'} in a row. Keep it up!
                 </p>
                 <div className="flex items-center gap-2 text-xs text-orange-700 font-medium">
@@ -453,12 +453,12 @@ export function PremiumLandingView({
 
             {/* NEXT MILESTONE (if under 10 interviews) */}
             {stats.totalInterviews < 10 && (
-              <div className="rounded-xl bg-gradient-to-br from-cyan-50 to-blue-50 p-6 border border-cyan-100">
-                <div className="flex items-center gap-3 mb-3">
-                  <Target className="h-5 w-5 text-cyan-600" />
+              <div className="rounded-xl bg-gradient-to-br from-cyan-50 to-blue-50 p-5 border border-cyan-100">
+                <div className="flex items-center gap-2 mb-2">
+                  <Target className="h-4 w-4 text-cyan-600" />
                   <h3 className="text-sm font-semibold text-slate-800">Next Milestone</h3>
                 </div>
-                <p className="text-sm text-slate-700 mb-4">
+                <p className="text-xs text-slate-700 mb-3">
                   {10 - stats.totalInterviews} more {10 - stats.totalInterviews === 1 ? 'interview' : 'interviews'} to unlock advanced insights
                 </p>
                 <div className="w-full h-3 bg-white rounded-full overflow-hidden">
