@@ -198,24 +198,14 @@ export default async function Home() {
                   </Link>
                 </>
               ) : (
-                <>
-                  <Link href="/assessment/setup">
-                    <Button 
-                      size="lg"
-                      className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-md hover:shadow-lg transition-all"
-                    >
-                      Start My Free 3-Question Assessment →
-                    </Button>
-                  </Link>
-                  <Link href="/pricing">
-                    <Button
-                      size="lg"
-                      className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white"
-                    >
-                      Explore Premium Plans
-                    </Button>
-                  </Link>
-                </>
+                <Link href="/assessment/setup">
+                  <Button
+                    size="lg"
+                    className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white"
+                  >
+                    Start My Free 3-Question Assessment →
+                  </Button>
+                </Link>
               )}
             </div>
           </div>
