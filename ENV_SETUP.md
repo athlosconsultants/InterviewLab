@@ -87,6 +87,7 @@ openssl rand -base64 32
 ```bash
 WHOP_API_KEY=your-whop-api-key
 WHOP_CLIENT_ID=your-whop-client-id
+NEXT_PUBLIC_WHOP_CLIENT_ID=your-whop-client-id
 WHOP_CLIENT_SECRET=your-whop-client-secret
 WHOP_WEBHOOK_SECRET=your-whop-webhook-secret
 WHOP_COMPANY_ID=your-whop-company-id
@@ -96,11 +97,12 @@ WHOP_COMPANY_ID=your-whop-company-id
 
 Whop is an optional payment provider that runs alongside your existing Stripe integration. Users can purchase on Whop and access your app via "Sign in with Whop".
 
-- `WHOP_API_KEY`: Your Whop API key (for verifying memberships)
-- `WHOP_CLIENT_ID`: OAuth Client ID from Whop
-- `WHOP_CLIENT_SECRET`: OAuth Client Secret from Whop
-- `WHOP_WEBHOOK_SECRET`: Secret for verifying webhook signatures
-- `WHOP_COMPANY_ID`: Your Whop company ID
+- `WHOP_API_KEY`: Your Whop API key (for verifying memberships) - server-side only
+- `WHOP_CLIENT_ID`: OAuth Client ID from Whop - server-side only
+- `NEXT_PUBLIC_WHOP_CLIENT_ID`: Same OAuth Client ID - client-side (must be NEXT_PUBLIC_)
+- `WHOP_CLIENT_SECRET`: OAuth Client Secret from Whop - server-side only
+- `WHOP_WEBHOOK_SECRET`: Secret for verifying webhook signatures - server-side only
+- `WHOP_COMPANY_ID`: Your Whop company ID - server-side only
 
 **How to Get Whop Credentials:**
 

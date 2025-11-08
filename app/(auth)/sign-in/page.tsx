@@ -8,7 +8,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import { useDevice } from '@/hooks/useDevice';
 import { bindDevice } from '@/app/assessment/setup/actions';
-import { getWhopOAuthUrl } from '@/lib/whop';
+import { getWhopOAuthUrl } from '@/lib/whop-client';
 
 function SignInForm() {
   const [email, setEmail] = useState('');

@@ -358,25 +358,4 @@ export async function getWhopUserMemberships(
   }
 }
 
-/**
- * Get Whop OAuth authorization URL
- */
-export function getWhopOAuthUrl(): string {
-  if (!WHOP_CLIENT_ID) {
-    console.error('[Whop] Missing WHOP_CLIENT_ID');
-    return '#';
-  }
-
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
-  const redirectUri = `${baseUrl}/whop/callback`;
-  
-  const params = new URLSearchParams({
-    client_id: WHOP_CLIENT_ID,
-    redirect_uri: redirectUri,
-    response_type: 'code',
-    scope: 'user:read memberships:read',
-  });
-
-  return `https://whop.com/oauth?${params.toString()}`;
-}
 
