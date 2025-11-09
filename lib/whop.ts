@@ -263,10 +263,16 @@ export async function exchangeWhopOAuthCode(
     return { success: false, error: 'Missing OAuth credentials' };
   }
 
+  if (!WHOP_API_KEY) {
+    console.error('[Whop] Missing WHOP_API_KEY');
+    return { success: false, error: 'Missing API key' };
+  }
+
   // TEMPORARY DEBUG - Remove after testing
   console.log('[Whop] Client ID present:', !!WHOP_CLIENT_ID);
   console.log('[Whop] Client ID starts with:', WHOP_CLIENT_ID?.substring(0, 8));
   console.log('[Whop] Client Secret present:', !!WHOP_CLIENT_SECRET);
+  console.log('[Whop] API Key present:', !!WHOP_API_KEY);
   console.log('[Whop] Redirect URI:', redirectUri);
 
   try {
@@ -283,6 +289,7 @@ export async function exchangeWhopOAuthCode(
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
         Accept: 'application/json',
+        Authorization: `Bearer ${WHOP_API_KEY}`,
       },
       body: body.toString(),
     });
