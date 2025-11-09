@@ -6,7 +6,9 @@ import Image from 'next/image';
 import { createClient } from '@/lib/supabase-client';
 
 function WhopCallbackContent() {
-  const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
+  const [status, setStatus] = useState<'loading' | 'success' | 'error'>(
+    'loading'
+  );
   const [message, setMessage] = useState('Connecting your Whop account...');
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -46,15 +48,15 @@ function WhopCallbackContent() {
           return;
         }
 
-        // Sign in the user with Supabase
+        // Set the session using the tokens from backend
         const supabase = createClient();
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-          email: data.email,
-          password: data.tempPassword,
+        const { error: sessionError } = await supabase.auth.setSession({
+          access_token: data.accessToken,
+          refresh_token: data.refreshToken,
         });
 
-        if (signInError) {
-          console.error('[Whop] Supabase sign-in error:', signInError);
+        if (sessionError) {
+          console.error('[Whop] Failed to set session:', sessionError);
           setStatus('error');
           setMessage('Failed to sign in. Please try again.');
           return;
@@ -115,8 +117,8 @@ function WhopCallbackContent() {
             status === 'loading'
               ? 'bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/20 dark:to-cyan-950/20 border-blue-300 dark:border-blue-800'
               : status === 'success'
-              ? 'bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 border-green-300 dark:border-green-800'
-              : 'bg-gradient-to-br from-red-50 to-rose-50 dark:from-red-950/20 dark:to-rose-950/20 border-red-300 dark:border-red-800'
+                ? 'bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 border-green-300 dark:border-green-800'
+                : 'bg-gradient-to-br from-red-50 to-rose-50 dark:from-red-950/20 dark:to-rose-950/20 border-red-300 dark:border-red-800'
           }`}
         >
           <div className="flex items-center space-x-3">
@@ -196,4 +198,3 @@ export default function WhopCallbackPage() {
     </Suspense>
   );
 }
-

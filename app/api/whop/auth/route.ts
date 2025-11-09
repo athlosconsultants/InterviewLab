@@ -72,7 +72,6 @@ export async function POST(request: NextRequest) {
       .single();
 
     let supabaseUserId: string;
-    let tempPassword = '';
 
     if (existingUser) {
       // User already linked
@@ -91,7 +90,7 @@ export async function POST(request: NextRequest) {
       } else {
         // Create new Supabase auth user
         // Generate a secure temporary password
-        tempPassword = `whop_${whopUserId}_${Date.now()}_${Math.random().toString(36)}`;
+        const tempPassword = `whop_${whopUserId}_${Date.now()}_${Math.random().toString(36)}`;
 
         const { data: authData, error: authError } =
           await supabase.auth.admin.createUser({
@@ -165,11 +164,27 @@ export async function POST(request: NextRequest) {
       console.log('[Whop Auth] No active memberships found for user');
     }
 
+    // Create a session for the user
+    const { data: sessionData, error: sessionError } =
+      await supabase.auth.admin.generateLink({
+        type: 'magiclink',
+        email: email,
+      });
+
+    if (sessionError || !sessionData) {
+      console.error('[Whop Auth] Failed to generate session:', sessionError);
+      return NextResponse.json(
+        { success: false, error: 'Failed to create session' },
+        { status: 500 }
+      );
+    }
+
     return NextResponse.json({
       success: true,
       email: email,
-      tempPassword: tempPassword || undefined,
       userId: supabaseUserId,
+      accessToken: sessionData.properties.access_token,
+      refreshToken: sessionData.properties.refresh_token,
     });
   } catch (error) {
     console.error('[Whop Auth] Error:', error);
