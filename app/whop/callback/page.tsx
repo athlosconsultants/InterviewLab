@@ -67,19 +67,21 @@ function WhopCallbackContent() {
         }
 
         console.log('[Whop Callback] Session established successfully!');
+        console.log('[Whop Callback] Membership tier:', data.membershipTier);
         setStatus('success');
         setMessage('Success! Redirecting...');
 
-        // Redirect based on membership status
+        // Redirect based on membership tier
         setTimeout(() => {
-          if (data.hasMembership) {
+          if (data.membershipTier === 'premium') {
             console.log(
-              '[Whop Callback] User has membership, redirecting to dashboard'
+              '[Whop Callback] Premium user, redirecting to dashboard'
             );
             router.push('/dashboard');
           } else {
+            // Free tier or no membership - redirect to landing page
             console.log(
-              '[Whop Callback] User has no membership, redirecting to home'
+              '[Whop Callback] Free/no membership, redirecting to home'
             );
             router.push('/');
           }

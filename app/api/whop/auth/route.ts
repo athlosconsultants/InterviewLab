@@ -146,7 +146,7 @@ export async function POST(request: NextRequest) {
 
     // Fetch and sync user's Whop memberships using their access token
     const memberships = await getWhopUserMemberships(tokenResult.accessToken!);
-    let hasActiveMembership = false;
+    let membershipTier: 'free' | 'premium' | null = null;
 
     if (memberships.length > 0) {
       // Sync all active memberships
@@ -156,7 +156,19 @@ export async function POST(request: NextRequest) {
           membership.status === 'trialing'
         ) {
           await syncWhopMembershipToSupabase(membership);
-          hasActiveMembership = true;
+
+          // Determine tier: if any membership is premium, set as premium
+          const { mapWhopPlanToTier } = await import('@/lib/whop');
+          const tier = mapWhopPlanToTier(
+            membership.product_id,
+            membership.plan_id
+          );
+
+          if (tier === 'free') {
+            membershipTier = membershipTier || 'free'; // Only set to free if not already premium
+          } else {
+            membershipTier = 'premium'; // Premium overrides free
+          }
         }
       }
       console.log(
@@ -188,14 +200,14 @@ export async function POST(request: NextRequest) {
 
     console.log('[Whop Auth] Temporary password set successfully');
     console.log('[Whop Auth] Returning credentials to frontend');
-    console.log('[Whop Auth] Has active membership:', hasActiveMembership);
+    console.log('[Whop Auth] Membership tier:', membershipTier);
 
     return NextResponse.json({
       success: true,
       email: email,
       userId: supabaseUserId,
       password: tempPassword,
-      hasMembership: hasActiveMembership,
+      membershipTier: membershipTier,
     });
   } catch (error) {
     console.error('[Whop Auth] Error:', error);

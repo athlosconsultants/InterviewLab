@@ -130,17 +130,25 @@ export async function verifyWhopMembership(
 export function mapWhopPlanToTier(
   productId: string,
   planId: string
-): '48h' | '7d' | '30d' | 'lifetime' {
+): '48h' | '7d' | '30d' | 'lifetime' | 'free' {
   // Map both product IDs and plan IDs for flexibility
-  const productMappings: Record<string, '48h' | '7d' | '30d' | 'lifetime'> = {
-    // Product IDs (if each tier is a separate product)
+  const productMappings: Record<
+    string,
+    '48h' | '7d' | '30d' | 'lifetime' | 'free'
+  > = {
+    // Free Product
+    prod_KgdLN06kTjvbL: 'free', // Free 3-question assessment (no free interviews)
+    // Premium Products
     prod_jDt4y7WIAHML0: '48h', // 48-hour pass
     prod_xT6VjeAQ2isxv: '7d', // 7-day pass
     prod_LbtjUWWQ2FqqT: '30d', // 30-day pass
     prod_6Qht7KNk8j5C8: 'lifetime', // Lifetime access
   };
 
-  const planMappings: Record<string, '48h' | '7d' | '30d' | 'lifetime'> = {
+  const planMappings: Record<
+    string,
+    '48h' | '7d' | '30d' | 'lifetime' | 'free'
+  > = {
     // Plan IDs (if multiple plans within one product)
     // Add your plan IDs here when you get them, format: 'plan_xxxxx': '48h',
   };
@@ -153,10 +161,10 @@ export function mapWhopPlanToTier(
  * Calculate expiration date based on tier
  */
 export function calculateExpirationDate(
-  tier: '48h' | '7d' | '30d' | 'lifetime'
+  tier: '48h' | '7d' | '30d' | 'lifetime' | 'free'
 ): Date | null {
-  if (tier === 'lifetime') {
-    return null; // null = never expires
+  if (tier === 'lifetime' || tier === 'free') {
+    return null; // null = never expires (free tier doesn't expire)
   }
 
   const now = new Date();
