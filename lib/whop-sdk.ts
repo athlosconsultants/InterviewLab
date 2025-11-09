@@ -72,6 +72,48 @@ export async function exchangeWhopCode(
 }
 
 /**
+ * Get user info using access token
+ */
+export async function getWhopUserInfo(accessToken: string): Promise<{
+  success: boolean;
+  userId?: string;
+  email?: string;
+  username?: string;
+  error?: string;
+}> {
+  try {
+    console.log('[Whop SDK] Fetching user info');
+
+    const userResponse = await whopApi.users.me({
+      accessToken,
+    });
+
+    if (!userResponse.ok) {
+      console.error('[Whop SDK] Failed to fetch user info:', userResponse.code);
+      return {
+        success: false,
+        error: `Failed to fetch user info (${userResponse.code})`,
+      };
+    }
+
+    console.log('[Whop SDK] User info fetched successfully');
+
+    return {
+      success: true,
+      userId: userResponse.data.id,
+      email: userResponse.data.email,
+      username: userResponse.data.username || undefined,
+    };
+  } catch (error) {
+    console.error('[Whop SDK] Error fetching user info:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Internal error',
+    };
+  }
+}
+
+/**
  * Get OAuth authorization URL
  */
 export function getWhopOAuthUrl(redirectUri: string): string {

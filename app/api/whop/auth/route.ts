@@ -7,9 +7,8 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase-server';
-import { exchangeWhopCode } from '@/lib/whop-sdk';
+import { exchangeWhopCode, getWhopUserInfo } from '@/lib/whop-sdk';
 import {
-  getWhopUserInfo,
   getWhopUserMemberships,
   syncWhopMembershipToSupabase,
 } from '@/lib/whop';
