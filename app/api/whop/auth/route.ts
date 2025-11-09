@@ -164,74 +164,34 @@ export async function POST(request: NextRequest) {
       console.log('[Whop Auth] No active memberships found for user');
     }
 
-    // Generate a one-time link for the user to establish session
-    // Use 'signup' type to get session tokens in the response
-    const { data: linkData, error: linkError } =
-      await supabase.auth.admin.generateLink({
-        type: 'magiclink',
-        email: email,
-      });
+    // Create a session for the user using a temporary password
+    const tempPassword = crypto.randomUUID();
 
-    if (linkError || !linkData) {
-      console.error('[Whop Auth] Failed to generate link:', linkError);
+    // Update the user's password (works for both new and existing users)
+    const { error: updateError } = await supabase.auth.admin.updateUserById(
+      supabaseUserId,
+      { password: tempPassword }
+    );
+
+    if (updateError) {
+      console.error(
+        '[Whop Auth] Failed to set temporary password:',
+        updateError
+      );
       return NextResponse.json(
         { success: false, error: 'Failed to create session' },
         { status: 500 }
       );
     }
 
-    console.log(
-      '[Whop Auth] Link data structure:',
-      JSON.stringify(linkData, null, 2)
-    );
+    console.log('[Whop Auth] Temporary password set successfully');
+    console.log('[Whop Auth] Returning credentials to frontend');
 
-    // Check if session tokens are in the response properties
-    const accessToken =
-      (linkData as any).access_token || linkData.properties?.access_token;
-    const refreshToken =
-      (linkData as any).refresh_token || linkData.properties?.refresh_token;
-
-    // If not in properties, try extracting from URL hash
-    if (!accessToken || !refreshToken) {
-      const actionLink = linkData.properties.action_link;
-      const url = new URL(actionLink);
-
-      // Try hash first
-      let hashAccessToken = null;
-      let hashRefreshToken = null;
-
-      if (url.hash) {
-        const hashParams = new URLSearchParams(url.hash.substring(1));
-        hashAccessToken = hashParams.get('access_token');
-        hashRefreshToken = hashParams.get('refresh_token');
-      }
-
-      if (hashAccessToken && hashRefreshToken) {
-        console.log('[Whop Auth] Session tokens extracted from hash');
-        return NextResponse.json({
-          success: true,
-          email: email,
-          userId: supabaseUserId,
-          accessToken: hashAccessToken,
-          refreshToken: hashRefreshToken,
-        });
-      }
-
-      console.error('[Whop Auth] No session tokens found in response or URL');
-      console.error('[Whop Auth] URL:', actionLink);
-      return NextResponse.json(
-        { success: false, error: 'Failed to create session tokens' },
-        { status: 500 }
-      );
-    }
-
-    console.log('[Whop Auth] Session tokens found in response properties');
     return NextResponse.json({
       success: true,
       email: email,
       userId: supabaseUserId,
-      accessToken: accessToken,
-      refreshToken: refreshToken,
+      password: tempPassword,
     });
   } catch (error) {
     console.error('[Whop Auth] Error:', error);

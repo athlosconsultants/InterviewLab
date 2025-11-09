@@ -51,16 +51,16 @@ function WhopCallbackContent() {
           return;
         }
 
-        // Set the session using the tokens from backend
-        console.log('[Whop Callback] Setting session with tokens...');
+        // Sign in with the temporary password
+        console.log('[Whop Callback] Signing in with password...');
         const supabase = createClient();
-        const { error: sessionError } = await supabase.auth.setSession({
-          access_token: data.accessToken,
-          refresh_token: data.refreshToken,
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email: data.email,
+          password: data.password,
         });
 
-        if (sessionError) {
-          console.error('[Whop Callback] Failed to set session:', sessionError);
+        if (signInError) {
+          console.error('[Whop Callback] Failed to sign in:', signInError);
           setStatus('error');
           setMessage('Failed to sign in. Please try again.');
           return;
