@@ -1,14 +1,14 @@
 /**
  * Whop OAuth Authentication Handler
- * 
+ *
  * Exchanges OAuth code for access token, fetches user info,
  * creates/links Supabase account, and syncs entitlements
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase-server';
+import { exchangeWhopCode } from '@/lib/whop-sdk';
 import {
-  exchangeWhopOAuthCode,
   getWhopUserInfo,
   getWhopUserMemberships,
   syncWhopMembershipToSupabase,
@@ -31,9 +31,9 @@ export async function POST(request: NextRequest) {
     // Exchange code for access token
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
     const redirectUri = `${baseUrl}/whop/callback`;
-    
-    const tokenResult = await exchangeWhopOAuthCode(code, redirectUri);
-    
+
+    const tokenResult = await exchangeWhopCode(code, redirectUri);
+
     if (!tokenResult.success || !tokenResult.accessToken) {
       console.error('[Whop Auth] Failed to exchange code:', tokenResult.error);
       return NextResponse.json(
@@ -44,9 +44,16 @@ export async function POST(request: NextRequest) {
 
     // Get Whop user info
     const userInfoResult = await getWhopUserInfo(tokenResult.accessToken);
-    
-    if (!userInfoResult.success || !userInfoResult.userId || !userInfoResult.email) {
-      console.error('[Whop Auth] Failed to fetch user info:', userInfoResult.error);
+
+    if (
+      !userInfoResult.success ||
+      !userInfoResult.userId ||
+      !userInfoResult.email
+    ) {
+      console.error(
+        '[Whop Auth] Failed to fetch user info:',
+        userInfoResult.error
+      );
       return NextResponse.json(
         { success: false, error: 'Failed to fetch Whop user information' },
         { status: 400 }
@@ -75,17 +82,18 @@ export async function POST(request: NextRequest) {
       // Create new Supabase auth user
       // Generate a secure temporary password
       tempPassword = `whop_${whopUserId}_${Date.now()}_${Math.random().toString(36)}`;
-      
-      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-        email: email,
-        password: tempPassword,
-        email_confirm: true, // Auto-confirm since Whop already verified
-        user_metadata: {
-          whop_user_id: whopUserId,
-          username: username,
-          auth_provider: 'whop',
-        },
-      });
+
+      const { data: authData, error: authError } =
+        await supabase.auth.admin.createUser({
+          email: email,
+          password: tempPassword,
+          email_confirm: true, // Auto-confirm since Whop already verified
+          user_metadata: {
+            whop_user_id: whopUserId,
+            username: username,
+            auth_provider: 'whop',
+          },
+        });
 
       if (authError || !authData.user) {
         console.error('[Whop Auth] Failed to create Supabase user:', authError);
@@ -115,22 +123,30 @@ export async function POST(request: NextRequest) {
         });
 
       if (whopUserError) {
-        console.error('[Whop Auth] Failed to store Whop user data:', whopUserError);
+        console.error(
+          '[Whop Auth] Failed to store Whop user data:',
+          whopUserError
+        );
         // Continue anyway, user is created
       }
     }
 
     // Fetch and sync user's Whop memberships
     const memberships = await getWhopUserMemberships(whopUserId);
-    
+
     if (memberships.length > 0) {
       // Sync all active memberships
       for (const membership of memberships) {
-        if (membership.status === 'active' || membership.status === 'trialing') {
+        if (
+          membership.status === 'active' ||
+          membership.status === 'trialing'
+        ) {
           await syncWhopMembershipToSupabase(membership);
         }
       }
-      console.log(`[Whop Auth] Synced ${memberships.length} membership(s) for user ${whopUserId}`);
+      console.log(
+        `[Whop Auth] Synced ${memberships.length} membership(s) for user ${whopUserId}`
+      );
     } else {
       console.log('[Whop Auth] No active memberships found for user');
     }
@@ -149,4 +165,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-
