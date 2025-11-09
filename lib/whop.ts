@@ -263,24 +263,26 @@ export async function exchangeWhopOAuthCode(
     return { success: false, error: 'Missing OAuth credentials' };
   }
 
+  // TEMPORARY DEBUG - Remove after testing
+  console.log('[Whop] Client ID present:', !!WHOP_CLIENT_ID);
+  console.log('[Whop] Client ID starts with:', WHOP_CLIENT_ID?.substring(0, 8));
+  console.log('[Whop] Client Secret present:', !!WHOP_CLIENT_SECRET);
+  console.log('[Whop] Redirect URI:', redirectUri);
+
   try {
     const body = new URLSearchParams({
       client_id: WHOP_CLIENT_ID,
+      client_secret: WHOP_CLIENT_SECRET,
       code,
       redirect_uri: redirectUri,
       grant_type: 'authorization_code',
     });
-
-    const basicAuth = Buffer.from(
-      `${WHOP_CLIENT_ID}:${WHOP_CLIENT_SECRET}`
-    ).toString('base64');
 
     const response = await fetch('https://api.whop.com/api/v2/oauth/token', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
         Accept: 'application/json',
-        Authorization: `Basic ${basicAuth}`,
       },
       body: body.toString(),
     });
