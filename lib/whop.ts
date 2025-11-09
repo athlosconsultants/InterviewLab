@@ -1,6 +1,6 @@
 /**
  * Whop Integration Utilities
- * 
+ *
  * Handles Whop API interactions, membership verification, and OAuth flows
  */
 
@@ -47,10 +47,7 @@ export interface WhopWebhookEvent {
 /**
  * Verify Whop webhook signature
  */
-export function verifyWhopWebhook(
-  payload: string,
-  signature: string
-): boolean {
+export function verifyWhopWebhook(payload: string, signature: string): boolean {
   if (!WHOP_WEBHOOK_SECRET) {
     console.error('[Whop] Missing WHOP_WEBHOOK_SECRET');
     return false;
@@ -58,11 +55,8 @@ export function verifyWhopWebhook(
 
   const hmac = crypto.createHmac('sha256', WHOP_WEBHOOK_SECRET);
   const digest = hmac.update(payload).digest('hex');
-  
-  return crypto.timingSafeEqual(
-    Buffer.from(signature),
-    Buffer.from(digest)
-  );
+
+  return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(digest));
 }
 
 /**
@@ -81,7 +75,7 @@ export async function getWhopMembership(
       `${WHOP_API_BASE}/memberships/${membershipId}`,
       {
         headers: {
-          'Authorization': `Bearer ${WHOP_API_KEY}`,
+          Authorization: `Bearer ${WHOP_API_KEY}`,
           'Content-Type': 'application/json',
         },
       }
@@ -107,7 +101,7 @@ export async function verifyWhopMembership(
   membershipId: string
 ): Promise<boolean> {
   const membership = await getWhopMembership(membershipId);
-  
+
   if (!membership) {
     return false;
   }
@@ -133,14 +127,17 @@ export async function verifyWhopMembership(
  * Map Whop product/plan to our PassTier system
  * Updated with actual Whop product IDs
  */
-export function mapWhopPlanToTier(productId: string, planId: string): '48h' | '7d' | '30d' | 'lifetime' {
+export function mapWhopPlanToTier(
+  productId: string,
+  planId: string
+): '48h' | '7d' | '30d' | 'lifetime' {
   // Map both product IDs and plan IDs for flexibility
   const productMappings: Record<string, '48h' | '7d' | '30d' | 'lifetime'> = {
     // Product IDs (if each tier is a separate product)
-    'prod_jDt4y7WIAHML0': '48h',      // 48-hour pass
-    'prod_xT6VjeAQ2isxv': '7d',       // 7-day pass
-    'prod_LbtjUWWQ2FqqT': '30d',      // 30-day pass
-    'prod_6Qht7KNk8j5C8': 'lifetime', // Lifetime access
+    prod_jDt4y7WIAHML0: '48h', // 48-hour pass
+    prod_xT6VjeAQ2isxv: '7d', // 7-day pass
+    prod_LbtjUWWQ2FqqT: '30d', // 30-day pass
+    prod_6Qht7KNk8j5C8: 'lifetime', // Lifetime access
   };
 
   const planMappings: Record<string, '48h' | '7d' | '30d' | 'lifetime'> = {
@@ -155,13 +152,15 @@ export function mapWhopPlanToTier(productId: string, planId: string): '48h' | '7
 /**
  * Calculate expiration date based on tier
  */
-export function calculateExpirationDate(tier: '48h' | '7d' | '30d' | 'lifetime'): Date | null {
+export function calculateExpirationDate(
+  tier: '48h' | '7d' | '30d' | 'lifetime'
+): Date | null {
   if (tier === 'lifetime') {
     return null; // null = never expires
   }
 
   const now = new Date();
-  
+
   switch (tier) {
     case '48h':
       return new Date(now.getTime() + 48 * 60 * 60 * 1000);
@@ -197,7 +196,9 @@ export async function syncWhopMembershipToSupabase(
 
     if (!whopUser) {
       // User hasn't signed in with Whop yet, we'll create entitlement when they do
-      console.log('[Whop] User not found in whop_users, skipping sync until first sign-in');
+      console.log(
+        '[Whop] User not found in whop_users, skipping sync until first sign-in'
+      );
       return { success: true };
     }
 
@@ -208,26 +209,35 @@ export async function syncWhopMembershipToSupabase(
     // Create or update entitlement
     const { error: entitlementError } = await supabase
       .from('entitlements')
-      .upsert({
-        user_id: userId,
-        type: 'interview_package',
-        tier: tier,
-        status: membership.status === 'active' || membership.status === 'trialing' ? 'active' : 'expired',
-        expires_at: expiresAt,
-        payment_provider: 'whop',
-        whop_membership_id: membership.id,
-        whop_product_id: membership.product_id,
-        whop_plan_id: membership.plan_id,
-      }, {
-        onConflict: 'whop_membership_id',
-      });
+      .upsert(
+        {
+          user_id: userId,
+          type: 'interview_package',
+          tier: tier,
+          status:
+            membership.status === 'active' || membership.status === 'trialing'
+              ? 'active'
+              : 'expired',
+          expires_at: expiresAt,
+          payment_provider: 'whop',
+          whop_membership_id: membership.id,
+          whop_product_id: membership.product_id,
+          whop_plan_id: membership.plan_id,
+        },
+        {
+          onConflict: 'whop_membership_id',
+        }
+      );
 
     if (entitlementError) {
       console.error('[Whop] Error upserting entitlement:', entitlementError);
       return { success: false, error: 'Failed to create entitlement' };
     }
 
-    console.log('[Whop] Successfully synced membership to Supabase:', membership.id);
+    console.log(
+      '[Whop] Successfully synced membership to Supabase:',
+      membership.id
+    );
     return { success: true };
   } catch (error) {
     console.error('[Whop] Error syncing membership:', error);
@@ -254,27 +264,38 @@ export async function exchangeWhopOAuthCode(
   }
 
   try {
+    const body = new URLSearchParams({
+      client_id: WHOP_CLIENT_ID,
+      client_secret: WHOP_CLIENT_SECRET,
+      code,
+      redirect_uri: redirectUri,
+      grant_type: 'authorization_code',
+    });
+
     const response = await fetch('https://api.whop.com/api/v2/oauth/token', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/x-www-form-urlencoded',
+        Accept: 'application/json',
       },
-      body: JSON.stringify({
-        client_id: WHOP_CLIENT_ID,
-        client_secret: WHOP_CLIENT_SECRET,
-        code: code,
-        redirect_uri: redirectUri,
-        grant_type: 'authorization_code',
-      }),
+      body: body.toString(),
     });
 
     if (!response.ok) {
-      console.error('[Whop] OAuth token exchange failed:', response.status);
-      return { success: false, error: 'Failed to exchange OAuth code' };
+      const errorText = await response.text();
+      console.error(
+        '[Whop] OAuth token exchange failed:',
+        response.status,
+        errorText
+      );
+      return {
+        success: false,
+        error: errorText || 'Failed to exchange OAuth code',
+      };
     }
 
     const data = await response.json();
-    
+
     return {
       success: true,
       accessToken: data.access_token,
@@ -290,9 +311,7 @@ export async function exchangeWhopOAuthCode(
 /**
  * Get Whop user info from access token
  */
-export async function getWhopUserInfo(
-  accessToken: string
-): Promise<{
+export async function getWhopUserInfo(accessToken: string): Promise<{
   success: boolean;
   userId?: string;
   email?: string;
@@ -302,7 +321,7 @@ export async function getWhopUserInfo(
   try {
     const response = await fetch(`${WHOP_API_BASE}/me`, {
       headers: {
-        'Authorization': `Bearer ${accessToken}`,
+        Authorization: `Bearer ${accessToken}`,
         'Content-Type': 'application/json',
       },
     });
@@ -313,7 +332,7 @@ export async function getWhopUserInfo(
     }
 
     const data = await response.json();
-    
+
     return {
       success: true,
       userId: data.id,
@@ -342,14 +361,17 @@ export async function getWhopUserMemberships(
       `${WHOP_API_BASE}/memberships?user_id=${whopUserId}`,
       {
         headers: {
-          'Authorization': `Bearer ${WHOP_API_KEY}`,
+          Authorization: `Bearer ${WHOP_API_KEY}`,
           'Content-Type': 'application/json',
         },
       }
     );
 
     if (!response.ok) {
-      console.error('[Whop] Failed to fetch user memberships:', response.status);
+      console.error(
+        '[Whop] Failed to fetch user memberships:',
+        response.status
+      );
       return [];
     }
 
@@ -360,5 +382,3 @@ export async function getWhopUserMemberships(
     return [];
   }
 }
-
-
