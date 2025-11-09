@@ -78,31 +78,46 @@ export async function POST(request: NextRequest) {
       // User already linked
       supabaseUserId = existingUser.user_id;
     } else {
-      // Create new Supabase auth user
-      // Generate a secure temporary password
-      tempPassword = `whop_${whopUserId}_${Date.now()}_${Math.random().toString(36)}`;
+      // Check if a user with this email already exists in Supabase
+      const { data: existingAuthUsers } = await supabase.auth.admin.listUsers();
+      const existingAuthUser = existingAuthUsers?.users.find(
+        (u) => u.email === email
+      );
 
-      const { data: authData, error: authError } =
-        await supabase.auth.admin.createUser({
-          email: email,
-          password: tempPassword,
-          email_confirm: true, // Auto-confirm since Whop already verified
-          user_metadata: {
-            whop_user_id: whopUserId,
-            username: username,
-            auth_provider: 'whop',
-          },
-        });
+      if (existingAuthUser) {
+        // User exists in Supabase auth, just link to Whop
+        console.log('[Whop Auth] User exists in Supabase, linking to Whop');
+        supabaseUserId = existingAuthUser.id;
+      } else {
+        // Create new Supabase auth user
+        // Generate a secure temporary password
+        tempPassword = `whop_${whopUserId}_${Date.now()}_${Math.random().toString(36)}`;
 
-      if (authError || !authData.user) {
-        console.error('[Whop Auth] Failed to create Supabase user:', authError);
-        return NextResponse.json(
-          { success: false, error: 'Failed to create user account' },
-          { status: 500 }
-        );
+        const { data: authData, error: authError } =
+          await supabase.auth.admin.createUser({
+            email: email,
+            password: tempPassword,
+            email_confirm: true, // Auto-confirm since Whop already verified
+            user_metadata: {
+              whop_user_id: whopUserId,
+              username: username,
+              auth_provider: 'whop',
+            },
+          });
+
+        if (authError || !authData.user) {
+          console.error(
+            '[Whop Auth] Failed to create Supabase user:',
+            authError
+          );
+          return NextResponse.json(
+            { success: false, error: 'Failed to create user account' },
+            { status: 500 }
+          );
+        }
+
+        supabaseUserId = authData.user.id;
       }
-
-      supabaseUserId = authData.user.id;
 
       // Store Whop OAuth data
       const tokenExpiresAt = tokenResult.expiresIn
