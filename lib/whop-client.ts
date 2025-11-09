@@ -26,7 +26,7 @@ export function getWhopOAuthUrl(): string {
     client_id: appId,
     redirect_uri: redirectUri,
     response_type: 'code',
-    scope: 'read_user',
+    scope: 'read_user read_memberships',
   });
 
   return `https://whop.com/oauth?${params.toString()}`;

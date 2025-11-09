@@ -15,7 +15,7 @@ const WHOP_CLIENT_SECRET = process.env.WHOP_CLIENT_SECRET;
 const WHOP_COMPANY_ID = process.env.WHOP_COMPANY_ID;
 
 // Whop API Base URL
-const WHOP_API_BASE = 'https://api.whop.com/api/v2';
+const WHOP_API_BASE = 'https://api.whop.com/api/v5';
 
 export interface WhopMembership {
   id: string;
