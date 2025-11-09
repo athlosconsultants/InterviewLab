@@ -192,6 +192,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    console.log('[Whop Auth] Session token generated successfully');
+    console.log('[Whop Auth] Returning success response to frontend');
+
     return NextResponse.json({
       success: true,
       email: email,

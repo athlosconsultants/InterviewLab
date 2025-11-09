@@ -32,6 +32,7 @@ function WhopCallbackContent() {
         }
 
         // Exchange code for access token and create/link account
+        console.log('[Whop Callback] Exchanging code with backend...');
         const response = await fetch('/api/whop/auth', {
           method: 'POST',
           headers: {
@@ -41,14 +42,17 @@ function WhopCallbackContent() {
         });
 
         const data = await response.json();
+        console.log('[Whop Callback] Backend response:', data);
 
         if (!data.success) {
+          console.error('[Whop Callback] Backend returned error:', data.error);
           setStatus('error');
           setMessage(data.error || 'Failed to authenticate with Whop');
           return;
         }
 
         // Verify the OTP token to establish session
+        console.log('[Whop Callback] Verifying OTP token...');
         const supabase = createClient();
         const { error: verifyError } = await supabase.auth.verifyOtp({
           email: data.email,
@@ -57,12 +61,13 @@ function WhopCallbackContent() {
         });
 
         if (verifyError) {
-          console.error('[Whop] Failed to verify token:', verifyError);
+          console.error('[Whop Callback] Failed to verify token:', verifyError);
           setStatus('error');
           setMessage('Failed to sign in. Please try again.');
           return;
         }
 
+        console.log('[Whop Callback] Session established successfully!');
         setStatus('success');
         setMessage('Success! Redirecting to your dashboard...');
 
