@@ -118,14 +118,13 @@ export async function POST(request: NextRequest) {
         supabaseUserId = authData.user.id;
       }
 
-      // Store Whop OAuth data
+      // Store/update Whop OAuth data
       const tokenExpiresAt = tokenResult.expiresIn
         ? new Date(Date.now() + tokenResult.expiresIn * 1000)
         : null;
 
-      const { error: whopUserError } = await supabase
-        .from('whop_users')
-        .insert({
+      const { error: whopUserError } = await supabase.from('whop_users').upsert(
+        {
           user_id: supabaseUserId,
           whop_user_id: whopUserId,
           whop_email: email,
@@ -133,7 +132,11 @@ export async function POST(request: NextRequest) {
           access_token: tokenResult.accessToken,
           refresh_token: tokenResult.refreshToken,
           token_expires_at: tokenExpiresAt,
-        });
+        },
+        {
+          onConflict: 'whop_user_id',
+        }
+      );
 
       if (whopUserError) {
         console.error(

@@ -1,6 +1,6 @@
 /**
  * Whop Webhook Handler
- * 
+ *
  * Receives webhook events from Whop when memberships are created, updated, or cancelled
  * Events: membership.went_valid, membership.went_invalid, membership.deleted
  */
@@ -24,20 +24,14 @@ export async function POST(request: NextRequest) {
 
     if (!signature) {
       console.error('[Whop Webhook] Missing signature header');
-      return NextResponse.json(
-        { error: 'Missing signature' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Missing signature' }, { status: 400 });
     }
 
     // Verify webhook signature
     const isValid = verifyWhopWebhook(body, signature);
     if (!isValid) {
       console.error('[Whop Webhook] Invalid signature');
-      return NextResponse.json(
-        { error: 'Invalid signature' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
     }
 
     // Parse webhook event
@@ -63,9 +57,12 @@ export async function POST(request: NextRequest) {
         };
 
         const result = await syncWhopMembershipToSupabase(membership);
-        
+
         if (!result.success) {
-          console.error('[Whop Webhook] Failed to sync membership:', result.error);
+          console.error(
+            '[Whop Webhook] Failed to sync membership:',
+            result.error
+          );
           return NextResponse.json(
             { error: 'Failed to sync membership' },
             { status: 500 }
@@ -76,9 +73,33 @@ export async function POST(request: NextRequest) {
         break;
 
       case 'membership.deleted':
-        // Handle membership deletion
+        // Handle membership deletion - mark entitlement as cancelled
         console.log('[Whop Webhook] Membership deleted:', event.data.id);
-        // TODO: Mark entitlement as cancelled in Supabase
+        const { createServiceRoleClient } = await import(
+          '@/lib/supabase-server'
+        );
+        const supabase = createServiceRoleClient();
+
+        const { error: deleteError } = await supabase
+          .from('entitlements')
+          .update({ status: 'cancelled' })
+          .eq('whop_membership_id', event.data.id);
+
+        if (deleteError) {
+          console.error(
+            '[Whop Webhook] Failed to cancel entitlement:',
+            deleteError
+          );
+          return NextResponse.json(
+            { error: 'Failed to cancel entitlement' },
+            { status: 500 }
+          );
+        }
+
+        console.log(
+          '[Whop Webhook] Successfully cancelled entitlement for membership:',
+          event.data.id
+        );
         break;
 
       default:
@@ -94,4 +115,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-
