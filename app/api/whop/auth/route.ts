@@ -179,28 +179,31 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Extract the token from the generated link
-    const url = new URL(linkData.properties.action_link);
-    const token = url.searchParams.get('token');
-    const tokenHash = url.hash.replace('#', '');
+    // Extract access_token and refresh_token from the URL hash
+    const actionLink = linkData.properties.action_link;
+    const url = new URL(actionLink);
+    const hashParams = new URLSearchParams(url.hash.substring(1)); // Remove '#' and parse
+    const accessToken = hashParams.get('access_token');
+    const refreshToken = hashParams.get('refresh_token');
 
-    if (!token) {
-      console.error('[Whop Auth] No token in generated link');
+    if (!accessToken || !refreshToken) {
+      console.error('[Whop Auth] No session tokens in generated link');
+      console.error('[Whop Auth] Hash:', url.hash);
       return NextResponse.json(
-        { success: false, error: 'Failed to create session token' },
+        { success: false, error: 'Failed to create session tokens' },
         { status: 500 }
       );
     }
 
-    console.log('[Whop Auth] Session token generated successfully');
+    console.log('[Whop Auth] Session tokens extracted successfully');
     console.log('[Whop Auth] Returning success response to frontend');
 
     return NextResponse.json({
       success: true,
       email: email,
       userId: supabaseUserId,
-      token: token,
-      tokenHash: tokenHash,
+      accessToken: accessToken,
+      refreshToken: refreshToken,
     });
   } catch (error) {
     console.error('[Whop Auth] Error:', error);

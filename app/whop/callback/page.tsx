@@ -51,17 +51,16 @@ function WhopCallbackContent() {
           return;
         }
 
-        // Verify the OTP token to establish session
-        console.log('[Whop Callback] Verifying OTP token...');
+        // Set the session using the tokens from backend
+        console.log('[Whop Callback] Setting session with tokens...');
         const supabase = createClient();
-        const { error: verifyError } = await supabase.auth.verifyOtp({
-          email: data.email,
-          token: data.token,
-          type: 'magiclink',
+        const { error: sessionError } = await supabase.auth.setSession({
+          access_token: data.accessToken,
+          refresh_token: data.refreshToken,
         });
 
-        if (verifyError) {
-          console.error('[Whop Callback] Failed to verify token:', verifyError);
+        if (sessionError) {
+          console.error('[Whop Callback] Failed to set session:', sessionError);
           setStatus('error');
           setMessage('Failed to sign in. Please try again.');
           return;
