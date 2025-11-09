@@ -29,6 +29,7 @@ export async function exchangeWhopCode(
   success: boolean;
   accessToken?: string;
   refreshToken?: string;
+  expiresIn?: number;
   error?: string;
 }> {
   try {
@@ -55,6 +56,7 @@ export async function exchangeWhopCode(
       success: true,
       accessToken: authResponse.tokens.access_token,
       refreshToken: authResponse.tokens.refresh_token,
+      expiresIn: authResponse.tokens.expires_in,
     };
   } catch (error) {
     console.error('[Whop SDK] Error exchanging code:', error);
