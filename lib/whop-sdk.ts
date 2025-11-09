@@ -59,7 +59,7 @@ export async function exchangeWhopCode(
     return {
       success: true,
       accessToken: authResponse.tokens.access_token,
-      refreshToken: authResponse.tokens.refresh_token,
+      refreshToken: undefined, // Whop SDK doesn't provide refresh tokens in this response
       expiresIn: authResponse.tokens.expires_in,
     };
   } catch (error) {
