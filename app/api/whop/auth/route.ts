@@ -164,17 +164,30 @@ export async function POST(request: NextRequest) {
       console.log('[Whop Auth] No active memberships found for user');
     }
 
-    // Create a session for the user
-    const { data: sessionData, error: sessionError } =
+    // Generate a one-time link for the user to establish session
+    const { data: linkData, error: linkError } =
       await supabase.auth.admin.generateLink({
         type: 'magiclink',
         email: email,
       });
 
-    if (sessionError || !sessionData) {
-      console.error('[Whop Auth] Failed to generate session:', sessionError);
+    if (linkError || !linkData) {
+      console.error('[Whop Auth] Failed to generate link:', linkError);
       return NextResponse.json(
         { success: false, error: 'Failed to create session' },
+        { status: 500 }
+      );
+    }
+
+    // Extract the token from the generated link
+    const url = new URL(linkData.properties.action_link);
+    const token = url.searchParams.get('token');
+    const tokenHash = url.hash.replace('#', '');
+
+    if (!token) {
+      console.error('[Whop Auth] No token in generated link');
+      return NextResponse.json(
+        { success: false, error: 'Failed to create session token' },
         { status: 500 }
       );
     }
@@ -183,8 +196,8 @@ export async function POST(request: NextRequest) {
       success: true,
       email: email,
       userId: supabaseUserId,
-      accessToken: sessionData.properties.access_token,
-      refreshToken: sessionData.properties.refresh_token,
+      token: token,
+      tokenHash: tokenHash,
     });
   } catch (error) {
     console.error('[Whop Auth] Error:', error);

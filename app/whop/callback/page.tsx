@@ -48,15 +48,16 @@ function WhopCallbackContent() {
           return;
         }
 
-        // Set the session using the tokens from backend
+        // Verify the OTP token to establish session
         const supabase = createClient();
-        const { error: sessionError } = await supabase.auth.setSession({
-          access_token: data.accessToken,
-          refresh_token: data.refreshToken,
+        const { error: verifyError } = await supabase.auth.verifyOtp({
+          email: data.email,
+          token: data.token,
+          type: 'magiclink',
         });
 
-        if (sessionError) {
-          console.error('[Whop] Failed to set session:', sessionError);
+        if (verifyError) {
+          console.error('[Whop] Failed to verify token:', verifyError);
           setStatus('error');
           setMessage('Failed to sign in. Please try again.');
           return;
