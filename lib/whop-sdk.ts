@@ -82,27 +82,36 @@ export async function getWhopUserInfo(accessToken: string): Promise<{
   error?: string;
 }> {
   try {
-    console.log('[Whop SDK] Fetching user info');
+    console.log('[Whop SDK] Fetching user info with access token');
 
-    const userResponse = await whopApi.users.me({
-      accessToken,
+    const response = await fetch('https://api.whop.com/api/v5/me', {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
     });
 
-    if (!userResponse.ok) {
-      console.error('[Whop SDK] Failed to fetch user info:', userResponse.code);
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(
+        '[Whop SDK] Failed to fetch user info:',
+        response.status,
+        errorText
+      );
       return {
         success: false,
-        error: `Failed to fetch user info (${userResponse.code})`,
+        error: `Failed to fetch user info (${response.status})`,
       };
     }
 
+    const data = await response.json();
     console.log('[Whop SDK] User info fetched successfully');
 
     return {
       success: true,
-      userId: userResponse.data.id,
-      email: userResponse.data.email,
-      username: userResponse.data.username || undefined,
+      userId: data.id,
+      email: data.email,
+      username: data.username || undefined,
     };
   } catch (error) {
     console.error('[Whop SDK] Error fetching user info:', error);
