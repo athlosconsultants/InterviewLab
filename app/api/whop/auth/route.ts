@@ -144,8 +144,8 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Fetch and sync user's Whop memberships
-    const memberships = await getWhopUserMemberships(whopUserId);
+    // Fetch and sync user's Whop memberships using their access token
+    const memberships = await getWhopUserMemberships(tokenResult.accessToken!);
 
     if (memberships.length > 0) {
       // Sync all active memberships

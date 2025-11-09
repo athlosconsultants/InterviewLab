@@ -355,31 +355,25 @@ export async function getWhopUserInfo(accessToken: string): Promise<{
 }
 
 /**
- * Get all active memberships for a Whop user
+ * Get all active memberships for a Whop user using their access token
  */
 export async function getWhopUserMemberships(
-  whopUserId: string
+  accessToken: string
 ): Promise<WhopMembership[]> {
-  if (!WHOP_API_KEY) {
-    console.error('[Whop] Missing WHOP_API_KEY');
-    return [];
-  }
-
   try {
-    const response = await fetch(
-      `${WHOP_API_BASE}/memberships?user_id=${whopUserId}`,
-      {
-        headers: {
-          Authorization: `Bearer ${WHOP_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-      }
-    );
+    const response = await fetch(`${WHOP_API_BASE}/me/memberships`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+    });
 
     if (!response.ok) {
+      const errorText = await response.text();
       console.error(
         '[Whop] Failed to fetch user memberships:',
-        response.status
+        response.status,
+        errorText
       );
       return [];
     }
