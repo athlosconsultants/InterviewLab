@@ -146,6 +146,7 @@ export async function POST(request: NextRequest) {
 
     // Fetch and sync user's Whop memberships using their access token
     const memberships = await getWhopUserMemberships(tokenResult.accessToken!);
+    let hasActiveMembership = false;
 
     if (memberships.length > 0) {
       // Sync all active memberships
@@ -155,6 +156,7 @@ export async function POST(request: NextRequest) {
           membership.status === 'trialing'
         ) {
           await syncWhopMembershipToSupabase(membership);
+          hasActiveMembership = true;
         }
       }
       console.log(
@@ -186,12 +188,14 @@ export async function POST(request: NextRequest) {
 
     console.log('[Whop Auth] Temporary password set successfully');
     console.log('[Whop Auth] Returning credentials to frontend');
+    console.log('[Whop Auth] Has active membership:', hasActiveMembership);
 
     return NextResponse.json({
       success: true,
       email: email,
       userId: supabaseUserId,
       password: tempPassword,
+      hasMembership: hasActiveMembership,
     });
   } catch (error) {
     console.error('[Whop Auth] Error:', error);

@@ -68,11 +68,21 @@ function WhopCallbackContent() {
 
         console.log('[Whop Callback] Session established successfully!');
         setStatus('success');
-        setMessage('Success! Redirecting to your dashboard...');
+        setMessage('Success! Redirecting...');
 
-        // Redirect to dashboard
+        // Redirect based on membership status
         setTimeout(() => {
-          router.push('/');
+          if (data.hasMembership) {
+            console.log(
+              '[Whop Callback] User has membership, redirecting to dashboard'
+            );
+            router.push('/dashboard');
+          } else {
+            console.log(
+              '[Whop Callback] User has no membership, redirecting to home'
+            );
+            router.push('/');
+          }
         }, 1500);
       } catch (err) {
         console.error('[Whop Callback] Error:', err);
