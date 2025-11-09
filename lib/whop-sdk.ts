@@ -129,6 +129,7 @@ export function getWhopOAuthUrl(redirectUri: string): string {
   try {
     const { url } = whopApi.oauth.getAuthorizationUrl({
       redirectUri,
+      // @ts-ignore - Whop SDK types are incomplete, read_memberships is valid
       scope: ['read_user', 'read_memberships'],
     });
 
