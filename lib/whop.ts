@@ -266,17 +266,21 @@ export async function exchangeWhopOAuthCode(
   try {
     const body = new URLSearchParams({
       client_id: WHOP_CLIENT_ID,
-      client_secret: WHOP_CLIENT_SECRET,
       code,
       redirect_uri: redirectUri,
       grant_type: 'authorization_code',
     });
+
+    const basicAuth = Buffer.from(
+      `${WHOP_CLIENT_ID}:${WHOP_CLIENT_SECRET}`
+    ).toString('base64');
 
     const response = await fetch('https://api.whop.com/api/v2/oauth/token', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
         Accept: 'application/json',
+        Authorization: `Basic ${basicAuth}`,
       },
       body: body.toString(),
     });
