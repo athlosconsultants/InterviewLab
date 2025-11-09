@@ -212,9 +212,23 @@ export async function syncWhopMembershipToSupabase(
 
     const userId = whopUser.user_id;
     const tier = mapWhopPlanToTier(membership.product_id, membership.plan_id);
+
+    // Skip creating entitlement for free tier
+    // Free Whop users are treated the same as regular free users (no entitlement needed)
+    if (tier === 'free') {
+      console.log(
+        '[Whop] Skipping entitlement creation for free tier membership:',
+        membership.id
+      );
+      console.log(
+        '[Whop] Free Whop users have same access as regular free users'
+      );
+      return { success: true };
+    }
+
     const expiresAt = membership.expires_at || calculateExpirationDate(tier);
 
-    // Create or update entitlement
+    // Create or update entitlement for premium tiers only
     const { error: entitlementError } = await supabase
       .from('entitlements')
       .upsert(
