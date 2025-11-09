@@ -43,10 +43,14 @@ export async function exchangeWhopCode(
     });
 
     if (!authResponse.ok) {
-      console.error('[Whop SDK] Code exchange failed:', authResponse.error);
+      console.error(
+        '[Whop SDK] Code exchange failed:',
+        authResponse.code,
+        authResponse.raw
+      );
       return {
         success: false,
-        error: authResponse.error?.message || 'Failed to exchange code',
+        error: `Failed to exchange code (${authResponse.code})`,
       };
     }
 
