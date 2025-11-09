@@ -5,7 +5,7 @@
  */
 
 import crypto from 'crypto';
-import { createClient } from '@/lib/supabase-server';
+import { createServiceRoleClient } from '@/lib/supabase-server';
 
 // Environment variables
 const WHOP_API_KEY = process.env.WHOP_API_KEY;
@@ -180,7 +180,7 @@ export async function syncWhopMembershipToSupabase(
   membership: WhopMembership
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const supabase = await createClient();
+    const supabase = createServiceRoleClient();
 
     // First, check if a user with this Whop user_id exists in whop_users
     const { data: whopUser, error: whopUserError } = await supabase

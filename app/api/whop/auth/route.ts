@@ -6,7 +6,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase-server';
+import { createServiceRoleClient } from '@/lib/supabase-server';
 import { exchangeWhopCode, getWhopUserInfo } from '@/lib/whop-sdk';
 import {
   getWhopUserMemberships,
@@ -61,8 +61,8 @@ export async function POST(request: NextRequest) {
 
     const { userId: whopUserId, email, username } = userInfoResult;
 
-    // Create/update Supabase user
-    const supabase = await createClient();
+    // Create/update Supabase user (use service role for admin operations)
+    const supabase = createServiceRoleClient();
 
     // Check if user already exists in our system
     const { data: existingUser } = await supabase
