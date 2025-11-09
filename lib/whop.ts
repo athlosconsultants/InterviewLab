@@ -361,6 +361,7 @@ export async function getWhopUserMemberships(
   accessToken: string
 ): Promise<WhopMembership[]> {
   try {
+    console.log('[Whop] Fetching user memberships...');
     const response = await fetch(`${WHOP_API_BASE}/me/memberships`, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -379,6 +380,8 @@ export async function getWhopUserMemberships(
     }
 
     const data = await response.json();
+    console.log('[Whop] Memberships response:', JSON.stringify(data, null, 2));
+    console.log('[Whop] Memberships count:', data.data?.length || 0);
     return data.data || [];
   } catch (error) {
     console.error('[Whop] Error fetching user memberships:', error);
