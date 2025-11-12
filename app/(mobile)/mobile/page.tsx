@@ -15,6 +15,7 @@ import {
 import { Footer } from '@/components/Footer';
 import { createClient } from '@/lib/supabase-client';
 import { QuickTryWidget } from '@/components/landing/QuickTryWidget';
+import { ScrollingBanner } from '@/components/landing/ScrollingBanner';
 import { PrefetchLinks } from '@/components/PrefetchLinks';
 import { PremiumLandingView } from '@/components/landing/PremiumLandingView';
 import { DashboardStats } from '@/lib/dashboard-stats';
@@ -146,6 +147,11 @@ export default function MobileLandingPage() {
           {/* QuickTry Widget */}
           <div className="mb-8">
             <QuickTryWidget />
+          </div>
+
+          {/* Scrolling Company Banner */}
+          <div className="mb-8">
+            <ScrollingBanner />
           </div>
 
           {/* CTA Below Widget */}
