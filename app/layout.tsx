@@ -24,6 +24,21 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        {/* Preload critical company logos for instant display */}
+        <link rel="preload" href="/logos/goldman-sachs.svg" as="image" />
+        <link rel="preload" href="/logos/mckinsey.png" as="image" />
+        <link rel="preload" href="/logos/google.svg" as="image" />
+        <link rel="preload" href="/logos/deloitte.svg" as="image" />
+        <link rel="preload" href="/logos/hsbc.svg" as="image" />
+        <link rel="preload" href="/logos/vodafone.svg" as="image" />
+        <link rel="preload" href="/logos/turner-townsend.png" as="image" />
+        <link rel="preload" href="/logos/bp.svg" as="image" />
+        <link rel="preload" href="/logos/macquarie.svg" as="image" />
+        <link rel="preload" href="/logos/arup.jpeg" as="image" />
+        <link rel="preload" href="/logos/rio-tinto.svg" as="image" />
+        <link rel="preload" href="/logos/atlassian.svg" as="image" />
+      </head>
       <body>
         <Header />
         {children}

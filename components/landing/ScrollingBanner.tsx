@@ -19,7 +19,7 @@ const companies: Company[] = [
   },
   {
     name: 'McKinsey & Company',
-    logoUrl: '/logos/mckinsey.svg',
+    logoUrl: '/logos/mckinsey.png',
     brandColor: '#00338D',
     logoLetter: 'M',
   },
@@ -49,7 +49,7 @@ const companies: Company[] = [
   },
   {
     name: 'Turner & Townsend',
-    logoUrl: '/logos/turner-townsend.svg',
+    logoUrl: '/logos/turner-townsend.png',
     brandColor: '#E2231A',
     logoLetter: 'TT',
   },
@@ -67,7 +67,7 @@ const companies: Company[] = [
   },
   {
     name: 'Arup',
-    logoUrl: '/logos/arup.svg',
+    logoUrl: '/logos/arup.jpeg',
     brandColor: '#F0553C',
     logoLetter: 'A',
   },
@@ -124,7 +124,8 @@ function CompanyLogo({ company }: { company: Company }) {
       src={logoSrc}
       alt={`${company.name} logo`}
       className="w-5 h-5 md:w-6 md:h-6 flex-shrink-0 object-contain"
-      loading="lazy"
+      loading="eager"
+      fetchPriority="high"
       onError={handleError}
     />
   );
