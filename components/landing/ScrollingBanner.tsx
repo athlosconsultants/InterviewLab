@@ -80,9 +80,11 @@ export function ScrollingBanner() {
         <h3 className="text-center text-sm font-light text-slate-600 mb-6 tracking-wide">
           Join candidates who turned practice into offers at
         </h3>
+      </div>
 
-        {/* Scrolling Container with Mask */}
-        <div className="relative overflow-hidden">
+      {/* Scrolling Container with Mask - Full width on mobile */}
+      <div className="relative overflow-hidden px-3 md:px-0">
+        <div className="md:container md:mx-auto">
           {/* Scrolling wrapper with gradient mask for smooth fade */}
           <div
             className={`flex items-center gap-3 md:gap-4 scroll-mask ${
@@ -138,24 +140,26 @@ export function ScrollingBanner() {
 
         /* Gradient mask for smooth edge fades */
         .scroll-mask {
+          /* Mobile: Fade starts at 15px, fully visible by 35px (20px fade zone) */
           -webkit-mask-image: linear-gradient(
             to right,
             transparent 0%,
-            black 40px,
-            black calc(100% - 40px),
+            black 35px,
+            black calc(100% - 35px),
             transparent 100%
           );
           mask-image: linear-gradient(
             to right,
             transparent 0%,
-            black 40px,
-            black calc(100% - 40px),
+            black 35px,
+            black calc(100% - 35px),
             transparent 100%
           );
         }
 
         @media (min-width: 768px) {
           .scroll-mask {
+            /* Desktop: More spacious fade zones */
             -webkit-mask-image: linear-gradient(
               to right,
               transparent 0%,
