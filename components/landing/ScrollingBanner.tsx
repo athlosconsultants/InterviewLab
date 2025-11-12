@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
 interface Company {
   name: string;
@@ -133,6 +133,8 @@ function CompanyLogo({ company }: { company: Company }) {
 
 export function ScrollingBanner() {
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -143,7 +145,35 @@ export function ScrollingBanner() {
     return () => mediaQuery.removeEventListener('change', handleChange);
   }, []);
 
-  // Quadruple the array for seamless loop on mobile (need extra copies for smaller screens)
+  // Intersection Observer for smooth visibility transitions
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          setIsVisible(entry.isIntersecting);
+        });
+      },
+      {
+        threshold: 0.1, // Trigger when 10% visible
+        rootMargin: '50px', // Start transition 50px before entering viewport
+      }
+    );
+
+    const currentRef = containerRef.current;
+
+    if (currentRef) {
+      observer.observe(currentRef);
+    }
+
+    return () => {
+      if (currentRef) {
+        observer.unobserve(currentRef);
+      }
+    };
+  }, []);
+
+  // Quadruple the array to ensure endless scroll on all screen sizes
+  // Animation moves 50% (2 full sets), creating a perfect seamless loop
   const duplicatedCompanies = [
     ...companies,
     ...companies,
@@ -153,140 +183,121 @@ export function ScrollingBanner() {
 
   return (
     <div
-      className="w-full py-8 block"
+      ref={containerRef}
+      className={`w-full py-8 block transition-opacity duration-700 ease-in-out ${
+        isVisible ? 'opacity-100' : 'opacity-0'
+      }`}
       data-component="scrolling-banner"
-      data-version="2024-11-12-local-logos"
-      style={{ display: 'block', visibility: 'visible' }}
+      data-version="2024-11-13-polished"
     >
       <div className="container mx-auto px-6">
         {/* Title */}
-        <h3 className="text-center text-sm font-light text-slate-600 mb-6 tracking-wide block">
+        <h3 className="text-center text-sm font-light text-slate-600 mb-6 tracking-wide">
           Join candidates who turned practice into offers at
         </h3>
       </div>
 
       {/* Scrolling Container with Mask - Full width on mobile */}
-      <div
-        className="relative px-3 md:px-0 block"
-        style={{
-          display: 'block',
-          overflow: 'visible',
-          paddingTop: '8px',
-          paddingBottom: '8px',
-        }}
-      >
+      <div className="relative px-3 md:px-0 overflow-hidden">
+        {/* Scrolling wrapper with gradient mask for smooth fade */}
         <div
-          className="md:container md:mx-auto block"
-          style={{ overflow: 'hidden' }}
+          className={`flex items-center gap-3 md:gap-4 scroll-mask ${
+            prefersReducedMotion ? '' : 'animate-scroll-pills'
+          } hover:pause-animation`}
+          style={{
+            width: 'fit-content',
+            display: 'flex',
+          }}
         >
-          {/* Scrolling wrapper with gradient mask for smooth fade */}
-          <div
-            className={`flex items-center gap-3 md:gap-4 scroll-mask ${
-              prefersReducedMotion ? '' : 'animate-scroll-pills'
-            } hover:pause-animation`}
-            style={{
-              width: 'fit-content',
-              display: 'flex',
-              minWidth: '100%',
-            }}
-          >
-            {duplicatedCompanies.map((company, index) => (
-              <div
-                key={`${company.name}-${index}`}
-                className="flex-shrink-0 group"
-              >
-                {/* Pill Badge */}
-                <div className="flex items-center gap-2.5 bg-white/95 backdrop-blur-sm px-4 py-2.5 md:px-5 md:py-3 rounded-full shadow-sm border border-slate-200/50 hover:shadow-md transition-shadow duration-300">
-                  {/* Company Logo with fallback handling */}
-                  <CompanyLogo company={company} />
+          {duplicatedCompanies.map((company, index) => (
+            <div
+              key={`${company.name}-${index}`}
+              className="flex-shrink-0 group"
+            >
+              {/* Pill Badge */}
+              <div className="flex items-center gap-2.5 bg-white/95 backdrop-blur-sm px-4 py-2.5 md:px-5 md:py-3 rounded-full shadow-sm border border-slate-200/50 hover:shadow-md transition-shadow duration-300">
+                {/* Company Logo with fallback handling */}
+                <CompanyLogo company={company} />
 
-                  {/* Company Name */}
-                  <span className="text-slate-700 font-medium text-sm md:text-base whitespace-nowrap">
-                    {company.name}
-                  </span>
-                </div>
+                {/* Company Name */}
+                <span className="text-slate-700 font-medium text-sm md:text-base whitespace-nowrap">
+                  {company.name}
+                </span>
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
       </div>
 
       <style jsx>{`
-        @-webkit-keyframes scrollPills {
-          0% {
-            -webkit-transform: translateX(0);
-            transform: translateX(0);
-          }
-          100% {
-            -webkit-transform: translateX(-25%);
-            transform: translateX(-25%);
-          }
-        }
-
+        /* Seamless infinite scroll animation - moves exactly 50% for perfect loop */
         @keyframes scrollPills {
-          0% {
-            -webkit-transform: translateX(0);
+          from {
             transform: translateX(0);
           }
-          100% {
-            -webkit-transform: translateX(-25%);
-            transform: translateX(-25%);
+          to {
+            transform: translateX(-50%);
           }
         }
 
         .animate-scroll-pills {
-          animation: scrollPills 50s linear infinite;
+          animation: scrollPills 60s linear infinite;
           will-change: transform;
-          -webkit-animation: scrollPills 50s linear infinite;
         }
 
+        /* Pause animation on hover for user inspection */
         .pause-animation:hover {
           animation-play-state: paused;
         }
 
-        /* Gradient mask for smooth edge fades */
+        /* Gradient mask for elegant edge fades */
         .scroll-mask {
-          /* Mobile: Fade starts at 15px, fully visible by 35px (20px fade zone) */
           -webkit-mask-image: linear-gradient(
             to right,
             transparent 0%,
-            black 35px,
-            black calc(100% - 35px),
+            black 40px,
+            black calc(100% - 40px),
             transparent 100%
           );
           mask-image: linear-gradient(
             to right,
             transparent 0%,
-            black 35px,
-            black calc(100% - 35px),
+            black 40px,
+            black calc(100% - 40px),
             transparent 100%
           );
         }
 
         @media (min-width: 768px) {
           .scroll-mask {
-            /* Desktop: More spacious fade zones */
             -webkit-mask-image: linear-gradient(
               to right,
               transparent 0%,
-              black 60px,
-              black calc(100% - 60px),
+              black 80px,
+              black calc(100% - 80px),
               transparent 100%
             );
             mask-image: linear-gradient(
               to right,
               transparent 0%,
-              black 60px,
-              black calc(100% - 60px),
+              black 80px,
+              black calc(100% - 80px),
               transparent 100%
             );
           }
         }
 
+        /* Respect user motion preferences */
         @media (prefers-reduced-motion: reduce) {
           .animate-scroll-pills {
             animation: none;
           }
+        }
+
+        /* Optimize rendering performance */
+        .animate-scroll-pills {
+          backface-visibility: hidden;
+          perspective: 1000px;
         }
       `}</style>
     </div>
