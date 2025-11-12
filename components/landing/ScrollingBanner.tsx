@@ -77,20 +77,24 @@ export function ScrollingBanner() {
 
   return (
     <div
-      className="w-full py-8 overflow-hidden"
+      className="w-full py-8 overflow-hidden block"
       data-component="scrolling-banner"
-      data-version="2024-11-12"
+      data-version="2024-11-12-mobile-fix"
+      style={{ display: 'block', visibility: 'visible', minHeight: '100px' }}
     >
       <div className="container mx-auto px-6">
         {/* Title */}
-        <h3 className="text-center text-sm font-light text-slate-600 mb-6 tracking-wide">
+        <h3 className="text-center text-sm font-light text-slate-600 mb-6 tracking-wide block">
           Join candidates who turned practice into offers at
         </h3>
       </div>
 
       {/* Scrolling Container with Mask - Full width on mobile */}
-      <div className="relative overflow-hidden px-3 md:px-0">
-        <div className="md:container md:mx-auto">
+      <div
+        className="relative overflow-hidden px-3 md:px-0 block"
+        style={{ display: 'block' }}
+      >
+        <div className="md:container md:mx-auto block">
           {/* Scrolling wrapper with gradient mask for smooth fade */}
           <div
             className={`flex items-center gap-3 md:gap-4 scroll-mask ${
@@ -98,6 +102,7 @@ export function ScrollingBanner() {
             } hover:pause-animation`}
             style={{
               width: 'fit-content',
+              display: 'flex',
             }}
           >
             {duplicatedCompanies.map((company, index) => (
