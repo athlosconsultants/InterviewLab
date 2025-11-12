@@ -22,7 +22,7 @@ const companies: Company[] = [
   },
   {
     name: 'Deloitte',
-    logoUrl: 'https://cdn.simpleicons.org/deloitte',
+    logoUrl: 'https://logo.clearbit.com/deloitte.com',
   },
   {
     name: 'HSBC',
@@ -38,7 +38,7 @@ const companies: Company[] = [
   },
   {
     name: 'BP',
-    logoUrl: 'https://cdn.simpleicons.org/bp',
+    logoUrl: 'https://logo.clearbit.com/bp.com',
   },
   {
     name: 'Macquarie Group',
@@ -50,7 +50,7 @@ const companies: Company[] = [
   },
   {
     name: 'Rio Tinto',
-    logoUrl: 'https://cdn.simpleicons.org/riotinto',
+    logoUrl: 'https://logo.clearbit.com/riotinto.com',
   },
   {
     name: 'Atlassian',
