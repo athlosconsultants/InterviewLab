@@ -95,7 +95,7 @@ export function ScrollingBanner() {
   const duplicatedCompanies = [...companies, ...companies, ...companies];
 
   return (
-    <div className="w-full bg-gradient-to-r from-cyan-50/40 via-blue-50/50 to-cyan-50/40 py-8 overflow-hidden border-y border-cyan-100/50 backdrop-blur-sm">
+    <div className="w-full py-8 overflow-hidden">
       <div className="container mx-auto px-6">
         {/* Title */}
         <h3 className="text-center text-sm font-light text-slate-600 mb-6 tracking-wide">
