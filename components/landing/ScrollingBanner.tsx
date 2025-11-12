@@ -61,6 +61,8 @@ const companies: Company[] = [
 export function ScrollingBanner() {
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
+  // Cache buster - Last updated: 2024-11-12
+
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
     setPrefersReducedMotion(mediaQuery.matches);
@@ -74,7 +76,11 @@ export function ScrollingBanner() {
   const duplicatedCompanies = [...companies, ...companies, ...companies];
 
   return (
-    <div className="w-full py-8 overflow-hidden">
+    <div
+      className="w-full py-8 overflow-hidden"
+      data-component="scrolling-banner"
+      data-version="2024-11-12"
+    >
       <div className="container mx-auto px-6">
         {/* Title */}
         <h3 className="text-center text-sm font-light text-slate-600 mb-6 tracking-wide">
