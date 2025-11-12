@@ -4,78 +4,57 @@ import { useEffect, useState } from 'react';
 
 interface Company {
   name: string;
-  brandColor: string;
-  textColor: string;
-  logoLetter: string;
+  logoUrl: string;
 }
 
 const companies: Company[] = [
   {
     name: 'Goldman Sachs',
-    brandColor: '#0B4DA2',
-    textColor: '#FFFFFF',
-    logoLetter: 'GS',
+    logoUrl: 'https://cdn.simpleicons.org/goldmansachs',
   },
   {
     name: 'McKinsey & Company',
-    brandColor: '#00338D',
-    textColor: '#FFFFFF',
-    logoLetter: 'M',
+    logoUrl: 'https://logo.clearbit.com/mckinsey.com',
   },
   {
     name: 'Google',
-    brandColor: '#4285F4',
-    textColor: '#FFFFFF',
-    logoLetter: 'G',
+    logoUrl: 'https://cdn.simpleicons.org/google',
   },
   {
     name: 'Deloitte',
-    brandColor: '#86BC25',
-    textColor: '#000000',
-    logoLetter: 'D',
+    logoUrl: 'https://cdn.simpleicons.org/deloitte',
   },
   {
     name: 'HSBC',
-    brandColor: '#DB0011',
-    textColor: '#FFFFFF',
-    logoLetter: 'H',
+    logoUrl: 'https://cdn.simpleicons.org/hsbc',
   },
   {
     name: 'Vodafone',
-    brandColor: '#E60000',
-    textColor: '#FFFFFF',
-    logoLetter: 'V',
+    logoUrl: 'https://cdn.simpleicons.org/vodafone',
   },
   {
     name: 'Turner & Townsend',
-    brandColor: '#E2231A',
-    textColor: '#FFFFFF',
-    logoLetter: 'TT',
+    logoUrl: 'https://logo.clearbit.com/turnerandtownsend.com',
   },
-  { name: 'BP', brandColor: '#00693E', textColor: '#FFFFFF', logoLetter: 'BP' },
+  {
+    name: 'BP',
+    logoUrl: 'https://cdn.simpleicons.org/bp',
+  },
   {
     name: 'Macquarie Group',
-    brandColor: '#074F3F',
-    textColor: '#FFFFFF',
-    logoLetter: 'M',
+    logoUrl: 'https://logo.clearbit.com/macquarie.com',
   },
   {
     name: 'Arup',
-    brandColor: '#F0553C',
-    textColor: '#FFFFFF',
-    logoLetter: 'A',
+    logoUrl: 'https://logo.clearbit.com/arup.com',
   },
   {
     name: 'Rio Tinto',
-    brandColor: '#C8102E',
-    textColor: '#FFFFFF',
-    logoLetter: 'RT',
+    logoUrl: 'https://cdn.simpleicons.org/riotinto',
   },
   {
     name: 'Atlassian',
-    brandColor: '#0052CC',
-    textColor: '#FFFFFF',
-    logoLetter: 'A',
+    logoUrl: 'https://cdn.simpleicons.org/atlassian',
   },
 ];
 
@@ -120,16 +99,13 @@ export function ScrollingBanner() {
               >
                 {/* Pill Badge */}
                 <div className="flex items-center gap-2.5 bg-white/95 backdrop-blur-sm px-4 py-2.5 md:px-5 md:py-3 rounded-full shadow-sm border border-slate-200/50 hover:shadow-md transition-shadow duration-300">
-                  {/* Brand Logo Badge */}
-                  <div
-                    className="flex items-center justify-center w-6 h-6 md:w-7 md:h-7 rounded-full flex-shrink-0 font-bold text-xs md:text-sm shadow-sm"
-                    style={{
-                      backgroundColor: company.brandColor,
-                      color: company.textColor,
-                    }}
-                  >
-                    {company.logoLetter}
-                  </div>
+                  {/* Company Logo */}
+                  <img
+                    src={company.logoUrl}
+                    alt={`${company.name} logo`}
+                    className="w-5 h-5 md:w-6 md:h-6 flex-shrink-0 object-contain"
+                    loading="lazy"
+                  />
 
                   {/* Company Name */}
                   <span className="text-slate-700 font-medium text-sm md:text-base whitespace-nowrap">
