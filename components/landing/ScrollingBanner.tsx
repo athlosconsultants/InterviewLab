@@ -72,8 +72,13 @@ export function ScrollingBanner() {
     return () => mediaQuery.removeEventListener('change', handleChange);
   }, []);
 
-  // Triple the array for seamless loop (need more copies for pill spacing)
-  const duplicatedCompanies = [...companies, ...companies, ...companies];
+  // Quadruple the array for seamless loop on mobile (need extra copies for smaller screens)
+  const duplicatedCompanies = [
+    ...companies,
+    ...companies,
+    ...companies,
+    ...companies,
+  ];
 
   return (
     <div
@@ -103,6 +108,7 @@ export function ScrollingBanner() {
             style={{
               width: 'fit-content',
               display: 'flex',
+              minWidth: '100%',
             }}
           >
             {duplicatedCompanies.map((company, index) => (
@@ -132,17 +138,32 @@ export function ScrollingBanner() {
       </div>
 
       <style jsx>{`
-        @keyframes scrollPills {
+        @-webkit-keyframes scrollPills {
           0% {
+            -webkit-transform: translateX(0);
             transform: translateX(0);
           }
           100% {
-            transform: translateX(-33.33%);
+            -webkit-transform: translateX(-25%);
+            transform: translateX(-25%);
+          }
+        }
+
+        @keyframes scrollPills {
+          0% {
+            -webkit-transform: translateX(0);
+            transform: translateX(0);
+          }
+          100% {
+            -webkit-transform: translateX(-25%);
+            transform: translateX(-25%);
           }
         }
 
         .animate-scroll-pills {
           animation: scrollPills 50s linear infinite;
+          will-change: transform;
+          -webkit-animation: scrollPills 50s linear infinite;
         }
 
         .pause-animation:hover {
