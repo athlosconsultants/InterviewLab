@@ -40,15 +40,11 @@ export function ScrollingBanner() {
           Join candidates who turned practice into offers at
         </h3>
 
-        {/* Scrolling Container */}
-        <div className="relative">
-          {/* Gradient fade edges */}
-          <div className="absolute left-0 top-0 bottom-0 w-16 md:w-24 bg-gradient-to-r from-cyan-50/90 to-transparent z-10 pointer-events-none" />
-          <div className="absolute right-0 top-0 bottom-0 w-16 md:w-24 bg-gradient-to-l from-cyan-50/90 to-transparent z-10 pointer-events-none" />
-
-          {/* Scrolling wrapper */}
+        {/* Scrolling Container with Mask */}
+        <div className="relative overflow-hidden">
+          {/* Scrolling wrapper with gradient mask for smooth fade */}
           <div
-            className={`flex ${
+            className={`flex scroll-mask ${
               prefersReducedMotion ? '' : 'animate-scroll'
             } hover:pause-animation`}
             style={{
@@ -85,6 +81,43 @@ export function ScrollingBanner() {
 
         .pause-animation:hover {
           animation-play-state: paused;
+        }
+
+        /* Gradient mask for smooth edge fades */
+        .scroll-mask {
+          -webkit-mask-image: linear-gradient(
+            to right,
+            transparent 0%,
+            black 30px,
+            black calc(100% - 30px),
+            transparent 100%
+          );
+          mask-image: linear-gradient(
+            to right,
+            transparent 0%,
+            black 30px,
+            black calc(100% - 30px),
+            transparent 100%
+          );
+        }
+
+        @media (min-width: 768px) {
+          .scroll-mask {
+            -webkit-mask-image: linear-gradient(
+              to right,
+              transparent 0%,
+              black 50px,
+              black calc(100% - 50px),
+              transparent 100%
+            );
+            mask-image: linear-gradient(
+              to right,
+              transparent 0%,
+              black 50px,
+              black calc(100% - 50px),
+              transparent 100%
+            );
+          }
         }
 
         @media (prefers-reduced-motion: reduce) {
