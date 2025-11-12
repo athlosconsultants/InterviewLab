@@ -22,6 +22,7 @@ import {
 import { Metadata } from 'next';
 import { createClient } from '@/lib/supabase-server';
 import { QuickTryWidget } from '@/components/landing/QuickTryWidget';
+import { ScrollingBanner } from '@/components/landing/ScrollingBanner';
 import { PrefetchLinks } from '@/components/PrefetchLinks';
 
 export const metadata: Metadata = {
@@ -64,7 +65,9 @@ export default async function Home() {
   let passType: string | null = null;
 
   if (user) {
-    const { isEntitled, getUserEntitlements } = await import('@/lib/entitlements');
+    const { isEntitled, getUserEntitlements } = await import(
+      '@/lib/entitlements'
+    );
     const entitled = await isEntitled(user.id);
     if (entitled) {
       const entitlement = await getUserEntitlements(user.id);
@@ -167,8 +170,13 @@ export default async function Home() {
             <QuickTryWidget />
           </div>
 
+          {/* Scrolling Company Banner */}
+          <div className="mt-16 mb-12">
+            <ScrollingBanner />
+          </div>
+
           {/* Social Proof / Benefits Below Widget */}
-          <div className="mt-16 max-w-4xl mx-auto">
+          <div className="mt-4 max-w-4xl mx-auto">
             <div className="text-center mb-8">
               <h2 className="text-2xl sm:text-3xl font-bold mb-4">
                 Want the full experience?
