@@ -13,74 +13,73 @@ interface Company {
 const companies: Company[] = [
   {
     name: 'Goldman Sachs',
-    logoUrl: 'https://cdn.simpleicons.org/goldmansachs',
+    logoUrl: '/logos/goldman-sachs.svg',
     brandColor: '#0B4DA2',
     logoLetter: 'GS',
   },
   {
     name: 'McKinsey & Company',
-    logoUrl: 'https://logo.clearbit.com/mckinsey.com',
+    logoUrl: '/logos/mckinsey.svg',
     brandColor: '#00338D',
     logoLetter: 'M',
   },
   {
     name: 'Google',
-    logoUrl: 'https://cdn.simpleicons.org/google',
+    logoUrl: '/logos/google.svg',
     brandColor: '#4285F4',
     logoLetter: 'G',
   },
   {
     name: 'Deloitte',
-    logoUrl: 'https://logo.clearbit.com/deloitte.com',
+    logoUrl: '/logos/deloitte.svg',
     brandColor: '#86BC25',
     logoLetter: 'D',
   },
   {
     name: 'HSBC',
-    logoUrl: 'https://cdn.simpleicons.org/hsbc',
+    logoUrl: '/logos/hsbc.svg',
     brandColor: '#DB0011',
     logoLetter: 'H',
   },
   {
     name: 'Vodafone',
-    logoUrl: 'https://cdn.simpleicons.org/vodafone',
+    logoUrl: '/logos/vodafone.svg',
     brandColor: '#E60000',
     logoLetter: 'V',
   },
   {
     name: 'Turner & Townsend',
-    logoUrl: 'https://logo.clearbit.com/turnerandtownsend.com',
+    logoUrl: '/logos/turner-townsend.svg',
     brandColor: '#E2231A',
     logoLetter: 'TT',
   },
   {
     name: 'BP',
-    logoUrl: 'https://logo.clearbit.com/bp.com',
+    logoUrl: '/logos/bp.svg',
     brandColor: '#00693E',
     logoLetter: 'BP',
   },
   {
     name: 'Macquarie Group',
-    logoUrl: 'https://logo.clearbit.com/macquarie.com.au',
-    fallbackUrl: 'https://logo.clearbit.com/macquarie.com',
+    logoUrl: '/logos/macquarie.svg',
     brandColor: '#074F3F',
     logoLetter: 'M',
   },
   {
     name: 'Arup',
-    logoUrl: 'https://logo.clearbit.com/arup.com',
+    logoUrl: '/logos/arup.svg',
     brandColor: '#F0553C',
     logoLetter: 'A',
   },
   {
     name: 'Rio Tinto',
-    logoUrl: 'https://logo.clearbit.com/riotinto.com',
+    logoUrl: '/logos/rio-tinto.svg',
     brandColor: '#C8102E',
     logoLetter: 'RT',
   },
   {
     name: 'Atlassian',
-    logoUrl: 'https://cdn.simpleicons.org/atlassian',
+    logoUrl: '/logos/atlassian.svg',
     brandColor: '#0052CC',
     logoLetter: 'A',
   },
@@ -126,7 +125,6 @@ function CompanyLogo({ company }: { company: Company }) {
       alt={`${company.name} logo`}
       className="w-5 h-5 md:w-6 md:h-6 flex-shrink-0 object-contain"
       loading="lazy"
-      crossOrigin="anonymous"
       onError={handleError}
     />
   );
@@ -156,7 +154,7 @@ export function ScrollingBanner() {
     <div
       className="w-full py-8 block"
       data-component="scrolling-banner"
-      data-version="2024-11-12-mobile-logo-fix"
+      data-version="2024-11-12-local-logos"
       style={{ display: 'block', visibility: 'visible' }}
     >
       <div className="container mx-auto px-6">
